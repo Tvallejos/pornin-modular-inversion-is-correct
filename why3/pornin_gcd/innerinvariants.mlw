@@ -1,0 +1,352 @@
+module InnerInv
+
+  use int.Int
+
+  use number.Prime
+  use number.Divisibility
+  use number.Gcd
+  use number.Parity
+  use number.Coprime
+  use int.Power
+  use congr.Congr
+  use fitlen.FitLen
+  use int.MinMax
+  use int.Abs
+  use int.EuclideanDivision as ED
+  use ceildiv.Ceil_div
+  use montred.Mont_red
+  use factorat.Factor_at
+  use util.Util
+  use divdivides.Div_divides
+  use bool.Bool
+
+  use invariantsnotation.Xt
+
+  val constant m : int
+  axiom m_gt3 : m >= 3
+  axiom m_odd : ED.mod m 2 = 1
+  
+  clone export modops.ModOps with constant m = m , goal m_pos, axiom .
+  
+  lemma congr_m_congr : forall a b. congr_m a b -> congr a b m
+
+  let update_uv (u v f0 g0 f1 g1: int) : (int,int) =
+    (f0*u + g0*v, f1*u + g1*v)
+
+  let lemma congr_even (a y : int) (bu : t) 
+    requires { congr a (bu * y) m }
+    requires { coprime 2 m }
+    requires { ED.mod a 2 = 0 }
+    ensures { congr (ED.div a 2) (mont_div_mod bu * y) m  } 
+    =  begin 
+        assert { congr (ED.div a 2) (mont_div_mod bu * y) m 
+          by ((congr ((ED.div a 2) * 2) ((mont_div_mod bu * y) * 2) m) 
+            by (ED.div a 2 * 2 = a)
+              /\ 
+              (* by rewrite H *)
+              ( congr ((to_int (mont_div_mod bu) * y) * 2) (bu * y) m by ((to_int (mont_div_mod bu) * y) * 2) = ((2 * mont_div_mod bu) * y) )) } 
+        end 
+  
+  let lemma congr_barfg0_even (f0 bf0 j: int)
+    requires { congr f0 (factor_at (j - 1) * bf0) m }
+    requires { 0 <= (j - 1) } 
+    ensures { congr f0 (factor_at ((j + 1) - 1) * div_mod bf0 m) m }
+    = begin 
+      assert { congr (2 * div_mod bf0 m) bf0 m };
+      assert { factor_at ((j + 1) - 1) = 2 * (factor_at (j - 1)) by ((j + 1) - 1) = (j - 1) + 1};       
+      end
+
+  let lemma congr_barfg1_even (f1 bf1 j: int)
+    requires { congr f1 (factor_at (j - 1) * bf1) m }
+    requires { 0 <= (j - 1) } 
+    ensures { congr (2 * f1) (factor_at ((j + 1) - 1) * bf1) m } 
+    = begin assert { (factor_at ((j + 1) - 1) * bf1) = ((factor_at (j - 1) * bf1) * 2) 
+                        by  (((j + 1) - 1) = ((j-1) + 1) ) }
+      end
+
+
+  let lemma congr_mut_uf0 (u bu  v : t) (k f0 g0 i j : int)
+  requires { congr (updated_x (to_int u) (to_int v) f0 g0) 
+                   (factor_at ((((k - 1) * (i - 1)) + j) - 1) * to_int bu) m }
+  requires { 0 <= (i - 1) } 
+  requires { 0 <= (j - 1) } 
+  requires { 0 <= (k - 1) } 
+  ensures { congr (updated_x (to_int u) (to_int v) f0 g0) 
+                  (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1) * to_int (mont_div_mod bu))
+                  m }
+  = begin 
+   assert {  congr (2 * to_int (mont_div_mod bu)) (to_int bu) m };
+   assert { (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1) * to_int (mont_div_mod bu)) 
+             = (factor_at ((((k - 1) * (i - 1)) + j) - 1) * (2 * to_int (mont_div_mod bu))) 
+             by factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1) = (factor_at ((((k - 1) * (i - 1)) + j) - 1)) * 2
+             };
+    end
+  
+  let lemma congr_mut_uf1 (u v bv : t) (k f1 g1 i j : int)
+    requires { 0 <= (i - 1) } 
+    requires { 0 <= (j - 1) } 
+    requires { 0 <= (k - 1) } 
+    requires { congr (updated_x (to_int u) (to_int v) f1 g1) 
+                     (factor_at ((((k - 1) * (i - 1)) + j) - 1) * to_int bv) 
+                     m } 
+    ensures { congr (updated_x (to_int u) (to_int v) (2 * f1) (2 * g1))  (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1) * to_int bv) m }
+    = begin 
+      end 
+      
+  let lemma congr_mut_odd (u v bu bv : t) (f0 f1 g0 g1 i j k: int)
+    requires { 0 <= (i - 1) } 
+    requires { 0 <= (j - 1) } 
+    requires { 0 <= (k - 1) } 
+    requires { congr (updated_x (to_int u) (to_int v) f0 g0) ((factor_at ((k-1)*(i-1) + j - 1 )) * bu) m }
+    requires { congr (updated_x (to_int u) (to_int v) f1 g1) ((factor_at ((k-1)*(i-1) + j - 1 )) * bv) m } 
+    ensures  { congr (updated_x (to_int u) (to_int v) (f0 - f1) (g0 - g1))
+                     (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1)  * to_int (mont_div_mod (sub bu bv)))
+                     m }
+  = begin 
+           assert { congr (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1)  * to_int (mont_div_mod (sub bu bv)))
+                          ((to_int bu - to_int bv) *  (factor_at (((k - 1) * (i - 1)) + j - 1)))
+                           m 
+                  
+                  by ((((k - 1) * (i - 1)) + (j + 1)) - 1) = ((((k - 1) * (i - 1)) + j) - 1) + 1 
+                     /\ (congr (to_int bu - to_int bv) (sub bu bv) m) 
+                  so (congr ((to_int bu - to_int bv) *  (factor_at (((k - 1) * (i - 1)) + j - 1))) ((sub bu bv) * (factor_at (((k - 1) * (i - 1)) + j - 1)) ) m) 
+                  so (factor_at ((((k - 1) * (i - 1)) + (j + 1)) - 1)  * to_int (mont_div_mod (sub bu bv))) 
+                     = (2 * to_int (mont_div_mod (sub bu bv))) * (factor_at ((((k - 1) * (i - 1)) + j) - 1))
+                  so congr ((2 * to_int (mont_div_mod (sub bu bv))) * (factor_at ((((k - 1) * (i - 1)) + j) - 1)))
+                           ((to_int bu - to_int bv) *  (factor_at (((k - 1) * (i - 1)) + j - 1)))
+                            m
+                  } ;
+    end       
+  
+  let lemma gcd_odd_lt (a b : int) 
+  requires { ED.mod b 2 = 1 }
+  requires { ED.mod a 2 = 1 } 
+  ensures { gcd a b = gcd (ED.div (a - b) 2) b } 
+  = begin assert { gcd a b = gcd (ED.div (a - b) 2) b 
+                    by ED.mod (a - b) 2 = 0
+                    so gcd (a - b) b = gcd (ED.div (a - b) 2) b /\ gcd b a = gcd b (a - 1 * b) 
+                    so gcd a b = gcd (a - b) b }; 
+    end
+    
+  let lemma inv_bezout_odd_u (a b y: int) (bu bv : t)
+    requires { ED.mod b 2 = 1 }
+    requires { ED.mod a 2 = 1 } 
+    requires { congr a (bu * y) m } 
+    requires { congr b (bv * y) m }
+    ensures { congr (ED.div (a - b) 2) (to_int (mont_div_mod (sub bu bv)) * y) m }
+    = begin 
+       let a' = ED.div (a - b) 2 in let bu' = mont_div_mod (sub bu bv) in
+       assert { congr a' (y * bu') m 
+                  by congr ((m + 1) * (bu*y - bv*y)) (m * (bu*y - bv*y) + (bu*y - bv*y)) m
+                  so (congr (bu*y - bv*y) ((m + 1) * (bu*y - bv*y)) m by congr ((m + 1) * (bu*y - bv*y)) (bu*y - bv*y)  m)
+                  so (bu*y - bv*y = (bu-bv)*y)
+                  
+                  so ((congr (bu-bv) (2 * bu') m) by (congr (to_int bu - to_int bv) (sub bu bv) m))
+                  so (congr ((bu-bv)*y) ((2 * bu') * y) m)
+                  so (congr ((ED.div (a - b) 2) * 2) (y * (2 * bu')) m            
+                    by ((congr (a - b) (a' * 2) m by ED.mod (a - b) 2 = 0) /\ congr (a - b) (bu*y - bv*y) m)) }; 
+        end
+        
+   let lemma inv_bezout_odd_u' (a b j y f0 g0 f1 g1: int) (bu bv : t)
+     requires { j - 1 >= 0 }
+     requires { divides (power 2 (j - 1)) (updated_x a b f0 g0) }
+     requires { divides (power 2 (j - 1)) (updated_x a b f1 g1) } 
+     requires { ED.mod (xt a b f1 g1 (j - 1)) 2 = 1 } 
+     requires { ED.mod (xt a b (2 * f0) (2 * g0) ((j + 1) - 1)) 2 = 1 } 
+     requires { congr (xt a b f0 g0 (j - 1)) (to_int bu * y) m } 
+     requires { congr (xt a b f1 g1 (j - 1)) (to_int bv * y) m }
+     ensures { congr (xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1)) (to_int (mont_div_mod (sub bv bu)) * y) m }
+   = begin 
+  assert { congr (ED.div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2)
+  (to_int (mont_div_mod (sub bv bu)) * y) m };
+  assert { ED.mod (ED.div (updated_x a b f1 g1) (factor_at (j - 1))) 2 = 1 };
+  assert { ED.mod (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) 2 = 1 };
+  end  
+        
+   let lemma pres_f0_odd (f0 f1 j bf0 bf1 : int)
+    requires { congr f0 (factor_at (j - 1) * bf0) m }
+    requires { congr f1 (factor_at (j - 1) * bf1) m }
+    requires { (j - 1) >= 0 } 
+
+    ensures { congr (f0 - f1) (factor_at ((j + 1) - 1) * div_mod (bf0 - bf1) m) m  } 
+   = begin assert {  congr (f0 - f1) (factor_at ((j + 1) - 1) * div_mod (bf0 - bf1) m) m 
+                     by congr (factor_at ((j + 1) - 1) * div_mod (bf0 - bf1) m) ( (factor_at (j - 1)) * (bf0 - bf1) ) m
+                     by congr (factor_at ((j + 1) - 1) * div_mod (bf0 - bf1) m) ( (factor_at (j - 1)) * (2 * div_mod (bf0 - bf1 ) m)) m };
+     end
+  
+  (* gcd *) 
+  let lemma inner_gcd_even (a b f0 g0 f1 g1 j : int)
+    requires { gcd a b = gcd (xt a b f0 g0 (j - 1)) (xt a b f1 g1 (j - 1)) } 
+    requires { j - 1 >= 0 }
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+    requires { ED.mod (xt a b f0 g0 (j-1)) 2 = 0 } 
+    requires { ED.mod (xt a b f1 g1 (j-1)) 2 = 1 } 
+    ensures { gcd a b = gcd (xt a b f0 g0 ((j + 1) - 1)) (xt a b (2 * f1) (2 * g1) ((j + 1) - 1)) } 
+    (*ensures { gcd a b = gcd (xt a b f0 g0 (j + 1)) (xt a b (2 * f1) (2 * g1) (j + 1)) }*)
+  = begin 
+    assert { divides (2 * factor_at (j - 1)) (updated_x a b f0 g0) };
+    (* assert { (xt a b (2 * f1) (2 * g1) ((j + 1) - 1)) = (xt a b f1 g1 (j - 1)) }; *)
+  
+  
+  end
+  
+  let lemma gcd_inner_odd (a b f0 g0 f1 g1 j k : int)
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f1 g1) } 
+    requires { (j - 1) >= 0 } 
+    requires { ED.mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+    requires { congr (xt a b f0 g0 (j - 1))
+                     (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)) 2 }
+    requires { not ED.mod
+                  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+                  (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+                    2 = 0 }
+    ensures {  gcd (xt a b f0 g0 (j - 1)) (xt a b f1 g1 (j - 1)) 
+               = gcd (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1)) (xt a b (2 * f1) (2 * g1) ((j + 1) - 1))}
+               
+  = begin 
+    assert { xt a b (2 * f1) (2 * g1) ((j + 1) - 1) = xt a b f1 g1 (j - 1) };
+    assert { xt a b (f0 - f1) (g0 - g1) (j - 1) = ED.div (updated_x a b f0 g0 - updated_x a b f1 g1) (factor_at (j - 1)) };
+    assert { xt a b (f0 - f1) (g0 - g1) (j - 1) = (xt a b f0 g0 (j - 1) - xt a b f1 g1 (j - 1)) }
+  end  
+  
+   let lemma gcd_inner_odd_swap (a b f0 g0 f1 g1 j k : int)
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f1 g1) } 
+    requires { (j - 1) >= 0 } 
+    requires { ED.mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+    requires { congr (xt a b f0 g0 (j - 1))
+                     (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)) 2 }
+    requires { not ED.mod
+                  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+                  (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+                    2 = 0 }
+    ensures {  gcd (xt a b f1 g1 (j - 1)) (xt a b f0 g0 (j - 1)) 
+               = gcd (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1)) (xt a b (2 * f1) (2 * g1) ((j + 1) - 1))}
+               
+  = begin 
+    assert { gcd (xt a b f1 g1 (j - 1)) (xt a b f0 g0 (j - 1)) = gcd (xt a b f0 g0 (j - 1)) (xt a b f1 g1 (j - 1)) };
+  end  
+
+  let lemma inner_bound_at_even (a b f0 g0 j m : int)
+    requires { j - 1 >= 0 } 
+    requires { b >= 0 } 
+    requires { b < power 2 (len m) } 
+    requires { xt a b f0 g0 (j - 1) < power 2 (len m) } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) } 
+    requires { divides 2 (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) }    
+    ensures { xt a b f0 g0 ((j + 1) - 1) < power 2 (len m) }
+  = begin 
+    assert { divides (2 * factor_at (j - 1)) (updated_x a b f0 g0) };
+  
+  end 
+  
+  let lemma congr_even_bu (a b f0 g0 j ba y: int) (bu : t) 
+    (* requires { mod m 2 = 1 } *)
+    requires { j - 1 >= 0 }
+    requires { congr (xt a b f0 g0 (j - 1)) ba 2 }
+    requires { congr (xt a b f0 g0 (j - 1)) (to_int bu * y) m }
+    requires { ED.mod ba 2 = 0 }
+    ensures { congr (ED.div (xt a b f0 g0 (j - 1)) 2) (to_int (mont_div_mod bu) * y) m } 
+   = begin assert {coprime 2 m} end  
+  
+  let lemma exact_divs_even_f1 (a b f1 g1 j: int)
+    requires { j - 1 >= 0 } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+    ensures { divides (factor_at ((j + 1) - 1)) (updated_x a b (2 * f1) (2 * g1)) } 
+   = begin end 
+   
+   
+   let lemma exact_divs_even_f0 (a b f0 g0 j: int)
+    requires { j - 1 >= 0 } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+    requires { ED.mod (xt a b f0 g0 (j - 1)) 2 = 0 }
+    ensures { divides (factor_at ((j + 1) - 1)) (updated_x a b f0 g0) } 
+   = begin
+     (*assert { divides 2 (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) by ( divides 2 (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) ) };
+     assert { divides (2 * factor_at (j - 1)) (updated_x a b f0 g0) };   *)
+   end 
+      
+      
+  lemma mod_div_test : forall a i. i >= 1 -> congr a (ED.mod a (power 2 i)) 2
+  (* lemma mod_div_approx : forall a i : int. i >= 1 -> congr (ED.div a (power 2 i)) (ED.div (mod a (power 2 (i+1))) (power 2 i)) 2    *)
+
+
+  let lemma not_div_dec_len_even (y a b f0 g0 f1 g1 i j k : int) (not_div : bool)
+    requires { j - 1 >= 0 } 
+    requires { not_div = True } 
+    requires { not_div -> (xt a b f0 g0 (j-1)) >= 0 /\ (xt a b f1 g1 (j-1)) >= 0 } (* has not diverged *)
+    requires { (xt a b f0 g0 (j-1)) = 0 \/ (len y + len m >= len (xt a b f0 g0 (j-1)) + len (xt a b f1 g1 (j-1)) + (k-1)*(i-1) + j - 1) }
+    requires { divides (factor_at (j-1)) (updated_x a b f0 g0) }
+    requires { congr (xt a b f0 g0 (j - 1))
+                      (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+                      2 }
+    requires { ED.mod (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)) 2 = 0 }
+    
+    ensures { xt a b f0 g0 ((j + 1) - 1) = 0 \/
+         (len y + len m)
+                   >= ((((len (xt a b f0 g0 ((j + 1) - 1))
+                       + len (xt a b (2 * f1) (2 * g1) ((j + 1) - 1)))
+                       + ((k - 1) * (i - 1))) + (j + 1)) - 1) }
+  = begin 
+    assert { not factor_at (j-1) = 0 };
+    assert { divides ( 2 * factor_at (j - 1)) (updated_x a b f0 g0) };
+  
+  end 
+  
+  let lemma contr_divergence_1 (a b ba bb : int)
+    requires { not (orb (andb (ba < bb) (a >= b)) (andb (ba >= bb) (a < b))) }
+    requires { not (ba < bb) }
+    requires { a < b }
+    ensures { False }
+  = begin end
+  
+  let lemma contr_divergence_2 (a b ba bb : int)
+    requires { not (orb (andb (ba < bb) (a >= b)) (andb (ba >= bb) (a < b))) }
+    requires { (ba < bb) }
+    requires { not a < b }
+    ensures { False }
+  = begin end  
+
+  let lemma abs_bound_f0g0_odd (a b k f0 g0 f1 g1 j f01 g01 f11 g11 bb ba bg1 bg0 bg01 bg11 bf1 bf01 bf0 bf11: int)
+    (bv bu1 bu bv1 : t)
+    requires {  (abs f01 + abs g01) <= factor_at (j - 1) }
+    requires { (abs f11 + abs g11) <= factor_at (j - 1) }
+    requires { j - 1 >= 0 }
+    requires {   if xt (approx a (max (len a) (max (len b) (2 * k))) k)
+     (approx b (max (len a) (max (len b) (2 * k))) k) f01 g01 (j - 1)
+     < xt (approx a (max (len a) (max (len b) (2 * k))) k)
+       (approx b (max (len a) (max (len b) (2 * k))) k) f11 g11 (j - 1)
+  then (bb =
+        xt (approx a (max (len a) (max (len b) (2 * k))) k)
+        (approx b (max (len a) (max (len b) (2 * k))) k) f01 g01 (j - 1) /\
+        ba =
+        xt (approx a (max (len a) (max (len b) (2 * k))) k)
+        (approx b (max (len a) (max (len b) (2 * k))) k) f11 g11 (j - 1)) /\
+       (g1 = g01 /\ g0 = g11 /\ f1 = f01 /\ f0 = f11) /\
+       (bg1 = bg01 /\ bg0 = bg11 /\ bf1 = bf01 /\ bf0 = bf11) /\
+       bv = bu1 /\ bu = bv1
+  else ((((((((((bu = bu1 /\ bv = bv1) /\
+                ba =
+                xt (approx a (max (len a) (max (len b) (2 * k))) k)
+                (approx b (max (len a) (max (len b) (2 * k))) k) f01 g01
+                (j - 1)) /\
+               bb =
+               xt (approx a (max (len a) (max (len b) (2 * k))) k)
+               (approx b (max (len a) (max (len b) (2 * k))) k) f11 g11
+               (j - 1)) /\
+              f0 = f01) /\
+             f1 = f11) /\
+            g0 = g01) /\
+           g1 = g11) /\
+          bf0 = bf01) /\
+         bf1 = bf11) /\
+        bg0 = bg01) /\
+       bg1 = bg11 }
+    ensures { (abs (f0 - f1) + abs (g0 - g1)) <= factor_at ((j + 1) - 1) } 
+  = begin 
+    assert { abs (f0 - f1) <= abs f0 + abs f1 };
+    assert { abs (g0 - g1) <= abs g0 + abs g1 };
+    
+  end 
+end

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Z3" version="4.13.4" alternative="counterexamples" timelimit="5" steplimit="0" memlimit="1000"/>
+<prover id="2" name="CVC5" version="1.2.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="4" name="Z3" version="4.13.4" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="6" name="Alt-Ergo" version="2.6.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="divdivides.mlw"/>
+<theory name="Div_divides" proved="true">
+ <goal name="odd_sub_div" proved="true">
+ <proof prover="6"><result status="valid" time="0.027867" steps="358"/></proof>
+ </goal>
+ <goal name="mod21_sub_div" proved="true">
+ <proof prover="6"><result status="valid" time="0.033324" steps="93"/></proof>
+ </goal>
+ <goal name="div_comp" proved="true">
+ <proof prover="6"><result status="valid" time="0.079169" steps="34"/></proof>
+ </goal>
+ <goal name="div_divides" proved="true">
+ <proof prover="6"><result status="valid" time="0.035086" steps="26"/></proof>
+ </goal>
+ <goal name="divides_factors" proved="true">
+ <proof prover="6"><result status="valid" time="0.025270" steps="36"/></proof>
+ </goal>
+ <goal name="divides_sub" proved="true">
+ <proof prover="4"><result status="valid" time="0.018648" steps="32353"/></proof>
+ </goal>
+ <goal name="divides_factorK" proved="true">
+ <proof prover="4"><result status="valid" time="0.016573" steps="29396"/></proof>
+ </goal>
+ <goal name="divides_add" proved="true">
+ <proof prover="4"><result status="valid" time="0.023868" steps="32293"/></proof>
+ </goal>
+ <goal name="dividesP" proved="true">
+ <proof prover="6"><result status="valid" time="0.080638" steps="16224"/></proof>
+ </goal>
+ <goal name="div_sub&#39;vc" expl="VC for div_sub" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_sub&#39;vc.0" expl="assertion" proved="true">
+  <transf name="rewrite" proved="true" arg1="dividesP" arg2="in" arg3="Requires">
+   <goal name="div_sub&#39;vc.0.0" expl="assertion" proved="true">
+   <transf name="rewrite" proved="true" arg1="dividesP" arg2="in" arg3="Requires1">
+    <goal name="div_sub&#39;vc.0.0.0" expl="assertion" proved="true">
+    <transf name="split_vc" proved="true" >
+     <goal name="div_sub&#39;vc.0.0.0.0" expl="assertion" proved="true">
+     <transf name="exists" proved="true" arg1="q1">
+      <goal name="div_sub&#39;vc.0.0.0.0.0" proved="true">
+      <transf name="exists" proved="true" arg1="q">
+       <goal name="div_sub&#39;vc.0.0.0.0.0.0" proved="true">
+       <proof prover="4"><result status="valid" time="0.010578" steps="11429"/></proof>
+       </goal>
+      </transf>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="div_sub&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.032036" steps="4098"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_add&#39;vc" expl="VC for div_add" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_add&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.082838" steps="21159"/></proof>
+  </goal>
+  <goal name="div_add&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="4"><result status="valid" time="0.040663" steps="131326"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_mult" proved="true">
+ <proof prover="4"><result status="valid" time="0.020511" steps="32735"/></proof>
+ </goal>
+ <goal name="div_mult_factor_pos" proved="true">
+ <proof prover="4"><result status="valid" time="0.024273" steps="49866"/></proof>
+ </goal>
+ <goal name="div_factor_divisor" proved="true">
+ <proof prover="4"><result status="valid" time="0.020377" steps="34195"/></proof>
+ </goal>
+ <goal name="div_negH" proved="true">
+ <proof prover="6"><result status="valid" time="0.047662" steps="5670"/></proof>
+ </goal>
+ <goal name="div_negL&#39;vc" expl="VC for div_negL" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_negL&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.020646" steps="44450"/></proof>
+  </goal>
+  <goal name="div_negL&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.034340" steps="3907"/></proof>
+  </goal>
+  <goal name="div_negL&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="4"><result status="timeout" time="1.000000" steps="2306309"/></proof>
+  <proof prover="6"><result status="timeout" time="1.000000" steps="120388"/></proof>
+  <transf name="split_vc" proved="true" >
+   <goal name="div_negL&#39;vc.2.0" expl="postcondition" proved="true">
+   <proof prover="4"><result status="valid" time="0.018842" steps="18074"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_mult_factor_neg&#39;vc" expl="VC for div_mult_factor_neg" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_mult_factor_neg&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.007945" steps="4872"/></proof>
+  </goal>
+  <goal name="div_mult_factor_neg&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.956965" steps="80471"/></proof>
+  </goal>
+  <goal name="div_mult_factor_neg&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="4"><result status="valid" time="0.014985" steps="50436"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="divides_multl" proved="true">
+ <proof prover="6"><result status="valid" time="0.027409" steps="29"/></proof>
+ </goal>
+ <goal name="divides_multr" proved="true">
+ <proof prover="6"><result status="valid" time="0.023968" steps="29"/></proof>
+ </goal>
+ <goal name="split_factor_divisor" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="split_factor_divisor.0" proved="true">
+  <transf name="rewrite" proved="true" arg1="dividesP" arg2="in" arg3="H">
+   <goal name="split_factor_divisor.0.0" proved="true">
+   <transf name="split_vc" proved="true" >
+    <goal name="split_factor_divisor.0.0.0" proved="true">
+    <proof prover="4"><result status="valid" time="0.022783" steps="43572"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_factors_comm&#39;vc" expl="VC for div_factors_comm" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_factors_comm&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.027681" steps="3250"/></proof>
+  </goal>
+  <goal name="div_factors_comm&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.009621" steps="19734"/></proof>
+  </goal>
+  <goal name="div_factors_comm&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="4"><result status="valid" time="0.008270" steps="19990"/></proof>
+  </goal>
+  <goal name="div_factors_comm&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.030363" steps="640"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_lt_mono&#39;vc" expl="VC for div_lt_mono" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_lt_mono&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.140867" steps="31261"/></proof>
+  </goal>
+  <goal name="div_lt_mono&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.163774" steps="37557"/></proof>
+  </goal>
+  <goal name="div_lt_mono&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.065286" steps="2586"/></proof>
+  </goal>
+  <goal name="div_lt_mono&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="4"><result status="valid" time="0.015745" steps="41873"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="div_gt" proved="true">
+ <proof prover="4"><result status="valid" time="0.026083" steps="49628"/></proof>
+ </goal>
+ <goal name="gt_div" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="gt_div.0" proved="true">
+  <proof prover="0"><result status="valid" time="4.365232"/></proof>
+  <proof prover="6" timelimit="5"><result status="timeout" time="5.000000" steps="334792"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="abs_multC&#39;vc" expl="VC for abs_multC" proved="true">
+ <proof prover="6"><result status="valid" time="0.014792" steps="203"/></proof>
+ </goal>
+ <goal name="div_neg&#39;vc" expl="VC for div_neg" proved="true">
+ <proof prover="6"><result status="valid" time="0.041627" steps="16"/></proof>
+ </goal>
+ <goal name="abs_div&#39;vc" expl="VC for abs_div" proved="true">
+ <proof prover="6"><result status="valid" time="0.055983" steps="33"/></proof>
+ </goal>
+ <goal name="abs_div_le&#39;vc" expl="VC for abs_div_le" proved="true">
+ <proof prover="6"><result status="valid" time="0.064524" steps="2080"/></proof>
+ </goal>
+ <goal name="abs_div_strong&#39;vc" expl="VC for abs_div_strong" proved="true">
+ <proof prover="6"><result status="valid" time="0.033909" steps="1691"/></proof>
+ </goal>
+ <goal name="abs_div2&#39;vc" expl="VC for abs_div2" proved="true">
+ <proof prover="6"><result status="valid" time="0.215295" steps="29129"/></proof>
+ </goal>
+ <goal name="abs_div3&#39;vc" expl="VC for abs_div3" proved="true">
+ <proof prover="6"><result status="valid" time="0.029850" steps="53"/></proof>
+ </goal>
+ <goal name="abs_add&#39;vc" expl="VC for abs_add" proved="true">
+ <proof prover="4"><result status="valid" time="0.022198" steps="54371"/></proof>
+ </goal>
+ <goal name="abs_sub_bounds_gt&#39;vc" expl="VC for abs_sub_bounds_gt" proved="true">
+ <proof prover="4"><result status="valid" time="0.025194" steps="50827"/></proof>
+ </goal>
+ <goal name="abs_sub_bounds_geq&#39;vc" expl="VC for abs_sub_bounds_geq" proved="true">
+ <proof prover="4"><result status="valid" time="0.013272" steps="52154"/></proof>
+ </goal>
+ <goal name="div_abs_add_leq&#39;vc" expl="VC for div_abs_add_leq" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="div_abs_add_leq&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="0"><result status="valid" time="0.026360" steps="35572"/></proof>
+  <proof prover="6" timelimit="5"><result status="timeout" time="5.000000" steps="367310"/></proof>
+  </goal>
+  <goal name="div_abs_add_leq&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.020953" steps="274"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

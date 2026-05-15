@@ -1,0 +1,27 @@
+module ModOps
+  use int.Int
+  use int.EuclideanDivision
+  use number.Gcd
+  
+  constant m : int
+  axiom m_pos: 0 < m
+  
+  type t = abstract { n : int } invariant { 0 <= n < m }
+ 
+  val function to_int (n:t) : int ensures { result = n.n }
+  meta coercion function to_int
+  
+  predicate congr_m (x y : int) = x = y \/ x = y + m \/ y = x + m (* too clever? *)
+  
+  val function of_int (x : int) : t requires { 0 <= x < m } ensures{ x = result }
+  
+  val function add (x y: t): t ensures { congr_m (x + y) result }
+  val function sub (x y: t): t ensures { congr_m (x - y) result }
+
+  lemma x_mod : forall x : t. x = mod x m 
+
+  val function mont_div_mod (x : t) : t
+    requires { mod m 2 = 1 }
+    ensures { mod x m = mod (2 * result) m } 
+
+end

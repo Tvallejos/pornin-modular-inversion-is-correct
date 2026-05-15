@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="2" name="Z3" version="4.13.4" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="7" name="CVC5" version="1.2.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="10" name="Alt-Ergo" version="2.6.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="invariantsnotation.mlw"/>
+<theory name="Xt" proved="true">
+ <goal name="updated_init_a" proved="true">
+ <proof prover="2"><result status="valid" time="0.009739" steps="13160"/></proof>
+ </goal>
+ <goal name="updated_init_b" proved="true">
+ <proof prover="2"><result status="valid" time="0.009038" steps="13187"/></proof>
+ </goal>
+ <goal name="updated_double" proved="true">
+ <proof prover="2"><result status="valid" time="0.007107" steps="13264"/></proof>
+ </goal>
+ <goal name="updated_sub" proved="true">
+ <proof prover="2"><result status="valid" time="0.009064" steps="27785"/></proof>
+ </goal>
+ <goal name="xt&#39;vc" expl="VC for xt" proved="true">
+ <proof prover="2"><result status="valid" time="0.016483" steps="108369"/></proof>
+ </goal>
+ <goal name="unfold_xt" proved="true">
+ <proof prover="2"><result status="valid" time="0.006548" steps="13485"/></proof>
+ </goal>
+ <goal name="xt_init_a" proved="true">
+ <proof prover="10"><result status="valid" time="0.046142" steps="255"/></proof>
+ </goal>
+ <goal name="xt_init_b" proved="true">
+ <proof prover="10"><result status="valid" time="0.029884" steps="255"/></proof>
+ </goal>
+ <goal name="pow_rewr" proved="true">
+ <proof prover="2"><result status="valid" time="0.016970" steps="110962"/></proof>
+ </goal>
+ <goal name="xt_half" proved="true">
+ <proof prover="10"><result status="valid" time="0.195018" steps="33125"/></proof>
+ </goal>
+ <goal name="xt_half&#39;" proved="true">
+ <proof prover="7"><result status="valid" time="0.172193" steps="35963"/></proof>
+ <proof prover="10"><result status="valid" time="0.036274" steps="102"/></proof>
+ </goal>
+ <goal name="xt_double_half&#39;vc" expl="VC for xt_double_half" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="xt_double_half&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="10"><result status="valid" time="0.033082" steps="271"/></proof>
+  </goal>
+  <goal name="xt_double_half&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="10"><result status="valid" time="0.037205" steps="582"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="xt_double_half&#39;&#39;vc" expl="VC for xt_double_half&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.017183" steps="112322"/></proof>
+ </goal>
+ <goal name="xt_sub&#39;vc" expl="VC for xt_sub" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="xt_sub&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="7"><result status="valid" time="0.203152" steps="38890"/></proof>
+  <proof prover="10"><result status="valid" time="0.034146" steps="163"/></proof>
+  </goal>
+  <goal name="xt_sub&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="10"><result status="valid" time="0.459416" steps="13474"/></proof>
+  </goal>
+  <goal name="xt_sub&#39;vc.2" expl="assertion" proved="true">
+  <transf name="apply" proved="true" arg1="divides_factors">
+   <goal name="xt_sub&#39;vc.2.0" expl="apply premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.022301" steps="148979"/></proof>
+   </goal>
+   <goal name="xt_sub&#39;vc.2.1" expl="apply premises" proved="true">
+   <proof prover="7"><result status="valid" time="0.220153" steps="53481"/></proof>
+   <proof prover="10"><result status="valid" time="0.044173" steps="202"/></proof>
+   </goal>
+   <goal name="xt_sub&#39;vc.2.2" expl="apply premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.006772" steps="14146"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="xt_sub&#39;vc.3" expl="postcondition" proved="true">
+  <transf name="rewrite" proved="true" arg1="unfold_xt">
+   <goal name="xt_sub&#39;vc.3.0" expl="postcondition" proved="true">
+   <transf name="rewrite" proved="true" arg1="updated_sub">
+    <goal name="xt_sub&#39;vc.3.0.0" expl="postcondition" proved="true">
+    <transf name="rewrite" proved="true" arg1="factor_at_S">
+     <goal name="xt_sub&#39;vc.3.0.0.0" expl="postcondition" proved="true">
+     <transf name="rewrite" proved="true" arg1="split_factor_divisor">
+      <goal name="xt_sub&#39;vc.3.0.0.0.0" expl="postcondition" proved="true">
+      <proof prover="7"><result status="valid" time="1.103274" steps="264311"/></proof>
+      <proof prover="10"><result status="valid" time="0.242451" steps="21833"/></proof>
+      </goal>
+      <goal name="xt_sub&#39;vc.3.0.0.0.1" expl="rewrite premises" proved="true">
+      <proof prover="2"><result status="valid" time="0.008058" steps="14173"/></proof>
+      </goal>
+      <goal name="xt_sub&#39;vc.3.0.0.0.2" expl="rewrite premises" proved="true">
+      <proof prover="2"><result status="valid" time="0.022238" steps="142710"/></proof>
+      </goal>
+      <goal name="xt_sub&#39;vc.3.0.0.0.3" expl="rewrite premises" proved="true">
+      <proof prover="2"><result status="valid" time="0.007177" steps="14195"/></proof>
+      </goal>
+     </transf>
+     </goal>
+     <goal name="xt_sub&#39;vc.3.0.0.1" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.007372" steps="14173"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="xt_sub&#39;vc.3.1" expl="rewrite premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.017762" steps="120695"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="xt_sub&#39;&#39;vc" expl="VC for xt_sub&#39;" proved="true">
+ <proof prover="10"><result status="valid" time="0.048599" steps="192"/></proof>
+ </goal>
+ <goal name="divides_odd&#39;vc" expl="VC for divides_odd" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="divides_odd&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.034610" steps="275244"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.044920" steps="362849"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.009175" steps="30642"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.3" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.025645" steps="167831"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.4" expl="assertion" proved="true">
+  <proof prover="7"><result status="valid" time="0.161498" steps="46907"/></proof>
+  <proof prover="10"><result status="valid" time="0.039625" steps="257"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.5" expl="assertion" proved="true">
+  <proof prover="7"><result status="valid" time="0.707681" steps="150388"/></proof>
+  <proof prover="10"><result status="valid" time="0.063344" steps="791"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.6" expl="assertion" proved="true">
+  <proof prover="7"><result status="valid" time="0.234327" steps="48487"/></proof>
+  <proof prover="10"><result status="valid" time="0.044685" steps="326"/></proof>
+  </goal>
+  <goal name="divides_odd&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="10"><result status="valid" time="0.044493" steps="353"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="approx&#39;vc" expl="VC for approx" proved="true">
+ <proof prover="7"><result status="valid" time="0.227351" steps="50193"/></proof>
+ <proof prover="10"><result status="valid" time="0.034958" steps="119"/></proof>
+ </goal>
+ <goal name="unfold_approx" proved="true">
+ <proof prover="2"><result status="valid" time="0.006948" steps="14807"/></proof>
+ </goal>
+ <goal name="unfold_approx&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.010347" steps="47617"/></proof>
+ </goal>
+ <goal name="approx_parity" proved="true">
+ <proof prover="10"><result status="valid" time="0.474617" steps="12636"/></proof>
+ </goal>
+ <goal name="init_partity" proved="true">
+ <proof prover="10"><result status="valid" time="0.388713" steps="9477"/></proof>
+ </goal>
+ <goal name="parity_approx&#39;&#39;vc" expl="VC for parity_approx&#39;" proved="true">
+ <proof prover="7"><result status="valid" time="0.043125" steps="25268"/></proof>
+ </goal>
+ <goal name="parity_approx_even&#39;&#39;vc" expl="VC for parity_approx_even&#39;" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="parity_approx_even&#39;&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.027143" steps="138951"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.017990" steps="138951"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.025497" steps="138951"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.042575" steps="131927"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.045490" steps="131927"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.5" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.030999" steps="138951"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.6" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.031173" steps="138951"/></proof>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.7" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="parity_approx_even&#39;&#39;vc.7.0" expl="assertion" proved="true">
+   <transf name="rewrite" proved="true" arg1="unfold_xt">
+    <goal name="parity_approx_even&#39;&#39;vc.7.0.0" expl="assertion" proved="true">
+    <transf name="rewrite" proved="true" arg1="unfold_approx&#39;">
+     <goal name="parity_approx_even&#39;&#39;vc.7.0.0.0" expl="assertion" proved="true">
+     <transf name="unfold" proved="true" arg1="updated_x">
+      <goal name="parity_approx_even&#39;&#39;vc.7.0.0.0.0" expl="assertion" proved="true">
+      <proof prover="10"><result status="valid" time="0.076576" steps="5895"/></proof>
+      </goal>
+     </transf>
+     </goal>
+     <goal name="parity_approx_even&#39;&#39;vc.7.0.0.1" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.008024" steps="15113"/></proof>
+     </goal>
+     <goal name="parity_approx_even&#39;&#39;vc.7.0.0.2" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.007170" steps="15121"/></proof>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="parity_approx_even&#39;&#39;vc.7.0.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.005906" steps="15121"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.1" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.013879" steps="32003"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.2" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.318786" steps="982430"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.3" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="7"><result status="valid" time="0.030946" steps="23793"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.4" expl="VC for parity_approx_even&#39;" proved="true">
+   <transf name="rewrite" proved="true" arg1="H1">
+    <goal name="parity_approx_even&#39;&#39;vc.7.4.0" expl="VC for parity_approx_even&#39;" proved="true">
+    <transf name="rewrite" proved="true" arg1="H">
+     <goal name="parity_approx_even&#39;&#39;vc.7.4.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+     <transf name="rewrite" proved="true" arg1="Div_mult">
+      <goal name="parity_approx_even&#39;&#39;vc.7.4.0.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+      <proof prover="2"><result status="valid" time="0.019814" steps="15367"/></proof>
+      </goal>
+      <goal name="parity_approx_even&#39;&#39;vc.7.4.0.0.1" expl="rewrite premises" proved="true">
+      <proof prover="2"><result status="valid" time="0.249955" steps="982528"/></proof>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.5" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.147292" steps="21537"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.6" expl="VC for parity_approx_even&#39;" proved="true">
+   <transf name="rewrite" proved="true" arg1="unfold_congr">
+    <goal name="parity_approx_even&#39;&#39;vc.7.6.0" expl="VC for parity_approx_even&#39;" proved="true">
+    <transf name="rewrite" proved="true" arg1="H2">
+     <goal name="parity_approx_even&#39;&#39;vc.7.6.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+     <transf name="rewrite" proved="true" arg1="H1">
+      <goal name="parity_approx_even&#39;&#39;vc.7.6.0.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+      <transf name="rewrite" proved="true" arg1="H">
+       <goal name="parity_approx_even&#39;&#39;vc.7.6.0.0.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+       <transf name="rewrite" proved="true" arg1="Mod_mult">
+        <goal name="parity_approx_even&#39;&#39;vc.7.6.0.0.0.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+        <proof prover="2"><result status="valid" time="0.018271" steps="15428"/></proof>
+        </goal>
+        <goal name="parity_approx_even&#39;&#39;vc.7.6.0.0.0.0.1" expl="rewrite premises" proved="true">
+        <proof prover="2"><result status="valid" time="0.010060" steps="15440"/></proof>
+        </goal>
+       </transf>
+       </goal>
+      </transf>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="parity_approx_even&#39;&#39;vc.7.6.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.009270" steps="15436"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.7.7" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.035930" steps="435"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.8" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="parity_approx_even&#39;&#39;vc.8.0" expl="assertion" proved="true">
+   <proof prover="7"><result status="valid" time="0.278022" steps="48916"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.1" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.048464" steps="613"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.2" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.073117" steps="6018"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.3" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.032854" steps="318"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.4" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.011498" steps="34022"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.5" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.012162" steps="34224"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.6" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.305556" steps="1074908"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.7" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.033169" steps="612"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.8" expl="VC for parity_approx_even&#39;" proved="true">
+   <transf name="rewrite" proved="true" arg1="Div_mult">
+    <goal name="parity_approx_even&#39;&#39;vc.8.8.0" expl="VC for parity_approx_even&#39;" proved="true">
+    <proof prover="2"><result status="valid" time="0.014097" steps="16286"/></proof>
+    </goal>
+    <goal name="parity_approx_even&#39;&#39;vc.8.8.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.254248" steps="1173175"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.9" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="2"><result status="valid" time="0.589711" steps="1822346"/></proof>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.10" expl="VC for parity_approx_even&#39;" proved="true">
+   <transf name="rewrite" proved="true" arg1="H">
+    <goal name="parity_approx_even&#39;&#39;vc.8.10.0" expl="VC for parity_approx_even&#39;" proved="true">
+    <proof prover="2"><result status="valid" time="0.015631" steps="16374"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.11" expl="VC for parity_approx_even&#39;" proved="true">
+   <transf name="rewrite" proved="true" arg1="unfold_congr">
+    <goal name="parity_approx_even&#39;&#39;vc.8.11.0" expl="VC for parity_approx_even&#39;" proved="true">
+    <transf name="rewrite" proved="true" arg1="H">
+     <goal name="parity_approx_even&#39;&#39;vc.8.11.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+     <transf name="rewrite" proved="true" arg1="Mod_mult">
+      <goal name="parity_approx_even&#39;&#39;vc.8.11.0.0.0" expl="VC for parity_approx_even&#39;" proved="true">
+      <proof prover="2"><result status="valid" time="0.012256" steps="16363"/></proof>
+      </goal>
+      <goal name="parity_approx_even&#39;&#39;vc.8.11.0.0.1" expl="rewrite premises" proved="true">
+      <proof prover="2"><result status="valid" time="0.016457" steps="16375"/></proof>
+      </goal>
+     </transf>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="parity_approx_even&#39;&#39;vc.8.11.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.006724" steps="16371"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="parity_approx_even&#39;&#39;vc.8.12" expl="VC for parity_approx_even&#39;" proved="true">
+   <proof prover="10"><result status="valid" time="0.043093" steps="2819"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="parity_approx_even&#39;&#39;vc.9" expl="postcondition" proved="true">
+  <proof prover="7"><result status="valid" time="0.437222" steps="89147"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="close_approx&#39;vc" expl="VC for close_approx" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="close_approx&#39;vc.0" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="close_approx&#39;vc.0.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.008739" steps="16170"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.0.1" expl="VC for close_approx" proved="true">
+   <proof prover="2"><result status="valid" time="0.013449" steps="33747"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.0.2" expl="VC for close_approx" proved="true">
+   <transf name="rewrite" proved="true" arg1="H">
+    <goal name="close_approx&#39;vc.0.2.0" expl="VC for close_approx" proved="true">
+    <proof prover="10"><result status="valid" time="0.068498" steps="6282"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="close_approx&#39;vc.0.3" expl="VC for close_approx" proved="true">
+   <proof prover="2"><result status="valid" time="0.014984" steps="16281"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="close_approx&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="7"><result status="valid" time="0.169029" steps="55299"/></proof>
+  </goal>
+  <goal name="close_approx&#39;vc.2" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="close_approx&#39;vc.2.0" expl="assertion" proved="true">
+   <proof prover="7"><result status="valid" time="0.126133" steps="44662"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.2.1" expl="VC for close_approx" proved="true">
+   <proof prover="2"><result status="valid" time="0.156400" steps="495685"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.2.2" expl="VC for close_approx" proved="true">
+   <proof prover="2"><result status="valid" time="0.089318" steps="497045"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.2.3" expl="VC for close_approx" proved="true">
+   <transf name="rewrite" proved="true" arg1="H">
+    <goal name="close_approx&#39;vc.2.3.0" expl="VC for close_approx" proved="true">
+    <proof prover="2"><result status="valid" time="0.085876" steps="496953"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="close_approx&#39;vc.3" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="close_approx&#39;vc.3.0" expl="assertion" proved="true">
+   <proof prover="7"><result status="valid" time="0.047990" steps="27765"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="close_approx&#39;vc.4" expl="postcondition" proved="true">
+  <transf name="rewrite" proved="true" arg1="unfold_approx">
+   <goal name="close_approx&#39;vc.4.0" expl="postcondition" proved="true">
+   <proof prover="7"><result status="valid" time="0.049703" steps="28062"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.4.1" expl="rewrite premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.007503" steps="16337"/></proof>
+   </goal>
+   <goal name="close_approx&#39;vc.4.2" expl="rewrite premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.006502" steps="16337"/></proof>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="approx_2k_eq&#39;vc" expl="VC for approx_2k_eq" proved="true">
+ <proof prover="10"><result status="valid" time="0.066679" steps="2720"/></proof>
+ </goal>
+ <goal name="xd&#39;vc" expl="VC for xd" proved="true">
+ <proof prover="2"><result status="valid" time="0.012051" steps="16289"/></proof>
+ </goal>
+ <goal name="unfold_xd" proved="true">
+ <proof prover="2"><result status="valid" time="0.019667" steps="16494"/></proof>
+ </goal>
+ <goal name="id_updated_approx_sub&#39;vc" expl="VC for id_updated_approx_sub" proved="true">
+ <proof prover="10"><result status="valid" time="0.039262" steps="2646"/></proof>
+ </goal>
+ <goal name="id_approx_sub&#39;vc" expl="VC for id_approx_sub" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="id_approx_sub&#39;vc.0" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="id_approx_sub&#39;vc.0.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.033151" steps="151744"/></proof>
+   </goal>
+   <goal name="id_approx_sub&#39;vc.0.1" expl="assertion" proved="true">
+   <proof prover="10"><result status="valid" time="0.032442" steps="278"/></proof>
+   </goal>
+   <goal name="id_approx_sub&#39;vc.0.2" expl="VC for id_approx_sub" proved="true">
+   <transf name="rewrite" proved="true" arg1="unfold_xt">
+    <goal name="id_approx_sub&#39;vc.0.2.0" expl="VC for id_approx_sub" proved="true">
+    <transf name="rewrite" proved="true" arg1="div_sub">
+     <goal name="id_approx_sub&#39;vc.0.2.0.0" expl="VC for id_approx_sub" proved="true">
+     <proof prover="10"><result status="valid" time="0.086396" steps="4473"/></proof>
+     </goal>
+     <goal name="id_approx_sub&#39;vc.0.2.0.1" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.008877" steps="16913"/></proof>
+     </goal>
+     <goal name="id_approx_sub&#39;vc.0.2.0.2" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.016716" steps="16929"/></proof>
+     </goal>
+     <goal name="id_approx_sub&#39;vc.0.2.0.3" expl="rewrite premises" proved="true">
+     <proof prover="2"><result status="valid" time="0.020584" steps="16929"/></proof>
+     </goal>
+    </transf>
+    </goal>
+    <goal name="id_approx_sub&#39;vc.0.2.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.008255" steps="16913"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="id_approx_sub&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.078453" steps="303890"/></proof>
+  </goal>
+  <goal name="id_approx_sub&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="10"><result status="valid" time="0.033039" steps="360"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="triang_bound_sub_id&#39;vc" expl="VC for triang_bound_sub_id" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="triang_bound_sub_id&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.020197" steps="17112"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.015942" steps="17125"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.012241" steps="17112"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.007405" steps="17125"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.4" expl="assertion" proved="true">
+  <proof prover="10"><result status="valid" time="0.181044" steps="10831"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.5" expl="assertion" proved="true">
+  <transf name="subst_all" proved="true" >
+   <goal name="triang_bound_sub_id&#39;vc.5.0" expl="assertion" proved="true">
+   <transf name="rewrite" proved="true" arg1="&lt;-" arg2="id_updated_approx_sub">
+    <goal name="triang_bound_sub_id&#39;vc.5.0.0" expl="assertion" proved="true">
+    <proof prover="10"><result status="valid" time="0.374828" steps="41949"/></proof>
+    </goal>
+    <goal name="triang_bound_sub_id&#39;vc.5.0.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.008448" steps="17255"/></proof>
+    </goal>
+    <goal name="triang_bound_sub_id&#39;vc.5.0.2" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.006900" steps="17263"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.6" expl="assertion" proved="true">
+  <proof prover="10"><result status="valid" time="0.269260" steps="14305"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.7" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="triang_bound_sub_id&#39;vc.7.0" expl="assertion" proved="true">
+   <proof prover="10"><result status="valid" time="0.195056" steps="15844"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.7.1" expl="assertion" proved="true">
+   <proof prover="10"><result status="valid" time="0.230016" steps="15843"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.7.2" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.060662" steps="1047"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.7.3" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.076341" steps="1118"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.7.4" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.022005" steps="82"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.7.5" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.229172" steps="18585"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.8" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.016127" steps="37109"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.9" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="triang_bound_sub_id&#39;vc.9.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.011428" steps="17583"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.1" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="2"><result status="valid" time="0.226370" steps="1004959"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.2" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="2"><result status="valid" time="0.290815" steps="1004815"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.3" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.213249" steps="21226"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.4" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="2"><result status="valid" time="0.020958" steps="135386"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.5" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="10"><result status="valid" time="0.098101" steps="1817"/></proof>
+   </goal>
+   <goal name="triang_bound_sub_id&#39;vc.9.6" expl="VC for triang_bound_sub_id" proved="true">
+   <proof prover="2"><result status="valid" time="0.008226" steps="17718"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.10" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.348110" steps="1056762"/></proof>
+  </goal>
+  <goal name="triang_bound_sub_id&#39;vc.11" expl="postcondition" proved="true">
+  <transf name="rewrite" proved="true" arg1="Assert2">
+   <goal name="triang_bound_sub_id&#39;vc.11.0" expl="postcondition" proved="true">
+   <transf name="rewrite" proved="true" arg1="abs_div3">
+    <goal name="triang_bound_sub_id&#39;vc.11.0.0" expl="postcondition" proved="true">
+    <proof prover="10"><result status="valid" time="0.200397" steps="21493"/></proof>
+    </goal>
+    <goal name="triang_bound_sub_id&#39;vc.11.0.1" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.304184" steps="1001959"/></proof>
+    </goal>
+    <goal name="triang_bound_sub_id&#39;vc.11.0.2" expl="rewrite premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.020195" steps="17685"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="is_halving&#39;&#39;vc" expl="VC for is_halving&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.009673" steps="17266"/></proof>
+ </goal>
+ <goal name="is_divergent2&#39;vc" expl="VC for is_divergent2" proved="true">
+ <proof prover="2"><result status="valid" time="0.019222" steps="131938"/></proof>
+ </goal>
+ <goal name="bound_dS1&#39;vc" expl="VC for bound_dS1" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="bound_dS1&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.012795" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.1" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.005402" steps="17760"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.024346" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.3" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.022183" steps="17760"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.4" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.009906" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.5" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.016794" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.6" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.014423" steps="17760"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.7" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.020711" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.8" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.009596" steps="17760"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.9" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.009817" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.10" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.012793" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.11" expl="precondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.015022" steps="17747"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.12" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.010167" steps="37425"/></proof>
+  </goal>
+  <goal name="bound_dS1&#39;vc.13" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="bound_dS1&#39;vc.13.0" expl="assertion" proved="true">
+   <proof prover="7"><result status="valid" time="0.084018" steps="37012"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.1" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.102231" steps="37342"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.2" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.056647" steps="31495"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.3" expl="VC for bound_dS1" proved="true">
+   <proof prover="10"><result status="valid" time="0.088717" steps="908"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.4" expl="VC for bound_dS1" proved="true">
+   <proof prover="10"><result status="valid" time="0.048646" steps="910"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.5" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.125679" steps="545476"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.13.6" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.106855" steps="18206"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="bound_dS1&#39;vc.14" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="bound_dS1&#39;vc.14.0" expl="assertion" proved="true">
+   <proof prover="7"><result status="valid" time="0.054460" steps="31694"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.1" expl="VC for bound_dS1" proved="true">
+   <transf name="subst_all" proved="true" >
+    <goal name="bound_dS1&#39;vc.14.1.0" expl="VC for bound_dS1" proved="true">
+    <proof prover="2"><result status="valid" time="0.013704" steps="59468"/></proof>
+    </goal>
+   </transf>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.2" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.137113" steps="489783"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.3" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.015231" steps="59659"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.4" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.052538" steps="29544"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.5" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.027319" steps="59672"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.6" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.056287" steps="31569"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.7" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.007678" steps="18229"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.8" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.009700" steps="18229"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.14.9" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.027806" steps="140553"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="bound_dS1&#39;vc.15" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="bound_dS1&#39;vc.15.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.033871" steps="64323"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.1" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.113261" steps="495373"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.2" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.030811" steps="64595"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.3" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.040812" steps="29510"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.4" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.022496" steps="18241"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.5" expl="VC for bound_dS1" proved="true">
+   <proof prover="7"><result status="valid" time="0.066536" steps="31444"/></proof>
+   </goal>
+   <goal name="bound_dS1&#39;vc.15.6" expl="VC for bound_dS1" proved="true">
+   <proof prover="2"><result status="valid" time="0.107336" steps="506691"/></proof>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="bound_dS1&#39;vc.16" expl="postcondition" proved="true">
+  <proof prover="10"><result status="valid" time="0.046921" steps="766"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="regular&#39;&#39;vc" expl="VC for regular&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.030209" steps="137746"/></proof>
+ </goal>
+ <goal name="unfold_regular&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.013038" steps="17995"/></proof>
+ </goal>
+ <goal name="good&#39;&#39;vc" expl="VC for good&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.027480" steps="138740"/></proof>
+ </goal>
+ <goal name="unfold_good&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.013971" steps="18157"/></proof>
+ </goal>
+ <goal name="good&#39;_regular&#39;&#39;vc" expl="VC for good&#39;_regular&#39;" proved="true">
+ <proof prover="2"><result status="valid" time="0.028717" steps="144884"/></proof>
+ </goal>
+ <goal name="maxt&#39;vc" expl="VC for maxt" proved="true">
+ <proof prover="2"><result status="valid" time="0.007881" steps="18203"/></proof>
+ </goal>
+ <goal name="unfold_maxt" proved="true">
+ <proof prover="2"><result status="valid" time="0.016736" steps="18284"/></proof>
+ </goal>
+ <goal name="mint&#39;vc" expl="VC for mint" proved="true">
+ <proof prover="2"><result status="valid" time="0.026022" steps="18285"/></proof>
+ </goal>
+ <goal name="unfold_mint" proved="true">
+ <proof prover="2"><result status="valid" time="0.008570" steps="18366"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

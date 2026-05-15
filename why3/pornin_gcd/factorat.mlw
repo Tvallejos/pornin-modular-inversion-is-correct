@@ -1,0 +1,15 @@
+
+module Factor_at 
+
+  use int.Int
+  use int.EuclideanDivision
+  use int.Power
+
+
+  let function factor_at (t : int) : int
+    = power 2 t 
+  lemma div_pow_0 : forall a k : int. div a (power k 0) = a
+  lemma factor_at_init : factor_at 0 = 1
+  lemma factor_at_S : forall t : int. t >= 0 -> factor_at (t + 1) = 2 * factor_at t
+  lemma factor_at_S' : forall t : int. t - 1 >= 0 -> factor_at ((t + 1) - 1) = 2 * factor_at (t - 1)
+end

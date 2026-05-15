@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="2" name="Z3" version="4.13.4" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="5" name="Alt-Ergo" version="2.6.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="outerinvariants.mlw"/>
+<theory name="OuterInv" proved="true">
+ <goal name="gcd_outer_pos&#39;vc" expl="VC for gcd_outer_pos" proved="true">
+ <proof prover="2"><result status="valid" time="1.530518" steps="5737356"/></proof>
+ </goal>
+ <goal name="neg_even_bu&#39;vc" expl="VC for neg_even_bu" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="neg_even_bu&#39;vc.0" expl="assertion" proved="true">
+  <transf name="rewrite" proved="true" arg1="xt_half&#39;">
+   <goal name="neg_even_bu&#39;vc.0.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.862244" steps="3412842"/></proof>
+   </goal>
+   <goal name="neg_even_bu&#39;vc.0.1" expl="rewrite premises" proved="true">
+   <proof prover="2"><result status="valid" time="0.010862" steps="23949"/></proof>
+   </goal>
+   <goal name="neg_even_bu&#39;vc.0.2" expl="rewrite premises" proved="true">
+   <transf name="apply" proved="true" arg1="divides_factors">
+    <goal name="neg_even_bu&#39;vc.0.2.0" expl="apply premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.035827" steps="249218"/></proof>
+    </goal>
+    <goal name="neg_even_bu&#39;vc.0.2.1" expl="apply premises" proved="true">
+    <proof prover="2"><result status="valid" time="0.010015" steps="23965"/></proof>
+    </goal>
+    <goal name="neg_even_bu&#39;vc.0.2.2" expl="apply premises" proved="true">
+    <proof prover="5"><result status="valid" time="0.060079" steps="276"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="neg_even_bu&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="5"><result status="valid" time="0.658298" steps="62333"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="congr_neg_a_bu&#39;vc" expl="VC for congr_neg_a_bu" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="congr_neg_a_bu&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.039192" steps="273821"/></proof>
+  </goal>
+  <goal name="congr_neg_a_bu&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="5"><result status="valid" time="0.238383" steps="4205"/></proof>
+  </goal>
+  <goal name="congr_neg_a_bu&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.009713" steps="24214"/></proof>
+  </goal>
+  <goal name="congr_neg_a_bu&#39;vc.3" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.045232" steps="302013"/></proof>
+  </goal>
+  <goal name="congr_neg_a_bu&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="5"><result status="valid" time="0.055364" steps="280"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="factor_u_bu_outer&#39;vc" expl="VC for factor_u_bu_outer" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="factor_u_bu_outer&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="5"><result status="valid" time="0.045546" steps="2193"/></proof>
+  </goal>
+  <goal name="factor_u_bu_outer&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.009986" steps="24449"/></proof>
+  </goal>
+  <goal name="factor_u_bu_outer&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="5"><result status="valid" time="0.380078" steps="37902"/></proof>
+  </goal>
+  <goal name="factor_u_bu_outer&#39;vc.3" expl="assertion" proved="true">
+  <transf name="split_vc" proved="true" >
+   <goal name="factor_u_bu_outer&#39;vc.3.0" expl="assertion" proved="true">
+   <proof prover="2"><result status="valid" time="0.016019" steps="83649"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.1" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="2"><result status="valid" time="0.015770" steps="83782"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.2" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="2"><result status="valid" time="0.010060" steps="24549"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.3" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="2"><result status="valid" time="0.010176" steps="24562"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.4" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="2"><result status="valid" time="0.009939" steps="24569"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.5" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="2"><result status="valid" time="0.009909" steps="24582"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.6" expl="VC for factor_u_bu_outer" proved="true">
+   <proof prover="5"><result status="valid" time="0.042847" steps="8826"/></proof>
+   </goal>
+   <goal name="factor_u_bu_outer&#39;vc.3.7" expl="VC for factor_u_bu_outer" proved="true">
+   <transf name="rewrite" proved="true" arg1="H2">
+    <goal name="factor_u_bu_outer&#39;vc.3.7.0" expl="VC for factor_u_bu_outer" proved="true">
+    <transf name="rewrite" proved="true" arg1="H1">
+     <goal name="factor_u_bu_outer&#39;vc.3.7.0.0" expl="VC for factor_u_bu_outer" proved="true">
+     <proof prover="5"><result status="valid" time="0.042349" steps="9708"/></proof>
+     </goal>
+    </transf>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+  <goal name="factor_u_bu_outer&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.067211" steps="473394"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

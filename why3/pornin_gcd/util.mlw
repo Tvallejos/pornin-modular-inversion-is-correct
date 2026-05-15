@@ -1,0 +1,89 @@
+
+module Util
+
+  use int.Int
+  use number.Prime
+  (* use EDDivisibility *)
+  use number.Divisibility
+  use number.Gcd  
+  (* use EDParity *)
+  use number.Parity
+
+  use int.Power    
+  use int.EuclideanDivision as ED
+  use number.Coprime
+  use divdivides.Div_divides
+  use int.Abs
+  use int.MinMax
+
+  
+  (* not proven by solvers *)
+  lemma div2_no_div2 : forall a b. 
+    divides 2 a -> not (divides 2 b) -> gcd a b = gcd (ED.div a 2) b   
+    
+  let lemma gcd_sub (a b : int)
+    ensures { gcd a b = gcd (a - b) b }
+  = begin 
+    assert { gcd a b = gcd b a };
+    assert { gcd b a = gcd b (a - 1 * b) };
+  end 
+  
+  lemma gcd_odd_div2 : forall a b.
+    odd a -> odd b -> gcd a b = gcd (ED.div (a - b) 2) b
+  
+  lemma gcd_mod21_div2 : forall a b.
+    ED.mod a 2 = 1 -> ED.mod b 2 = 1 -> gcd a b = gcd (ED.div (a - b) 2) b
+    
+
+
+  lemma even_div_mult : forall n.
+    ED.mod n 2 = 0 -> n = 2 * (ED.div n 2)
+    
+  lemma coprime_2_m : forall m.
+    m >= 3 -> ED.mod m 2 = 1 -> coprime 2 m
+
+
+
+  lemma mult_geq : forall a b: int. a >= 0 -> b >= 0 -> a * b >= 0
+  
+  lemma coprime_sym : forall a b : int. coprime a b <-> coprime b a
+  
+  lemma coprime_odd_even : forall a b : int. ED.mod a 2 = 1 -> coprime a b -> coprime a (b * 2)
+  
+  (* by induction w, case w, then exists n, w = n + 1*)
+  lemma coprime_odd_pow2 : forall a w. w > 0 -> a > 2 -> ED.mod a 2 = 1 -> coprime (power 2 w) a
+
+  lemma geq_trans : forall a b c: int. a >= b -> b >= c -> a >= c  
+  lemma leq_trans : forall a b c: int. a <= b -> b <= c -> a <= c     
+  lemma leq_scale : forall a b k: int. a <= b -> k >= 0 -> k*a <= k*b
+      
+  lemma le_triangle_abs : forall a b: int. abs (a - b) <= abs a + abs b
+
+  lemma max_gt_k : forall a b k : int. (max a b >= k) <-> (a >= k /\ a >= b) \/ (b >= k /\ b >= a)    
+  lemma max_or : forall a b : int. max a b = a \/ max a b = b
+  lemma max_known : forall a b k : int. b > k -> (max a b) - k >= 0 
+  lemma mult_comm_factor : forall a b k: int. 
+    k * a + k * b = k* (a + b)
+  lemma max2 : forall a b : int. max a b = a \/ max a b = b 
+  lemma max_gt : forall a b : int. max a b >= a /\ max a b >= b
+  
+  let lemma max3 (a b c : int) 
+    ensures { max a (max b c) = a \/ max a (max b c) = b \/ max a (max b c) = c }
+  = begin end
+  
+  let lemma max3_gt (a b c : int) 
+    ensures { max a (max b c) >= a /\ max a (max b c) >= b /\ max a (max b c) >= c }
+  = begin end
+ 
+  let lemma add_max_min (a b : int) 
+    ensures { max a b + min a b = a + b }
+  = begin end
+ 
+ 
+ 
+  lemma mod_abs_leq : forall a k : int. k <> 0 -> ED.mod a k <= abs (k - 1)
+  lemma abs_pos : forall a : int. a >= 0 -> abs a = a
+  lemma abs_mult : forall a k : int. a >= 0 -> k >= 0 -> abs (k * a) = k * a
+  
+    
+end

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="2" name="Z3" version="4.13.4" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="5" name="CVC5" version="1.2.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="6" name="Alt-Ergo" version="2.6.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="non_div_proof.mlw"/>
+<theory name="Nondiv_proof" proved="true">
+ <goal name="not_div_dec_len_even&#39;vc" expl="VC for not_div_dec_len_even" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="not_div_dec_len_even&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.053843" steps="250485"/></proof>
+  </goal>
+  <goal name="not_div_dec_len_even&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.099919" steps="2295"/></proof>
+  </goal>
+  <goal name="not_div_dec_len_even&#39;vc.2" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.065524" steps="304499"/></proof>
+  </goal>
+  <goal name="not_div_dec_len_even&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="5"><result status="valid" time="0.844774" steps="150046"/></proof>
+  </goal>
+  <goal name="not_div_dec_len_even&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.086602" steps="324828"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv2&#39;vc" expl="VC for inner_dec_len_div_free_priv2" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="inner_dec_len_div_free_priv2&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="5"><result status="valid" time="0.658160" steps="125751"/></proof>
+  </goal>
+  <goal name="inner_dec_len_div_free_priv2&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="6"><result status="valid" time="0.140138" steps="6373"/></proof>
+  </goal>
+  <goal name="inner_dec_len_div_free_priv2&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="2"><result status="valid" time="0.552542" steps="1308767"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv1&#39;vc" expl="VC for inner_dec_len_div_free_priv1" proved="true">
+ <proof prover="6"><result status="valid" time="0.070599" steps="387"/></proof>
+ </goal>
+ <goal name="inner_dec_len_div_free_first_destruct_recH1&#39;vc" expl="VC for inner_dec_len_div_free_first_destruct_recH1" proved="true">
+ <proof prover="6"><result status="valid" time="0.064524" steps="381"/></proof>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv24&#39;vc" expl="VC for inner_dec_len_div_free_priv24" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="inner_dec_len_div_free_priv24&#39;vc.0" expl="assertion" proved="true">
+  <proof prover="5"><result status="valid" time="0.543207" steps="103336"/></proof>
+  </goal>
+  <goal name="inner_dec_len_div_free_priv24&#39;vc.1" expl="assertion" proved="true">
+  <proof prover="2"><result status="valid" time="0.141969" steps="539220"/></proof>
+  </goal>
+  <goal name="inner_dec_len_div_free_priv24&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="6"><result status="valid" time="0.138960" steps="5111"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv23&#39;vc" expl="VC for inner_dec_len_div_free_priv23" proved="true">
+ <proof prover="6"><result status="valid" time="0.205866" steps="16625"/></proof>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv22&#39;vc" expl="VC for inner_dec_len_div_free_priv22" proved="true">
+ <proof prover="6"><result status="valid" time="0.153762" steps="5832"/></proof>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv21&#39;vc" expl="VC for inner_dec_len_div_free_priv21" proved="true">
+ <proof prover="6"><result status="valid" time="0.076880" steps="368"/></proof>
+ </goal>
+ <goal name="inner_dec_len_div_free_priv_20&#39;vc" expl="VC for inner_dec_len_div_free_priv_20" proved="true">
+ <proof prover="6"><result status="valid" time="0.080362" steps="385"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

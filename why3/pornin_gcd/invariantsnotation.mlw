@@ -1,0 +1,445 @@
+module Xt
+
+  use int.Int
+  use number.Divisibility
+  use number.Parity
+  use int.Power
+  use congr.Congr
+  use fitlen.FitLen
+  use int.MinMax
+  use int.Abs
+  use int.EuclideanDivision as ED
+  use factorat.Factor_at
+  use util.Util
+  use divdivides.Div_divides
+
+(*               *)
+(*   updated_x   *)
+(*               *)
+  let function updated_x (a b f0 g0 : int) : int
+    = a*f0 + b*g0
+  lemma updated_init_a : forall a b : int. updated_x a b 1 0 = a
+  lemma updated_init_b : forall a b : int. updated_x a b 0 1 = b
+  lemma updated_double : forall a b f0 g0 : int. updated_x a b (2 * f0) (2 * g0) = 2 * updated_x a b f0 g0
+  lemma updated_sub : forall a b f0 g0 f1 g1 : int. updated_x a b (f0 - f1) (g0 - g1) = updated_x a b f0 g0 - updated_x a b f1 g1
+
+
+  
+
+(*         *)
+(*   x_t   *)
+(*         *)
+
+  let function xt(a b f0 g0 t: int) : int
+    requires { t >= 0 } 
+  = (ED.div (updated_x a b f0 g0) (factor_at t))
+  
+  lemma unfold_xt : forall a b f0 g0 t : int. 
+    t >= 0 ->
+    (xt a b f0 g0 t) = (ED.div (updated_x a b f0 g0) (factor_at t))
+     
+  lemma xt_init_a : forall a b : int. (xt a b 1 0 0) = a
+  lemma xt_init_b : forall a b : int. (xt a b 0 1 0) = b
+  
+  lemma pow_rewr : forall x k : int. k >= 0 -> power x (k + 1) = x * power x k
+  
+  lemma xt_half : forall a b f0 g0 t: int. t >= 0 -> divides (2 * factor_at t) (updated_x a b f0 g0) -> xt a b f0 g0 (t + 1) = ED.div (xt a b f0 g0 t) 2
+  
+  lemma xt_half' : forall a b f0 g0 t: int. t - 1 >= 0 -> divides (2 * factor_at (t - 1)) (updated_x a b f0 g0) -> (xt a b f0 g0 ((t + 1) - 1)) = ED.div (xt a b f0 g0 (t - 1)) 2
+  
+  let lemma xt_double_half (a b f0 g0 t : int)  
+    requires { t >= 0 }
+    ensures { xt a b (2*f0) (2*g0) (t + 1) = (xt a b f0 g0 t) }
+    = begin 
+      assert { xt a b (2*f0) (2*g0) (t + 1) = ED.div (2 * updated_x a b f0 g0) (2 * factor_at t) };
+      end     
+
+  let lemma xt_double_half' (a b f0 g0 t : int)  
+    requires { t - 1 >= 0 }
+    ensures { xt a b (2*f0) (2*g0) ((t + 1) - 1) = (xt a b f0 g0 (t - 1)) }
+    = begin 
+      (*assert { xt a b (2*f0) (2*g0) ((t + 1) - 1) = div (2 * updated_x a b f0 g0) (2 * factor_at t) };*)
+      end    
+
+  let lemma xt_sub (a b f0 g0 f1 g1 t : int) 
+    requires { t >= 0 }
+    requires { divides (power 2 t) (updated_x a b f0 g0) }
+    requires { divides (power 2 t) (updated_x a b f1 g1) }    
+    requires { ED.mod (ED.div (updated_x a b f0 g0) (factor_at t)) 2 = 1 }
+    requires { ED.mod (ED.div (updated_x a b f1 g1) (factor_at t)) 2 = 1 } 
+    
+    (* by rewrite unfold_xt updated_sub factor_at_S split_factor_divisor *)
+    ensures  { xt a b (f0 - f1) (g0 - g1) (t + 1) = ED.div (xt a b f0 g0 t - xt a b f1 g1 t) 2 } 
+    = begin 
+    assert { divides 2 (ED.div (updated_x a b f0 g0) (factor_at t) - ED.div (updated_x a b f1 g1) (factor_at t)) };
+    assert { divides 2 (ED.div (updated_x a b f0 g0 - updated_x a b f1 g1) (factor_at t)) }; 
+    (* by apply divides_factors *)
+    assert  { divides (2 * factor_at t) (updated_x a b f0 g0 - updated_x a b f1 g1) };
+
+    end
+    
+  let lemma xt_sub' (a b f0 g0 f1 g1 t : int) 
+    requires { t - 1 >= 0 }
+    requires { divides (power 2 (t - 1)) (updated_x a b f0 g0) }
+    requires { divides (power 2 (t - 1)) (updated_x a b f1 g1) }   
+    requires { ED.mod (ED.div (updated_x a b f0 g0) (factor_at (t-1))) 2 = 1 }
+    requires { ED.mod (ED.div (updated_x a b f1 g1) (factor_at (t-1))) 2 = 1 }      
+    ensures  { xt a b (f0 - f1) (g0 - g1) ((t + 1) - 1) = ED.div (xt a b f0 g0 (t - 1) - xt a b f1 g1 (t-1)) 2 } 
+    = begin 
+
+    end
+    
+   let lemma divides_odd (a b f0 g0 f1 g1 j : int)
+    requires { (j - 1) >= 0 } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f1 g1) }     
+    requires { ED.mod (xt a b f1 g1 (j - 1)) 2 = 1 } 
+    requires { ED.mod (xt a b f0 g0 (j - 1)) 2 = 1 }
+    ensures { divides (factor_at ((j + 1) - 1)) (updated_x a b (f0 - f1) (g0 - g1)) }
+  = begin 
+   assert { ED.mod (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) 2 = 1 };
+   assert { ED.mod (ED.div (updated_x a b f1 g1) (factor_at (j - 1))) 2 = 1 };
+   assert { (updated_x a b (f0 - f1) (g0 - g1)) = (updated_x a b f0 g0 - updated_x a b f1 g1) }; 
+   assert { (factor_at ((j + 1) - 1)) = (2 * factor_at (j - 1)) };
+   assert { divides (factor_at (j - 1)) (updated_x a b f0 g0 - updated_x a b f1 g1) };
+   assert { (ED.div (updated_x a b f0 g0 - updated_x a b f1 g1) (factor_at (j - 1))) = (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) - (ED.div (updated_x a b f1 g1) (factor_at (j - 1)))};
+   assert { divides 2  (ED.div (updated_x a b f0 g0 - updated_x a b f1 g1) (factor_at (j - 1))) };
+  
+  end   
+
+(*            *)
+(*   approx   *)
+(*            *)
+
+  let function approx (x n k : int) : int 
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+  =
+    let factor = (power 2 (k-1)) in 
+    (ED.mod x factor) + factor * (ED.div x (power 2 (n - k - 1)))
+ 
+  lemma unfold_approx : forall x n k : int. k > 1 -> n - k - 1 >= 0 -> 
+  (approx x n k) = let factor = (power 2 (k-1)) in (ED.mod x factor) + factor * (ED.div x (power 2 (n - k - 1)))
+  
+  lemma unfold_approx' : forall x n k : int. k > 1 -> n - k - 1 >= 0 -> 
+  (approx x n k) = let factor = (power 2 (k-1)) in factor * (ED.div x (power 2 (n - k - 1))) + (ED.mod x factor)
+  
+  lemma approx_parity : forall x n k : int. k > 1 -> n - k - 1 >= 0 -> x <> 0 -> ED.mod x 2 = ED.mod (approx x n k) 2
+
+  lemma init_partity : forall a b n k. k > 1 -> (n - k) - 1 >= 0 -> ED.mod (xt a b 1 0 0) 2 = ED.mod (approx a n k) 2
+  
+
+  let predicate parity_approx' (a b f0 g0 n j k : int) : bool =
+    requires { k > 1 } 
+    requires { n - k - 1 >= 0 }
+    requires { (j - 1) >= 0 }
+    congr (xt a b f0 g0 (j-1)) (xt (approx a n k) (approx b n k) f0 g0 (j-1)) 2
+  
+  let lemma parity_approx_even' (a b f0 g0 n j k : int)
+    requires { k > 1 } 
+    requires { n - k - 1 >= 0 }
+    requires { 1 <= j <= k - 1 }
+    ensures { parity_approx' a b f0 g0 n j k } 
+  = begin 
+      let af0 : int = (ED.mod a (power 2 (k-1))) * f0 in
+      let bg0 : int = (ED.mod b (power 2 (k-1))) * g0 in
+      let t : int = ED.div (af0 + bg0) (power 2 (j-1)) in
+      let rest_a : int = ED.div a (power 2 ((n - k) - 1)) in 
+      let rest_b : int = ED.div b (power 2 ((n - k) - 1)) in
+      let factor : int = power 2 (k - 1) in
+      let i_a : int = ED.mod a factor in
+      let i_b : int = ED.mod b factor in
+      
+      assert {  congr (xt (approx a n k) (approx b n k) f0 g0 (j-1)) t 2 
+                   (* by rewrite unfold_xt unfold_approx' unfold_approx'; unfold updated_x *)
+                by (xt (approx a n k) (approx b n k) f0 g0 (j-1)) 
+                    =  ED.div ((((factor * rest_a) + i_a) * f0) + (((factor * rest_b) + i_b) * g0)) (factor_at (j - 1))
+                so ((((factor * rest_a) + i_a) * f0) + (((factor * rest_b) + i_b) * g0)) = factor * (rest_a * f0 + rest_b * g0) + (i_a * f0 + i_b * g0)
+                (* by rewrite H1 H Div_mult *)
+                so (ED.div (factor * (rest_a * f0 + rest_b * g0) + (i_a * f0 + i_b * g0)) (factor_at (j - 1))
+                   = power 2 (k-1 - (j - 1)) * (rest_a * f0 + rest_b * g0) + ED.div (i_a * f0 + i_b * g0) (factor_at (j - 1))
+                   by (factor = factor_at (j-1) * (power 2 (k-1-(j-1)))
+                   so ( ((factor_at (j - 1) * power 2 ((k - 1) - (j - 1))) * ((rest_a * f0) + (rest_b * g0))) = factor_at (j - 1) * ( power 2 ((k - 1) - (j - 1)) * ((rest_a * f0) + (rest_b * g0))  ) ) ) 
+                   
+                   )
+                (* by rewrite unfold_congr H2 H1 H Mod_mult*)
+                so (congr (power 2 (k-1 - (j - 1)) * (rest_a * f0 + rest_b * g0) + ED.div (i_a * f0 + i_b * g0) (factor_at (j - 1))) (ED.div (i_a * f0 + i_b * g0) (factor_at (j - 1))) 2
+                  by ( exists c. c >= 0 /\ ((k - 1) - (j - 1)) = c + 1 /\ (power 2 (c + 1) = 2 * power 2 c) /\ ( ((2 * power 2 c) * ((rest_a * f0) + (rest_b * g0))) = 2 * ((power 2 c) * ((rest_a * f0) + (rest_b * g0)) ) ) )
+                )
+    };
+      assert {  congr (xt a b f0 g0 (j-1)) t 2 
+                 by (xt a b f0 g0 (j-1)) = (ED.div ((a * f0) + (b * g0)) (factor_at (j - 1))) 
+                 so a = factor * (ED.div a factor) + ED.mod a factor 
+                 so b = factor * (ED.div b factor) + ED.mod b factor 
+                 so ((a * f0) + (b * g0)) = (((factor * (ED.div a factor) + ED.mod a factor ) * f0) + ((factor * (ED.div b factor) + ED.mod b factor ) * g0))
+                 so (((factor * (ED.div a factor) + ED.mod a factor ) * f0) + ((factor * (ED.div b factor) + ED.mod b factor) * g0)) 
+                    = factor * (ED.div a factor) * f0 + factor * (ED.div b factor) * g0 + ((ED.mod a factor) * f0) + (ED.mod b factor) * g0
+                 so factor * (ED.div a factor) * f0 + factor * (ED.div b factor) * g0 + (ED.mod a factor * f0) + ED.mod b factor * g0
+                    = factor * ((ED.div a factor) * f0 + (ED.div b factor) * g0)+ ((ED.mod a factor * f0) + (ED.mod b factor) * g0)
+                 so (factor = factor_at (j-1) * (power 2 (k-1-(j-1))))
+                 so factor * ((ED.div a factor) * f0 + (ED.div b factor) * g0)+ ((ED.mod a factor * f0) + (ED.mod b factor) * g0)
+                    = factor_at (j-1) * ((power 2 (k-1-(j-1))) * ((ED.div a factor) * f0 + (ED.div b factor) * g0)) + ((ED.mod a factor * f0) + (ED.mod b factor) * g0)
+                 (* by rewrite Div_mult *)
+                 so ED.div (factor_at (j-1) * ((power 2 (k-1-(j-1))) * ((ED.div a factor) * f0 + (ED.div b factor) * g0)) + ((ED.mod a factor * f0) + (ED.mod b factor) * g0)) (factor_at (j-1))
+                    = ((power 2 (k-1-(j-1))) * ((ED.div a factor) * f0 + (ED.div b factor) * g0)) + ED.div ((ED.mod a factor * f0) + (ED.mod b factor) * g0) (factor_at (j-1))
+                    (* by rewrite unfold_congr H Mod_mult *)
+                 so (congr (((power 2 (k-1-(j-1))) * ((ED.div a factor) * f0 + (ED.div b factor) * g0)) + ED.div ((ED.mod a factor * f0) + (ED.mod b factor) * g0) (factor_at (j-1)))
+                          (ED.div ((ED.mod a factor * f0) + (ED.mod b factor) * g0) (factor_at (j-1)))
+                          2
+                          
+                     by ( 
+                     ( power 2 (((k - 1) - (j - 1)))  =  (2 * power 2 (((k - 1) - (j - 1)) - 1)) )
+                     (* by rewrite H *)
+                     so ((power 2 (k-1-(j-1))) * ((ED.div a factor) * f0 + (ED.div b factor) * g0)) = (2 * ((power 2 (((k - 1) - (j - 1)) - 1)) * ((ED.div a factor) * f0 + (ED.div b factor) * g0) )) 
+                     
+                     ))
+                 
+                    
+                                 
+               }; 
+   end
+  
+  let lemma close_approx (a n k : int)
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+    requires { n - 2 * k >= 0 }
+    (* by rewrite unfold_approx *)
+    ensures { abs (a - (power 2 (n-2*k)*(approx a n k))) < power 2 (n - k - 1)  }
+  = begin 
+  
+    let pn2k = power 2 (n- 2*k) in
+    let pk1 = power 2 (k - 1 ) in 
+    let pnk = power 2 (n - k - 1) in
+    assert { a - (power 2 (n - 2*k) * (let factor = power 2 (k - 1) in ED.mod a factor + (factor * ED.div a (power 2 ((n - k) - 1))))) 
+             = ED.mod a pnk - pn2k * ED.mod a pk1 
+             by ( (let factor = power 2 (k - 1) in ED.mod a factor + (factor * ED.div a (power 2 ((n - k) - 1)))) = ED.mod a pk1 + pk1 * ED.div a pnk)
+             so ( (power 2 (n - (2 * k)) * (ED.mod a pk1 + (pk1 * ED.div a pnk))) = pn2k * ED.mod a pk1 + pn2k * pk1 * ED.div a pnk )
+             (* by rewrite H *)  
+             so (a - (power 2 (n - (2 * k)) * (ED.mod a pk1 + (pk1 * ED.div a pnk)))) = (ED.mod a pnk - (pn2k * ED.mod a pk1))
+              };
+    assert { 0 <= ED.mod a pnk < pnk };
+    (*by rewrite H*)
+    assert { 0 <= pn2k * ED.mod a pk1  < pnk 
+                   by ED.mod a pk1 < pk1
+                   so pnk = pn2k * pk1 
+    };  
+    assert { abs( ED.mod a pnk - pn2k * ED.mod a pk1 ) < pnk };
+ 
+  end 
+      
+  let lemma approx_2k_eq (a k : int)
+    requires { k > 1 } 
+    requires { a >= 0 }
+    ensures { approx a (2*k) k = a }
+  = begin end
+  
+  
+
+  let function xd (a n k: int) : int
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+   = a - power 2 (n - 2*k) * approx a n k
+   
+  lemma unfold_xd : forall a n k : int. 
+    k > 1 ->
+    n - k - 1 >= 0 ->
+    (xd a n k) = a - power 2 (n - 2*k) * approx a n k
+    
+  let lemma id_updated_approx_sub (a b f0 g0 n k : int)
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }  
+    ensures { updated_x a b f0 g0 - (power 2 (n - 2*k)) * (updated_x (approx a n k) (approx b n k) f0 g0) 
+              = ( (xd a n k) *f0 + (xd b n k)*g0 ) }
+    = begin 
+    end       
+ 
+ let lemma id_approx_sub (a b f0 g0 n k j : int)
+    requires { j >= 0 }
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+    requires { divides (factor_at j) (updated_x a b f0 g0) } 
+    requires { divides (factor_at j) (updated_x (approx a n k) (approx b n k) f0 g0) }     
+    ensures { xt a b f0 g0 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f0 g0 j) 
+              = ED.div ( (xd a n k)*f0 + (xd b n k)*g0 ) (factor_at j) }
+    = begin 
+      (* by rewrite unfold_xt div_sub *)
+      assert {  xt a b f0 g0 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f0 g0 j) 
+                = ED.div ((updated_x a b f0 g0) - (power 2 (n-2*k))*(updated_x (approx a n k) (approx b n k) f0 g0) ) (factor_at j) 
+                by not factor_at j = 0
+                  /\ divides (factor_at j) (power 2 (n - (2 * k)) * updated_x (approx a n k) (approx b n k) f0 g0)};
+      assert { ((updated_x a b f0 g0) - (power 2 (n-2*k))*(updated_x (approx a n k) (approx b n k) f0 g0) ) 
+               = ( (xd a n k) *f0 + (xd b n k)*g0 ) };
+    end 
+  
+  (* lemma 2.11 *)
+  let lemma triang_bound_sub_id (a b f0 g0 n k j : int)
+    requires { j >= 0 }
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+    requires { divides (factor_at j) (updated_x a b f0 g0) } 
+    requires { divides (factor_at j) (updated_x (approx a n k) (approx b n k) f0 g0) }
+    requires { n >= 2 * k }
+    requires { abs f0 + abs g0 <= factor_at j }
+
+    (* by rewrite Assert2 abs_div3 *)
+    ensures { abs (xt a b f0 g0 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f0 g0 j)) 
+              <= power 2 (n - k - 1) }
+  = begin 
+  
+    let xda = xd a n k in
+    let xdaf = xda * f0 in 
+    let xdb = xd b n k in 
+    let xdbg = xdb * g0 in
+    assert { abs (xt a b f0 g0 j - (power 2 (n - (2 * k)) * xt (approx a n k) (approx b n k) f0 g0 j)) = abs (ED.div (xdaf + xdbg) (factor_at j)) };
+    (* by subst_all ; rewrite <- id_updated_approx_sub *)
+    assert { divides (factor_at j) (xdaf + xdbg) };
+    assert { (ED.div ((abs  xdaf) + (abs xdbg)) (factor_at j)) 
+             = (ED.div ( ( (abs  xda) * (abs f0) ) + ((abs  xdb) * (abs g0 ))) (factor_at j)) 
+           by             
+             (abs  xdaf) + (abs xdbg ) 
+             =  ( ( (abs  xda) * (abs f0) ) + ((abs  xdb) * (abs g0 ))) };
+             
+    let factor = power 2 (n - k - 1) in         
+    assert { (ED.div ( ( (abs  (xd a n k)) * (abs f0) ) + ((abs  (xd b n k)) * (abs g0 ))) (factor_at j))  <= ED.div (factor * (abs f0) + factor * (abs g0)) (factor_at j) 
+      by (abs xda) <= factor /\ (abs xdb) <= factor
+      so (abs xda) * (abs f0) <= factor * (abs f0)
+      so (abs xdb) * (abs g0) <= factor * (abs g0)
+      so ( ( (abs  (xd a n k)) * (abs f0) ) + ((abs  (xd b n k)) * (abs g0 ))) <= (factor * (abs f0) + factor * (abs g0)) 
+    
+    };
+    
+    assert { ED.div (factor * (abs f0) + factor * (abs g0)) (factor_at j)  = ED.div (factor * ((abs f0) + (abs g0))) (factor_at j) 
+      by (factor * (abs f0) + factor * (abs g0)) = (factor * ((abs f0) + (abs g0)))
+    };
+    
+    assert { ED.div (factor * ((abs f0) + (abs g0))) (factor_at j)  <= ED.div (factor * (factor_at j)) (factor_at j) 
+           by ((abs f0) + (abs g0)) <=  (factor_at j)
+           (* by apply leq_scale *)
+           so (factor * ((abs f0) + (abs g0))) <=  (factor * (factor_at j)) 
+           so ( ED.div (factor * (abs f0 + abs g0)) (factor_at j) <= ED.div (factor * factor_at j) (factor_at j) by ((0 <= (factor * (abs f0 + abs g0))) by (factor > 0 /\ abs f0 + abs g0 >= 0) ) ) };
+    assert { ED.div (factor * (factor_at j)) (factor_at j)  = power 2 (n - k - 1) };
+  end
+  
+  (* todo: remove this definition from modinv.mlw *)
+  let predicate is_halving' (ba : int) : bool = 
+    ED.mod ba 2 = 0
+  
+  use bool.Bool
+  
+  (* todo: remove this definition from modinv.mlw *)  
+  let predicate is_divergent2 (a b j ba bb f0 g0 f1 g1 : int) : bool
+    requires odd { not (is_halving' ba) } 
+  requires j_geq_1 { j >= 0 } 
+  =   (orb (andb (ba < bb) ((xt a b f0 g0 j) >= (xt a b f1 g1 j))) (andb (ba >= bb) ((xt a b f0 g0 j) < (xt a b f1 g1 j))))  
+  
+  
+ (* lemma 2.12 *)
+let lemma bound_dS1 (a b f0 g0 f1 g1 n k j : int)
+    requires { j >= 0 }
+    requires { k > 1 }
+    requires { n - k - 1 >= 0 }
+    requires { divides (factor_at j) (updated_x a b f0 g0) } 
+    requires { divides (factor_at j) (updated_x (approx a n k) (approx b n k) f0 g0) }
+    requires { divides (factor_at j) (updated_x a b f1 g1) } 
+    requires { divides (factor_at j) (updated_x (approx a n k) (approx b n k) f1 g1) }
+   (* requires { abs (xt a b f1 g1 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f1 g1 j)) 
+              <= power 2 (n - k - 1) }   *) 
+    requires { abs f0 + abs g0 <= factor_at j }
+    requires { abs f1 + abs g1 <= factor_at j }    
+    requires { n >= 2 * k }
+    requires odd { not (is_halving' (xt (approx a n k) (approx b n k) f0 g0 j) ) }     
+    requires { is_divergent2 a b j (xt (approx a n k) (approx b n k) f0 g0 j) (xt (approx a n k) (approx b n k) f1 g1 j) f0 g0 f1 g1 }
+
+    (* by rewrite Assert2 abs_div3 *)
+    (* requires { abs (xt a b f0 g0 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f0 g0 j)) 
+              <= power 2 (n - k - 1) } *)
+    ensures { abs ( (xt a b f1 g1 j) - (xt a b f0 g0 j)) <= factor_at (n - k) }
+  = begin 
+  
+    let ba = (xt (approx a n k) (approx b n k) f0 g0 j) in
+    let bb = (xt (approx a n k) (approx b n k) f1 g1 j) in
+    let a_t = (xt a b f0 g0 j) in 
+    let b_t = (xt a b f1 g1 j) in
+    let pn2k = power 2 (n - (2 * k)) in
+    let pnkS1 = power 2 (n - k - 1) in    
+    (* assert { abs (xt a b f0 g0 j - (power 2 (n - (2 * k)) * xt (approx a n k) (approx b n k) f0 g0 j)) = abs (div (xdaf + xdbg) (factor_at j)) };
+    (* by subst_all ; rewrite <- id_updated_approx_sub *)
+    assert { divides (factor_at j) (xdaf + xdbg) };
+    *)
+    assert { ( pn2k * (ba - bb) - (a_t - b_t)  =  (pn2k * ba - a_t) - (pn2k * bb - b_t) ) }; 
+    assert { ( abs (a_t - pn2k * ba) + abs (b_t - pn2k * bb) <= power 2 (n - k) )
+        by ( abs (pn2k * ba - a_t) = abs (a_t - pn2k * ba) ) 
+        so ( abs (pn2k * bb - b_t) = abs (b_t - pn2k * bb) )
+        so ( abs (pn2k * (ba - bb) - (a_t - b_t) ) <= abs (a_t - pn2k * ba) + abs (b_t - pn2k * bb) ) 
+        so ( abs (a_t - pn2k * ba) <= pnkS1 )
+        so ( abs (b_t - pn2k * bb) <= pnkS1 )        
+        so ( abs (a_t - pn2k * ba) + abs (b_t - pn2k * bb) <= power 2 (n - k) )   
+     };
+    
+    assert { (andb (ba >= bb) ((xt a b f0 g0 j) < (xt a b f1 g1 j))) -> abs ( b_t - a_t ) <= factor_at (n - k) 
+        by ( abs (pn2k * (ba - bb) - (a_t - b_t) ) <= abs (pn2k * ba - a_t) + abs (pn2k * bb - b_t) ) 
+        so ( ba - bb >= 0 )
+        so ( pn2k * (ba - bb) >= 0 )
+        so ( a_t - b_t < 0 ) 
+        so ( abs ( pn2k * (ba - bb) - (a_t - b_t) ) = ( pn2k * (ba - bb) + (b_t - a_t) ) )
+        (* so ( 0 <= ba - bb < power 2 k ) *) 
+        so ( 0 < b_t - a_t <= power 2 (n - k) )
+        so ( 0 < b_t - a_t <= factor_at (n - k) )        
+    
+    };
+    assert { (andb (ba < bb) ((xt a b f0 g0 j) >= (xt a b f1 g1 j))) -> abs ( b_t - a_t ) <= factor_at (n - k) 
+        by ( (ba - bb) < 0 )
+        so ( pn2k * (ba - bb) < 0 )
+        so (a_t - b_t >= 0)
+        so ( abs ( pn2k * (ba - bb) - (a_t - b_t) ) = ( pn2k * (bb - ba) + (a_t - b_t) ) )
+        so ( 0 <= a_t - b_t < power 2 (n - k)) 
+
+    
+    
+    };
+
+  end  
+  
+  
+  (* t is (j-1)*)
+  let predicate regular' (a b f0 g0 f1 g1 t : int) : bool =
+    requires { t >= 0 } 
+    (len a + len b >= len (xt a b f0 g0 t) + len (xt a b f1 g1 t) + t)
+  
+   lemma unfold_regular' : forall a b f0 g0 f1 g1 t.
+    t >= 0 -> (regular' a b f0 g0 f1 g1 t) <-> (len a + len b >= len (xt a b f0 g0 t) + len (xt a b f1 g1 t) + t)
+    
+  (* t is (j-1), k is k*)  
+  let predicate good' (a b f0 g0 f1 g1 t k : int) : bool = 
+    requires { t >= 0 }
+    requires { t <= k - 1 }
+    (len a + len b >= len (xt a b f0 g0 t) + len (xt a b f1 g1 t) + (k-1))
+    
+  lemma unfold_good' : forall a b f0 g0 f1 g1 t k.
+    t >= 0 -> t <= k - 1 -> (good' a b f0 g0 f1 g1 t k) <->  (len a + len b >= len (xt a b f0 g0 t) + len (xt a b f1 g1 t) + (k-1))
+    
+  (* t is (j-1). K is K *)
+  let lemma good'_regular' (a b f0 g0 f1 g1 t k : int)
+    requires { 0 <= t <= k - 1 } 
+    requires { good' a b f0 g0 f1 g1 t k }
+    ensures { regular' a b f0 g0 f1 g1 t }
+    = begin end 
+  
+  (* t is (j-1) *)
+  let function maxt (a b f0 g0 f1 g1 t : int) : int 
+    requires { t >= 0 } 
+    = max (xt a b f0 g0 t) (xt a b f1 g1 t)
+    
+   lemma unfold_maxt : forall a b f0 g0 f1 g1 t.
+    t >= 0 -> (maxt a b f0 g0 f1 g1 t) = (max (xt a b f0 g0 t) (xt a b f1 g1 t))
+ 
+  (* t is (j-1) *)
+  let function mint (a b f0 g0 f1 g1 t : int) : int 
+    requires { t >= 0 } 
+    = min (xt a b f0 g0 t) (xt a b f1 g1 t)
+    
+  lemma unfold_mint : forall a b f0 g0 f1 g1 t.
+    t >= 0 -> (mint a b f0 g0 f1 g1 t) = (min (xt a b f0 g0 t) (xt a b f1 g1 t))    
+    
+
+end

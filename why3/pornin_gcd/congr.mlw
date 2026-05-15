@@ -1,0 +1,148 @@
+
+module Congr
+  use int.Int
+
+  use number.Prime
+  use number.Divisibility 
+  (* use EDDivisibility *)
+  
+
+  use number.Parity
+  use number.Coprime
+  use int.EuclideanDivision as ED
+
+  
+  let predicate congr (a b m : int) : bool = 
+    requires { m <> 0 }
+    ED.mod a m = ED.mod b m
+    
+  (*lemma congr_divides : forall a b m : int.
+    m <> 0 -> congr a b m <-> divides m (a - b)*)
+    
+  (*lemma mod_sum_mod : forall a b m.
+    m <> 0 -> ED.mod (a + b) m = ED.mod ((ED.mod a m) + (ED.mod b m)) m *)
+
+        
+  lemma unfold_congr : forall a b m.
+    m <> 0 -> congr a b m <-> ED.mod a m = ED.mod b m  
+  meta "remove_unused:dependency" lemma unfold_congr, predicate congr
+
+  lemma mod_x_2_01 : forall x. ED.mod x 2 = 0 \/ ED.mod x 2 = 1 
+  meta "remove_unused:dependency" lemma mod_x_2_01, predicate congr
+  
+  lemma odd_mod2 :
+    forall n:int. odd n <-> ED.mod n 2 = 1
+  meta "remove_unused:dependency" lemma odd_mod2, predicate congr
+  
+ (* cannot be proven by the solvers *)
+  lemma mod_scaleRL : forall a b k m. 
+  m <> 0 ->
+    k <> 0 -> coprime k m -> congr (a * k) (b * k) m -> congr a b m 
+  meta "remove_unused:dependency" lemma mod_scaleRL, predicate congr  
+
+ (* cannot be proven by the solvers *)    
+  lemma mod_scaleLR : forall a b k m. 
+  m <> 0 -> 
+    congr a b m -> congr (a * k) (b * k) m
+  meta "remove_unused:dependency" lemma mod_scaleLR, predicate congr  
+
+  (* cannot be proven by the solvers *)  
+  lemma mod_sub : forall a b x y m.
+  m <> 0 ->
+    congr a x m -> congr b y m -> congr (a - b) (x - y) m
+  meta "remove_unused:dependency" lemma mod_sub, predicate congr  
+    
+  lemma mod_add : forall a b x y m.
+  m <> 0 ->
+    congr a x m -> congr b y m -> congr (a + b) (x + y) m
+  meta "remove_unused:dependency" lemma mod_add, predicate congr  
+    
+  let lemma mod_div (a b k m : int)
+    requires { m <> 0 }
+    requires { k <> 0 } 
+    requires { congr a b m }
+    requires { divides k a } 
+    requires { divides k b } 
+    requires { coprime k m }
+    ensures { congr (ED.div a k) (ED.div b k) m }
+   = begin 
+     assert {exists q1. a = q1 * k};
+     assert {exists q2. b = q2 * k};
+     end
+   meta "remove_unused:dependency" axiom mod_div, predicate congr  
+
+  lemma eq_congr : forall a b m.
+    m <> 0 -> a = b -> congr a b m
+  meta "remove_unused:dependency" lemma eq_congr, predicate congr
+    
+  lemma mod_mult: forall x y z:int. 
+    x > 0 ->
+    congr (x * y + z) z x 
+  meta "remove_unused:dependency" lemma mod_mult, predicate congr  
+  
+  lemma congr_trans : forall a b c m.
+    m <> 0 -> 
+    congr a b m -> congr b c m -> congr a c m
+  meta "remove_unused:dependency" lemma congr_trans, predicate congr
+
+  (* rewrite unfold congr *)    
+  lemma congr_add_m : forall a m.
+    m > 0 -> congr a (a + m) m
+  meta "remove_unused:dependency" lemma congr_add_m, predicate congr    
+        
+  lemma mod_idem : forall a m.
+    m <> 0 ->
+    (ED.mod (ED.mod a m) m) = ED.mod a m
+  meta "remove_unused:dependency" lemma mod_idem, predicate congr
+    
+  let lemma congr_mod (a b m : int)
+    requires { m > 0 }
+    requires { congr a b m }
+    ensures { congr a (b + m) m } 
+  = begin 
+    assert { b + m = m * 1 + b };
+    assert { ED.mod (m * 1 + b) m = ED.mod b m };
+    end
+  meta "remove_unused:dependency" axiom congr_mod, predicate congr
+  
+  lemma congr_mult : forall a b c d m.
+    m <> 0 -> 
+    congr a b m -> congr c (d*b) m -> congr c (d*a) m
+  meta "remove_unused:dependency" lemma congr_mult, predicate congr
+  
+  lemma congr_mod_idem : forall a b m.
+    m <> 0 ->
+    (congr (ED.mod a m) b m) = congr a b m
+  meta "remove_unused:dependency" lemma congr_mod_idem, predicate congr
+  
+  (* by rewrite unfold_congr!, rewrite hyp, rewrite <- unfold_congr *)  
+  lemma congr_rewr : forall a b c k m.
+    m <> 0 ->
+    k <> 0 ->
+    congr a b m ->
+    congr (a*k) c m ->
+    congr (b*k) c m
+  meta "remove_unused:dependency" lemma congr_rewr, predicate congr
+
+  let function div_mod (x m : int) : int 
+    requires { m > 0 }
+    requires { ED.mod m 2 = 1 }
+    ensures { congr x (2 * result) m } 
+  = 
+  assert { congr x (2 * (x * (ED.div (m + 1) 2))) m 
+    by 2 * (x * (ED.div (m + 1) 2)) = x * (m + 1) /\ congr x (m*x + x) m };
+  x * (ED.div (m + 1) 2)
+  
+  let function mont_div_mod (x m : int) : int
+    requires { m > 0 }
+    requires { ED.mod m 2 = 1 }
+    requires { 0 <= x < m }
+    
+    ensures { congr x (2 * result) m } 
+    ensures { 0 <= result < m }
+  = 
+  if ED.mod x 2 = 0 
+  then ED.div x 2 
+  else (ED.div (x + m) 2)
+    
+end

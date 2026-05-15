@@ -1,0 +1,16 @@
+
+module Mont_red
+  use int.Int
+  use int.EuclideanDivision
+  use int.Power
+  use congr.Congr
+
+  (* assumed correct *)
+  val function mont_red (n p w: int) : int 
+    requires {0 <= p < n * n}
+    requires {(power 2 w) > n}
+    requires {mod n 2 = 1}
+    ensures { congr p ((power 2 w) * result) n }
+    ensures { 0 <= result < n }
+  
+end

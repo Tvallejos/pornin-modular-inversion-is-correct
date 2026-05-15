@@ -1,0 +1,543 @@
+module Nondiv_proof
+  use int.Int
+
+  (* use number.Prime *)
+  use number.Divisibility
+  use number.Gcd 
+  (* use number.Parity *)
+  use number.Coprime 
+  use int.Power (* todo: remove and replace by factor_at *)
+  use congr.Congr 
+  use fitlen.FitLen
+  use int.MinMax
+  use int.Abs 
+  use int.EuclideanDivision 
+  use ceildiv.Ceil_div 
+  use montred.Mont_red 
+  use factorat.Factor_at 
+  use util.Util 
+  use divdivides.Div_divides 
+  use bool.Bool
+
+  use invariantsnotation.Xt
+  use innerinvariants.InnerInv
+  use outerinvariants.OuterInv
+
+
+  (* partially solves not divergence -> regular' *)
+  (* even case *)  
+  let lemma not_div_dec_len_even (a b f0 g0 f1 g1 j k : int) (not_div : bool)
+    requires { j - 1 >= 0 } 
+    requires { not_div = True } 
+    requires { not_div -> (xt a b f0 g0 (j-1)) >= 0 /\ (xt a b f1 g1 (j-1)) >= 0 } (* has not diverged *)
+    requires { (xt a b f0 g0 (j-1)) = 0 \/ (regular' a b f0 g0 f1 g1 (j-1)) }
+    requires { divides (factor_at (j-1)) (updated_x a b f0 g0) }
+    requires { congr (xt a b f0 g0 (j - 1))
+                      (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+                      2 }
+    requires { mod (xt (approx a (max (len a) (max (len b) (2 * k))) k) (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)) 2 = 0 }
+    
+ 
+    ensures { xt a b f0 g0 ((j + 1) - 1) = 0 \/
+         (len a + len b)
+                   >= ((((len (xt a b f0 g0 ((j + 1) - 1))
+                       + len (xt a b (2 * f1) (2 * g1) ((j + 1) - 1))) ) + (j + 1)) - 1) }
+    ensures { xt a b f0 g0 ((j + 1) - 1) = 0 \/
+         (regular' a b f0 g0 (2 * f1) (2 * g1) ((j + 1) - 1)) }
+    = begin 
+    assert { not factor_at (j-1) = 0 };
+    assert { divides ( 2 * factor_at (j - 1)) (updated_x a b f0 g0) };
+    assert {   xt a b f0 g0 (j - 1) = 0 \/
+  (len a + len b)
+  >= ((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1))) + (j - 1)) };
+  
+  end 
+
+    (* partially solves inner_dec_len_div_free_priv2 *)
+  let lemma inner_dec_len_div_free_priv2 ( a b f0 g0 f1 g1 i j k: int) ( divergence : bool)
+  requires HH { not divergence = True }
+  requires j_geq_1 { (j - 1) >= 0 } 
+
+  requires h2 { xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+  requires h1 { not xt a b f0 g0 (j - 1) = 0 }
+  requires h { regular' a b f0 g0 f1 g1 (j - 1) }
+  requires b_t_odd { mod (xt a b (2 * f0) (2 * g0) ((j + 1) - 1)) 2 = 1 }
+  requires b_t_odd2 { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+  requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+  requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+  requires bd_pos { not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+  
+  ensures { xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) }
+  = begin 
+  
+  
+  assert { ( ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2)
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + (j + 1))
+      - 1)) 
+      by ( ((((len (div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2) + len (xt a b f0 g0 (j - 1))) + ((k - 1) * (i - 1))) + (j + 1)) - 1) = ((((len (div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2) + 1 + len (xt a b f0 g0 (j - 1))) + ((k - 1) * (i - 1))) + j ) - 1) )
+
+   so  (((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1))
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1))
+   so (((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= (((((len (div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2) + 1)
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1))
+     so (((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1))
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1))
+     so (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) > 1
+      
+      };
+  assert { ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1))) + ((k - 1) * (i - 1))) + j) - 1) 
+               >= ((((len (xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1)) + len (xt a b (2 * f0) (2 * g0) ((j + 1) - 1))) + ((k - 1) * (i - 1))) + (j + 1)) - 1)
+               by ((((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1))
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + (j + 1))
+      - 1)) 
+      by (((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (div (xt a b f1 g1 (j - 1) - xt a b f0 g0 (j - 1)) 2)
+         + len (xt a b f0 g0 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + (j + 1))
+      - 1)) /\
+      divides (power 2 (j - 1)) (updated_x a b f1 g1)
+      /\ divides (power 2 (j - 1)) (updated_x a b f0 g0)
+      /\ mod (div (updated_x a b f1 g1) (factor_at (j - 1))) 2 = 1
+      /\  mod (div (updated_x a b f0 g0) (factor_at (j - 1))) 2 = 1
+
+
+      
+      )
+               
+               }
+  
+  end
+  
+  (* partially solves inner_dec_len_div_free_first_destruct_recH1 *)
+  let lemma inner_dec_len_div_free_priv1 ( a b f0 g0 f1 g1 j k: int) ( divergence : bool)
+  requires j_geq_1 { (j - 1) >= 0 }
+  requires not_div { not divergence = True }
+  requires H1 { not orb
+      (andb
+       (if xt (approx a (max (len a) (max (len b) (2 * k))) k)
+           (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+           < xt (approx a (max (len a) (max (len b) (2 * k))) k)
+             (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (
+             j - 1)
+        then True else False)
+       (if xt a b f0 g0 (j - 1) >= xt a b f1 g1 (j - 1) then True else False))
+      (andb
+       (if xt (approx a (max (len a) (max (len b) (2 * k))) k)
+           (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+           >= xt (approx a (max (len a) (max (len b) (2 * k))) k)
+              (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (
+              j - 1)
+        then True else False)
+       (if xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) then True else False)) =
+      True }
+  requires b_t_odd2 { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+  requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+  requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+  requires bd_pos { not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }      
+  requires H { 
+  xt (approx a (max (len a) (max (len b) (2 * k))) k)
+  (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+  < xt (approx a (max (len a) (max (len b) (2 * k))) k)
+    (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (j - 1) }
+  requires b_t_odd { mod (xt a b (2 * f0) (2 * g0) ((j + 1) - 1)) 2 = 1 }
+  requires inner_dec_len_div_free { xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) } 
+  ensures { xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) }
+  
+  = begin 
+  
+  assert { xt a b f0 g0 (j - 1) = 0 -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) };
+  
+  assert { not xt a b f0 g0 (j - 1) = 0 -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) 
+    (* by apply inner_dec_len_div_free_priv2 with divergence *)
+    by regular' a b f0 g0 f1 g1 (j - 1) -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) };
+
+  end 
+  
+  
+  (* partially solves not divergence -> regular' *)
+  (* applied on first goal of subst_all; destruct_rec H1 *)
+  let lemma inner_dec_len_div_free_first_destruct_recH1 ( a b f0 g0 f1 g1 j k: int) ( divergence : bool)
+    requires b_t_odd { mod (xt a b (2 * f0) (2 * g0) ((j + 1) - 1)) 2 = 1 }
+      requires j_geq_1 { (j - 1) >= 0 }
+  requires H1 { not orb
+      (andb
+       (if xt (approx a (max (len a) (max (len b) (2 * k))) k)
+           (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+           < xt (approx a (max (len a) (max (len b) (2 * k))) k)
+             (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (
+             j - 1)
+        then True else False)
+       (if xt a b f0 g0 (j - 1) >= xt a b f1 g1 (j - 1) then True else False))
+      (andb
+       (if xt (approx a (max (len a) (max (len b) (2 * k))) k)
+           (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+           >= xt (approx a (max (len a) (max (len b) (2 * k))) k)
+              (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (
+              j - 1)
+        then True else False)
+       (if xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) then True else False)) =
+      True }
+  requires H { 
+  xt (approx a (max (len a) (max (len b) (2 * k))) k)
+  (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1)
+  < xt (approx a (max (len a) (max (len b) (2 * k))) k)
+    (approx b (max (len a) (max (len b) (2 * k))) k) f1 g1 (j - 1) }
+    requires { not divergence = True } 
+    requires inner_dec_len_div_free { not divergence = True ->
+  xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) } 
+  
+  requires b_t_odd2 { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+  requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+  requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+  requires bd_pos { not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }     
+    
+    
+    
+  ensures { xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) }     
+  = begin 
+    assert { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1)  };
+    assert { xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) -> xt a b (f1 - f0) (g1 - g0) ((j + 1) - 1) = 0 \/
+  regular' a b (f1 - f0) (g1 - g0) (2 * f0) (2 * g0) ((j + 1) - 1) }; 
+  
+  
+  end 
+  
+    (* partially solves inner_dec_len_div_free_priv23 *)
+  let lemma inner_dec_len_div_free_priv24 (a b f0 g0 f1 g1 j k i : int) (divergence : bool)
+  requires h2 { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+  requires h1 { not xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 } 
+    requires j_geq_1 { (j - 1) >= 0 }
+          requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+      requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+      requires at_odd { mod (div (updated_x a b f0 g0) (factor_at (j - 1))) 2 = 1 }
+      requires bt_odd { mod (div (updated_x a b f1 g1) (factor_at (j - 1))) 2 = 1 }
+      requires bd_pos {
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+
+
+requires H { not divergence = True }
+
+  ensures { ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= (((((len (div (xt a b f0 g0 (j - 1) - xt a b f1 g1 (j - 1)) 2) + 1)
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1) }
+      
+      = begin 
+       assert { xt a b f0 g0 (j - 1) > xt a b f1 g1 (j - 1) };
+       assert { ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b f0 g0 (j - 1) - xt a b f1 g1 (j - 1))
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1) };
+      
+      
+      end 
+      
+        (* partially solves inner_dec_len_div_free_priv22 *)
+  let lemma inner_dec_len_div_free_priv23 (a b f0 g0 f1 g1 j k i : int) (divergence : bool)
+  requires j_geq_1 { (j - 1) >= 0 }
+requires b_t_odd { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+requires H2 { not divergence = True }
+
+requires h2 { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+
+requires h1 { not xt a b f0 g0 (j - 1) = 0 }
+
+requires h { xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) }
+requires bd_pos {
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+
+requires H11 { regular' a b f0 g0 f1 g1 (j - 1) } 
+
+requires H1 { not xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 }
+
+requires H {
+  ((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1))
+      + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + (j + 1))
+   - 1) =
+  (((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1)) + 1)
+      + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1) }
+requires parity {
+  congr (xt a b f0 g0 (j - 1))
+  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+   (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+  2 }
+
+requires HH {
+  not mod
+      (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+       (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+      2 = 0}
+      requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+      requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+
+ensures { 
+  ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= (((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1)) + 1)
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1) }
+      = begin 
+      
+      assert { mod (div (updated_x a b f0 g0) (factor_at (j - 1))) 2 = 1 };
+      assert { mod (div (updated_x a b f1 g1) (factor_at (j - 1))) 2 = 1 };
+      assert { ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= (((((len (div (xt a b f0 g0 (j - 1) - xt a b f1 g1 (j - 1)) 2) + 1)
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1)  
+      };
+      assert { ((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= (((((len (div (xt a b f0 g0 (j - 1) - xt a b f1 g1 (j - 1)) 2) + 1)
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + j)
+      - 1) };
+      assert { divides (power 2 (j - 1)) (updated_x a b f0 g0) };
+      assert { divides (power 2 (j - 1)) (updated_x a b f1 g1) };
+
+
+
+      
+      
+      
+      
+      
+      end 
+  
+    (* partially solves inner_dec_len_div_free_priv21 *)
+  let lemma inner_dec_len_div_free_priv22 (a b f0 g0 f1 g1 j k i : int) (divergence : bool) 
+  requires j_geq_1 { (j - 1) >= 0 }
+  requires H2 { not divergence = True }
+  requires h2 { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+  requires h1 { not xt a b f0 g0 (j - 1) = 0 }
+requires  h { xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) }
+requires H1 {regular' a b f0 g0 f1 g1 (j - 1) }
+requires H { not xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 }
+requires b_t_odd { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+requires bd_pos {
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+  requires parity {
+  congr (xt a b f0 g0 (j - 1))
+  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+   (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+  2 }
+
+requires HH {
+  not mod
+      (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+       (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+      2 = 0}
+      requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+      requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+ensures { xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) }
+  = begin 
+    assert { (((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1))
+         + len (xt a b (2 * f1) (2 * g1) ((j + 1) - 1)))
+        + ((k - 1) * (i - 1)))
+       + (j + 1))
+      - 1)) by 
+      ((((((len (xt a b f0 g0 (j - 1)) + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)
+  >= ((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1))
+         + len (xt a b f1 g1 (j - 1)))
+        + ((k - 1) * (i - 1)))
+       + (j + 1))
+      - 1)) by (  ((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1))
+      + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + (j + 1))
+   - 1) =
+  (((((len (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1)) + 1)
+      + len (xt a b f1 g1 (j - 1)))
+     + ((k - 1) * (i - 1)))
+    + j)
+   - 1)))
+      
+      }; 
+  
+  end 
+  
+  (* partially solves inner_dec_len_div_free_priv20 *)
+  let lemma inner_dec_len_div_free_priv21 (a b f0 g0 f1 g1 j k : int) (divergence : bool)
+    requires j_geq_1 { (j - 1) >= 0 }
+    requires b_t_odd { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+requires bd_pos {
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+  requires parity {
+  congr (xt a b f0 g0 (j - 1))
+  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+   (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+  2 }
+        requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+      requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+  requires HH {
+  not mod
+      (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+       (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+      2 = 0} 
+  requires H { not divergence = True }
+requires HHH { not xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 }
+requires h2 { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+
+requires h1 { not xt a b f0 g0 (j - 1) = 0 }
+
+requires h { xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) }
+
+
+ensures { xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) }
+  = begin 
+    assert { xt a b f0 g0 (j - 1) = 0 -> xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) }; 
+  assert { regular' a b f0 g0 f1 g1 (j - 1) -> xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) by 
+  (
+  (xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 ->
+  xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) ) 
+  /\
+  (not xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 ->
+   xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1))
+  
+  )
+  
+  
+  };
+  
+  
+  end 
+  
+  
+  
+  (* partially solves not divergence -> regular' *)
+  (* applied on second goal of subst_all; destruct_rec H1 *)
+  let lemma inner_dec_len_div_free_priv_20 (a b f0 g0 f1 g1 j k : int) (divergence : bool)
+      requires j_geq_1 { (j - 1) >= 0 }
+    requires b_t_odd { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+requires bd_pos {
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+  requires parity {
+  congr (xt a b f0 g0 (j - 1))
+  (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+   (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+  2 }
+  
+  requires b_t_odd { mod (xt a b f1 g1 (j - 1)) 2 = 1 }
+  requires bd_pos { not divergence = True ->
+  xt a b f0 g0 (j - 1) >= 0 /\ xt a b f1 g1 (j - 1) >= 0 }
+  requires H { not divergence = True }
+  requires h1 { not xt a b f0 g0 (j - 1) < xt a b f1 g1 (j - 1) }
+  requires inner_dec_len_div_free { 
+  not divergence = True ->
+  xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1) }
+          requires factor_ahatt { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+      requires factor_bhatt { divides (factor_at (j - 1)) (updated_x a b f1 g1) }
+  requires HH {
+  not mod
+      (xt (approx a (max (len a) (max (len b) (2 * k))) k)
+       (approx b (max (len a) (max (len b) (2 * k))) k) f0 g0 (j - 1))
+      2 = 0} 
+      
+  ensures { xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) }
+  = begin 
+    assert {   xt a b f0 g0 (j - 1) = 0  ->  xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) };
+  assert {  not (xt a b f0 g0 (j - 1) = 0)  ->  xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 -> xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) by 
+    xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1)
+    };  
+    assert {  not (xt a b f0 g0 (j - 1) = 0)  ->  not ( xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0) -> xt a b (f0 - f1) (g0 - g1) ((j + 1) - 1) = 0 \/
+  regular' a b (f0 - f1) (g0 - g1) (2 * f1) (2 * g1) ((j + 1) - 1) by 
+    xt a b f0 g0 (j - 1) = 0 \/ regular' a b f0 g0 f1 g1 (j - 1)
+    };  
+  
+  end 
+
+end 

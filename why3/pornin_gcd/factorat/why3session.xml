@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="Alt-Ergo" version="2.6.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Z3" version="4.13.4" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="factorat.mlw"/>
+<theory name="Factor_at" proved="true">
+ <goal name="div_pow_0" proved="true">
+ <proof prover="0"><result status="valid" time="0.034058" steps="240"/></proof>
+ </goal>
+ <goal name="factor_at_init" proved="true">
+ <proof prover="3"><result status="valid" time="0.019357" steps="6775"/></proof>
+ </goal>
+ <goal name="factor_at_S" proved="true">
+ <proof prover="3"><result status="valid" time="0.012549" steps="8117"/></proof>
+ </goal>
+ <goal name="factor_at_S&#39;" proved="true">
+ <proof prover="3"><result status="valid" time="0.011094" steps="8595"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

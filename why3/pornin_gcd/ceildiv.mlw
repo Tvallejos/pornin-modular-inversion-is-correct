@@ -1,0 +1,18 @@
+
+module Ceil_div
+
+  use int.Int
+  use int.EuclideanDivision
+      
+  let function ceil_div (x k : int) : int =
+    requires { k <> 0 } 
+    if (mod x k = 0) then div x k else (div x k) + 1
+  
+  lemma ceil_div_bound : forall a k: int. k <> 0 -> div a k <= (ceil_div a k)
+  lemma ceil_div_mult : forall a k: int. k <> 0 -> k > 0 -> (div a k * k) <= ((ceil_div a k) * k)
+  lemma ceil_div_mult_bound : 
+    forall a k: int. k <> 0 -> k > 0 -> (div a k * k) <= ((ceil_div a k) * k)
+  lemma ceil_div_mult_2 :
+    forall a k: int. k <> 0 -> k > 0 -> a <= ((ceil_div a k) * k)
+    
+end

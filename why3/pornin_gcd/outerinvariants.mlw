@@ -1,0 +1,85 @@
+module OuterInv
+
+  use int.Int
+  use number.Divisibility
+  use number.Gcd
+  use int.Power
+  use congr.Congr
+  use int.EuclideanDivision
+
+  use factorat.Factor_at
+  use util.Util
+  use divdivides.Div_divides
+
+  use invariantsnotation.Xt
+  use innerinvariants.InnerInv
+
+
+  let lemma gcd_outer_pos ( a b f0 g0 f1 g1 k y :int )
+    requires {  gcd a b = gcd y m } 
+    requires { gcd a b = gcd (xt a b f0 g0 (((k - 1) + 1) - 1)) (xt a b f1 g1 (((k - 1) + 1) - 1)) } 
+    requires { (k - 1) >= 0 } 
+    ensures { gcd (div ((a * f0) + (b * g0)) (power 2 (k - 1))) (div ((a * f1) + (b * g1)) (power 2 (k - 1))) = gcd y m }
+  = begin 
+    (* assert { gcd (- div ((a * f0) + (b * g0)) (power 2 (k - 1))) (- div ((a * f1) + (b * g1)) (power 2 (k - 1))) = gcd (div ((a * f0) + (b * g0)) (power 2 (k - 1))) (div ((a * f1) + (b * g1)) (power 2 (k - 1)))  }; *)
+    assert { (div ((a * f0) + (b * g0)) (power 2 (k - 1))) = xt a b f0 g0 (k-1) };
+    assert { (div ((a * f1) + (b * g1)) (power 2 (k - 1))) = xt a b f1 g1 (k-1) };
+    assert { (((k - 1) + 1) - 1) = (k - 1) };
+  end 
+
+  let lemma neg_even_bu (a b f0 g0 j ba y: int) (bu : t) 
+    requires { j - 1 >= 0 }
+    requires { congr (xt a b f0 g0 (j - 1)) ba 2 }
+    requires { mod ba 2 = 0 }
+    requires { xt a b f0 g0 (j - 1) < 0 -> congr (- xt a b f0 g0 (j - 1)) (to_int bu * y) m } 
+    requires { xt a b f0 g0 (j - 1) < 0 } 
+    requires { divides (factor_at (j - 1)) (updated_x a b f0 g0) }
+
+    ensures { congr (- xt a b f0 g0 ((j + 1) - 1)) (to_int (mont_div_mod bu) * y) m } 
+  = begin 
+    (* by rewrite xt_half' then third case by apply divides_factors *)  
+  assert { (- xt a b f0 g0 ((j + 1) - 1)) = div ( - (xt a b f0 g0 (j - 1))) 2 };
+  end
+  
+  let lemma congr_neg_a_bu (a b f0 g0 y k : int) (bu : t) 
+    requires { (k - 1) >= 0 } 
+    requires { div ((a * f0) + (b * g0)) (power 2 (k - 1)) < 0 } 
+    requires { xt a b f0 g0 (((k - 1) + 1) - 1) < 0 -> congr (- xt a b f0 g0 (((k - 1) + 1) - 1)) ((- to_int bu) * y) m }
+    ensures { congr (- div ((a * f0) + (b * g0)) (power 2 (k - 1))) (to_int (sub (of_int 0) bu) * y) m }
+  = begin 
+    assert { congr (to_int (sub (of_int 0) bu)) (to_int (of_int 0) - to_int bu) m };
+    assert { congr ((- to_int bu) * y) (to_int (sub (of_int 0) bu) * y) m };
+    assert { k - 1 = ((k - 1) + 1) - 1 }; 
+    assert { (- div ((a * f0) + (b * g0)) (power 2 (k - 1))) = - (xt a b f0 g0 (((k - 1) + 1) - 1)) };
+  end 
+  
+  let lemma factor_u_bu_outer (f0 g0 i k : int) (u v bu : t) 
+    requires { congr (updated_x (to_int u) (to_int v) f0 g0)
+  (factor_at ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) * to_int bu) m } 
+    requires { mod ((to_int u * (- f0)) + (to_int v * (- g0))) m =
+  to_int (of_int (mod ((to_int u * (- f0)) + (to_int v * (- g0))) m)) } 
+    ensures { congr (to_int (of_int (mod ((to_int u * (- f0)) + (to_int v * (- g0))) m)))
+  (power 2 ((k - 1) * ((i + 1) - 1)) * to_int (sub (of_int 0) bu)) m }  
+  = begin 
+  assert { congr (to_int (of_int (mod ((to_int u * (- f0)) + (to_int v * (- g0))) m)))
+                 (power 2 ((k - 1) * ((i + 1) - 1)) * to_int (sub (of_int 0) bu)) m 
+        =  congr ((to_int u * (- f0)) + (to_int v * (- g0)))
+                 (power 2 ((k - 1) * ((i + 1) - 1)) * to_int (sub (of_int 0) bu)) m };
+  assert { ((to_int u * (- f0)) + (to_int v * (- g0))) = (- ((to_int u * f0) + (to_int v * g0)))};
+  assert { congr (- ((to_int u * f0) + (to_int v * g0))) ( - (factor_at ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) * to_int bu) ) m };
+  (* by rewrite H2 H1 *)
+  assert { congr (- (factor_at ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) * to_int bu))
+                 (power 2 ((k - 1) * ((i + 1) - 1)) * to_int (sub (of_int 0) bu)) m
+           by ( ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) = ((k - 1) * ((i + 1) - 1)) ) 
+           so (- (factor_at ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) * to_int bu)) = (- (factor_at ((k - 1) * ((i + 1) - 1)) * to_int bu))
+           so (- (factor_at ((k - 1) * ((i + 1) - 1)) * to_int bu)) = (factor_at ((k - 1) * ((i + 1) - 1))) * (-1 * to_int bu)
+           so (factor_at ((k - 1) * ((i + 1) - 1))) * (-1 * to_int bu) = (-1 * to_int bu) * (factor_at ((k - 1) * ((i + 1) - 1))) 
+           so (- (factor_at ((((k - 1) * (i - 1)) + ((k - 1) + 1)) - 1) * to_int bu)) = (-1 * to_int bu) * (power 2 ((k - 1) * ((i + 1) - 1))) 
+           so (power 2 ((k - 1) * ((i + 1) - 1)) * to_int (sub (of_int 0) bu)) = to_int (sub (of_int 0) bu) * (power 2 ((k - 1) * ((i + 1) - 1)))
+           so congr (-1 * to_int bu) (to_int (sub (of_int 0) bu)) m 
+                      
+           };
+                 
+  end 
+
+end

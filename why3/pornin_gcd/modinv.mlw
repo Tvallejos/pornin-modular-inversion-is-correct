@@ -1,0 +1,866 @@
+module Modinv
+
+  use int.Int
+
+  (* use number.Prime *)
+  use number.Divisibility
+  use number.Gcd 
+  (* use number.Parity *)
+  use number.Coprime 
+  use int.Power (* todo: remove and replace by factor_at *)
+  use congr.Congr 
+  use fitlen.FitLen
+  use int.MinMax
+  use int.Abs 
+  use int.EuclideanDivision as ED
+  use ceildiv.Ceil_div 
+  use montred.Mont_red 
+  use factorat.Factor_at 
+  use util.Util 
+  use divdivides.Div_divides 
+  use bool.Bool
+  
+  use invariantsnotation.Xt
+  use innerinvariants.InnerInv
+  use outerinvariants.OuterInv
+  use non_div_proof.Nondiv_proof
+  
+  type iter_vars =
+    { a' : int;
+      b' : int; 
+      k' : int;
+      n' : int;
+      j' : int;
+      ba' : int;
+      bb' : int;
+      f0' : int;
+      g0' : int;
+      f1' : int;
+      g1' : int;
+ghost bf0' : int;
+ghost bg0' : int;
+ghost bf1' : int;        
+ghost bg1' : int;   
+      bu' : t;
+      bv' : t;
+ghost this_iter' : bool;
+ divergence' : bool;
+    }
+    
+  let function mk_iter (a b k n j ba bb f0 g0 f1 g1 :int) (ghost bf0 : int) (ghost bg0 : int) (ghost bf1 : int) (ghost bg1 : int) (bu bv : t) (ghost this_iter : bool) (divergence : bool) : iter_vars
+  = { 
+    a' = a;
+    b' = b;
+    k' = k;
+    n' = n;
+    j' = j;
+    ba' = ba;
+    bb' = bb;
+    f0' = f0;
+    g0' = g0 ;
+    f1' = f1 ;
+    g1' = g1 ;
+    bf0' = bf0;  
+    bg0' = bg0 ;
+    bf1' = bf1;
+    bg1' = bg1;
+    bu' = bu ;
+    bv' = bv;
+    this_iter' = this_iter; 
+    divergence' = divergence;
+    
+    }
+
+  let function a_t (vars : iter_vars) : int 
+      requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = (xt vars.a' vars.b' vars.f0' vars.g0' (vars.j' - 1))
+  
+  let function b_t (vars : iter_vars) : int 
+      requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = (xt vars.a' vars.b' vars.f1' vars.g1' (vars.j' - 1))
+
+  
+  let predicate is_halving' (ba : int) : bool = 
+    ED.mod ba 2 = 0
+      
+  let predicate is_halving (vars : iter_vars) : bool 
+  = is_halving' (vars.ba') 
+  
+  let function halving_step (vars : iter_vars) : iter_vars
+  =                   
+  let ba = ED.div vars.ba' 2 in
+  let bu = mont_div_mod vars.bu' in 
+  let bf0 = (div_mod vars.bf0' m) in 
+  let bg0 = (div_mod vars.bg0' m) in 
+  let f1 = 2*vars.f1' in 
+  let g1 = 2*vars.g1' in  
+  mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' ba vars.bb' vars.f0' vars.g0' f1 g1 bf0 bg0 vars.bf1' vars.bg1' bu vars.bv' false vars.divergence' 
+  
+  let function swap (vars : iter_vars) : iter_vars 
+  = mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' vars.bb' vars.ba' vars.f1' vars.g1' vars.f0' vars.g0' vars.bf1' vars.bg1' vars.bf0' vars.bg0' vars.bv' vars.bu' vars.this_iter' vars.divergence' 
+  
+  let predicate is_divergent' (a b j ba bb f0 g0 f1 g1 : int) : bool
+  requires j_geq_1 { j - 1 >= 0 } 
+  =   (orb (andb (ba < bb) ((xt a b f0 g0 (j-1)) >= (xt a b f1 g1 (j-1)))) (andb (ba >= bb) ((xt a b f0 g0 (j-1)) < (xt a b f1 g1 (j-1)))))
+  (*is_divergent (mk_iter a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence)*)
+    
+
+
+  let predicate is_divergent (vars : iter_vars) : bool
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = 
+  let ba = vars.ba' in let bb = vars.bb' in let a = vars.a' in let b = vars.b' in 
+  let f0 = vars.f0' in let g0 = vars.g0' in let f1 = vars.f1' in let g1 = vars.g1' in 
+  let j = vars.j' in  
+  is_divergent' a b j ba bb f0 g0 f1 g1
+  
+  lemma divergent_dec_w : forall vs : iter_vars. 0 <= j' vs - 1 -> is_divergent vs \/ ((not is_divergent vs))
+
+  let predicate has_diverged (vars : iter_vars) : bool
+  = vars.divergence'
+
+  let predicate has_diverged' (a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 : int) (bu bv : t) (this_iter divergence : bool) : bool
+  = has_diverged (mk_iter a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence)
+
+  let function set_this_iter (vars : iter_vars) : iter_vars
+  = mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' vars.ba' vars.bb' vars.f0' vars.g0' vars.f1' vars.g1' vars.bf0' vars.bg0' vars.bf1' vars.bg1' vars.bu' vars.bv' true vars.divergence' 
+  
+  let function unset_this_iter (vars : iter_vars) : iter_vars
+    ensures { result.this_iter' = false } 
+  = mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' vars.ba' vars.bb' vars.f0' vars.g0' vars.f1' vars.g1' vars.bf0' vars.bg0' vars.bf1' vars.bg1' vars.bu' vars.bv' false vars.divergence'   
+  
+  let function set_divergence (vars : iter_vars) : iter_vars
+  = mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' vars.ba' vars.bb' vars.f0' vars.g0' vars.f1' vars.g1' vars.bf0' vars.bg0' vars.bf1' vars.bg1' vars.bu' vars.bv' vars.this_iter' true
+
+  let function inc_j (vars : iter_vars) : iter_vars 
+  ensures { result.a' = vars.a' }
+  ensures { result.b' = vars.b' }
+  ensures { result.k' = vars.k' }
+  ensures { result.n' = vars.n' }
+  ensures { result.j' = vars.j' + 1 }
+  ensures { result.ba' = vars.ba' }
+  ensures { result.bb' = vars.bb' }
+  ensures { result.f0' = vars.f0' }
+  ensures { result.g0' = vars.g0' }
+  ensures { result.f1' = vars.f1' }
+  ensures { result.g1' = vars.g1' }
+  ensures { result.bf0' = vars.bf0' }
+  ensures { result.bg0' = vars.bg0' }
+  ensures { result.bf1' = vars.bf1' }
+  ensures { result.bg1' = vars.bg1' }
+  ensures { result.bu' = vars.bu' }
+  ensures { result.bv' = vars.bv' }
+  ensures { result.this_iter' = vars.this_iter' }
+  ensures { result.divergence' = vars.divergence' }
+  = mk_iter vars.a' vars.b' vars.k' vars.n' (vars.j' + 1) vars.ba' vars.bb' vars.f0' vars.g0' vars.f1' vars.g1' vars.bf0' vars.bg0' vars.bf1' vars.bg1' vars.bu' vars.bv' vars.this_iter' vars.divergence'
+  
+  let function update_divergence_status (vars : iter_vars) : iter_vars
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+  =  if is_divergent vars then 
+      begin if has_diverged vars 
+            then vars (* divergence already set to true *)
+            else set_this_iter (set_divergence vars)
+      end 
+      else vars
+      
+  let lemma update_not_divergent (vars : iter_vars) 
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+    requires { not (is_divergent vars) }   
+    ensures { update_divergence_status vars = vars }
+  = begin end 
+  
+  let lemma update_divergent_has (vars : iter_vars) 
+    requires j_geq_1 { vars.j' - 1 >= 0 }     
+    requires { is_divergent vars }
+    requires { has_diverged vars }
+    ensures { update_divergence_status vars = vars }
+  = begin end   
+  
+  let lemma update_divergent_not_has (vars : iter_vars) 
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+    requires { is_divergent vars }
+    requires { not (has_diverged vars) }
+    ensures { update_divergence_status vars = set_this_iter (set_divergence vars)}
+  = begin end  
+   
+      
+  let function odd_not_swap (vars : iter_vars) : iter_vars
+  = 
+  let ba' = ED.div (vars.ba' - vars.bb') 2 in 
+  let bu' = mont_div_mod (sub vars.bu' vars.bv') in
+  let f0' = vars.f0' - vars.f1' in 
+  let g0' = vars.g0' - vars.g1' in 
+  let bf0' = div_mod (vars.bf0' - vars.bf1') m in 
+  let bg0' = div_mod (vars.bg0' - vars.bg1') m in                 
+  let f1' = 2*vars.f1' in 
+  let g1' = 2*vars.g1' in    
+  mk_iter vars.a' vars.b' vars.k' vars.n' vars.j' ba' vars.bb' f0' g0' f1' g1' bf0' bg0' vars.bf1' vars.bg1' bu' vars.bv' vars.this_iter' vars.divergence' 
+         
+  let predicate is_ba_lt_bb (vars : iter_vars) : bool
+  = vars.ba' < vars.bb'     
+  
+  let predicate is_swap ( vars : iter_vars ) : bool 
+  = andb (vars.ba' < vars.bb') (not (is_halving vars))    
+  
+  let predicate same_sign (x y : int) 
+  = orb (andb (x >= 0) (y >= 0)) (andb (x < 0) (y < 0))
+  
+  let predicate is_synchronous ( vars : iter_vars ) : bool 
+  requires j_geq_1 { vars.j' - 1 >= 0 }
+  = let a = vars.a' in let b = vars.b' in let f0 = vars.f0' in let g0 = vars.g0' in 
+    let f1 = vars.f1' in let g1 = vars.g1' in let j = vars.j' in
+  let a_t = xt a b f0 g0 (j - 1) in 
+  let b_t = xt a b f1 g1 (j - 1) in
+  same_sign (b_t - a_t) (vars.bb' - vars.ba')
+                    
+  let function odd_step (vars: iter_vars) : iter_vars
+  requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = let vars' = update_divergence_status vars in  
+  if is_ba_lt_bb vars'
+    then odd_not_swap (swap vars')
+    else odd_not_swap vars'
+    
+  let lemma update_swap (vars : iter_vars) 
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+    ensures { is_ba_lt_bb vars <-> is_ba_lt_bb (update_divergence_status vars) }  
+  = begin end   
+    
+  let lemma odd_step_lt (vars: iter_vars)
+  requires j_geq_1 { vars.j' - 1 >= 0 } 
+  requires { is_ba_lt_bb vars  } 
+  ensures { odd_step vars = odd_not_swap (swap (update_divergence_status vars)) }
+  = begin end 
+  
+  let lemma odd_step_not_lt (vars: iter_vars)
+  requires j_geq_1 { vars.j' - 1 >= 0 } 
+  requires { not (is_ba_lt_bb vars) } 
+  ensures { odd_step vars = odd_not_swap (update_divergence_status vars) }
+  = begin end   
+  
+  let lemma this_iter_lt (vars : iter_vars)
+   ensures { is_ba_lt_bb vars = is_ba_lt_bb (unset_this_iter vars) }
+  = begin end 
+
+  let function inner_iter_fun' (vars : iter_vars) : iter_vars
+      requires j_geq_1 { 1 <= vars.j' <= vars.k' - 1 } 
+      (* requires reset { vars.this_iter' = false }    *)
+  = let vars' = unset_this_iter vars in if is_halving vars' then halving_step vars' else odd_step vars'
+  (*
+  adding the following three lemmas makes the solvers unable to prove assertion 
+  assert vars_iter { vars =  inner_iter_fun (vars at Beg) }; *)
+  
+  lemma inner_iter_fun'_a_cst : forall vs : iter_vars. 1 <= vs.j' <= vs.k' - 1 -> a' (inner_iter_fun' vs) = vs.a'
+  lemma inner_iter_fun'_b_cst : forall vs : iter_vars. 1 <= vs.j' <= vs.k' - 1 -> b' (inner_iter_fun' vs) = vs.b'    
+  lemma inner_iter_fun'_j_cst : forall vs : iter_vars. 1 <= vs.j' <= vs.k' - 1 -> j' (inner_iter_fun' vs) = vs.j'
+  lemma inner_iter_fun'_k_cst : forall vs : iter_vars. 1 <= vs.j' <= vs.k' - 1 -> k' (inner_iter_fun' vs) = vs.k'  
+
+
+  let function inner_iter_fun (vars : iter_vars) : iter_vars
+      requires j_geq_1 { 1 <= vars.j' <= vars.k' - 1 }       
+      (* requires reset { vars.this_iter' = false }    *)
+  = inc_j (inner_iter_fun' vars) 
+    (* cannot increase j on the imperative side *)
+    (* inner_iter_fun' vars *)
+
+  (* missing restiction for j (t) *)
+  let predicate decreasing (vars : iter_vars) : bool 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+  = let r = inc_j (inner_iter_fun' vars) in 
+  len (a_t r) + len (b_t r) <= len (a_t vars) + len (b_t vars) - 1
+
+  let predicate regular (vars : iter_vars) : bool 
+      requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = len (a_t vars) + len (b_t vars) <= len (vars.a') + len (vars.b') - (vars.j'-1)
+
+  let predicate good (vars : iter_vars) : bool 
+      requires j_geq_1 { vars.j' - 1 >= 0 } 
+  = len (a_t vars) + len (b_t vars) <= len (vars.a') + len (vars.b') - (vars.k'-1)
+ 
+   let predicate parity_approx (vars : iter_vars) : bool =
+    requires { vars.k' > 1 } 
+    requires { vars.n' - vars.k' - 1 >= 0 }
+    requires { (vars.j' - 1) >= 0 }
+    parity_approx' vars.a' vars.b' vars.f0' vars.g0' vars.n' vars.j' vars.k'
+    
+  let lemma parity_approx_even (vars : iter_vars) 
+    requires { vars.k' > 1 } 
+    requires { vars.n' - vars.k' - 1 >= 0 }
+    requires { 1 <= vars.j' <= vars.k' - 1 }
+    ensures { parity_approx vars } 
+  = begin end 
+
+  (* let predicate lasting_good (vars : iter_vars)
+  = forall t. vars.j' <= t <= (vars.k' - 1) + 1 ->  *)
+  let lemma good_impl_regular (vars : iter_vars)
+    requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+    requires { good vars }
+    ensures { regular vars}
+  = begin end 
+  
+  let lemma good_impl_good' (vars : iter_vars)
+    requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }
+    requires { good vars }
+    ensures { good' vars.a' vars.b' vars.f0' vars.g0' vars.f1' vars.g1' (vars.j'-1) vars.k' }
+  = begin end 
+
+  let lemma regular_impl_regular' (vars : iter_vars)
+    requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }
+    requires { regular vars }
+    ensures { regular' vars.a' vars.b' vars.f0' vars.g0' vars.f1' vars.g1' (vars.j'-1) }
+  = begin end   
+  
+  let lemma regular_impl_reg (vars : iter_vars) (a b f0 g0 f1 g1 j : int)
+    requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }
+    requires { good vars }
+    requires { a = vars.a' }
+    requires { b = vars.b' }
+    requires { f0 = vars.f0' } 
+    requires { g0 = vars.g0' }
+    requires { f1 = vars.f1' }
+    requires { g1 = vars.g1' }
+    requires { j = vars.j' }                       
+    ensures { regular' a b f0 g0 f1 g1 (j-1) } 
+  = begin end
+
+  let lemma update_status_ba (vars : iter_vars)
+    requires j_geq_1 { vars.j' - 1 >= 0 } 
+    ensures { (update_divergence_status vars).ba' = vars.ba' }
+  = begin end 
+
+  let lemma update_status_bb (vars : iter_vars)
+    requires j_geq_1 { vars.j' - 1 >= 0 }      
+    ensures { (update_divergence_status vars).bb' = vars.bb' }
+  = begin end 
+  
+  let lemma update_status_gt (vars : iter_vars)
+      requires j_geq_1 { vars.j' - 1 >= 0 }    
+  ensures { ((update_divergence_status vars).ba' < (update_divergence_status vars).bb') <-> vars.ba' < vars.bb' }
+  = begin end 
+  
+  let lemma inner_iter_fun_halving (vars : iter_vars) 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { is_halving vars }
+   (* requires reset { vars.this_iter' = false }  *)
+   ensures { inner_iter_fun' vars = halving_step vars }
+   ensures { inner_iter_fun vars = inc_j (halving_step vars) }
+   = begin end 
+   
+  let lemma inner_iter_fun_odd (vars : iter_vars) 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   ensures { inner_iter_fun' vars = odd_step (unset_this_iter vars) }
+   ensures { inner_iter_fun vars = inc_j (odd_step (unset_this_iter vars)) }
+   = begin end 
+   
+  let lemma inner_iter_fun_odd_lt (vars : iter_vars) 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { is_ba_lt_bb vars }
+   ensures { inner_iter_fun' vars = odd_not_swap (swap (update_divergence_status (unset_this_iter vars))) }
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (swap (update_divergence_status (unset_this_iter vars)))) }   
+   = begin end    
+   
+  let lemma inner_iter_fun_odd_not_lt_divergent_not_has (vars : iter_vars) 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { not (is_ba_lt_bb vars) }
+   requires { is_divergent vars }
+   requires { not (has_diverged vars) }
+   ensures { inner_iter_fun' vars = odd_not_swap (set_this_iter (set_divergence (unset_this_iter vars))) }
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (set_this_iter (set_divergence (unset_this_iter vars)))) }   
+   = begin 
+     assert {   odd_not_swap (update_divergence_status (unset_this_iter vars)) =
+  odd_not_swap (set_this_iter (set_divergence (unset_this_iter vars))) };
+  
+     assert {   odd_step (unset_this_iter vars) =
+  odd_not_swap (set_this_iter (set_divergence (unset_this_iter vars))) };
+
+   end      
+   
+   let lemma inner_iter_fun_odd_lt_divergent_not_has (vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { is_ba_lt_bb vars }
+   requires { is_divergent vars }
+   requires { not (has_diverged vars) }
+   ensures { inner_iter_fun' vars = odd_not_swap (swap (set_this_iter (set_divergence (unset_this_iter vars)))) }
+   ensures { inner_iter_fun vars = inc_j ( odd_not_swap (swap (set_this_iter (set_divergence (unset_this_iter vars))))) }   
+   = begin end  
+
+   let lemma inner_iter_fun_odd_lt_divergent_has (vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { is_ba_lt_bb vars }
+   requires { is_divergent vars }
+   requires {  (has_diverged vars) }
+   ensures { inner_iter_fun' vars = odd_not_swap (swap (unset_this_iter vars)) }
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (swap (unset_this_iter vars))) }   
+   = begin 
+     assert {   odd_not_swap (swap (update_divergence_status (unset_this_iter vars))) =
+  odd_not_swap (swap (unset_this_iter vars)) };
+   end     
+   
+   let lemma inner_iter_fun_odd_lt_not_divergent (vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { (is_ba_lt_bb vars) }
+   requires { not is_divergent vars } 
+   ensures { inner_iter_fun' vars = odd_not_swap (swap (update_divergence_status (unset_this_iter vars))) }
+   ensures { inner_iter_fun' vars = odd_not_swap (swap (unset_this_iter vars)) }   
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (swap (unset_this_iter vars))) }      
+   = begin end 
+   
+   let lemma inner_iter_fun_odd_not_lt_not_divergent (vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { not (is_ba_lt_bb vars) }
+   requires { not is_divergent vars }
+   ensures { inner_iter_fun' vars = odd_not_swap (unset_this_iter vars) }   
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (unset_this_iter vars)) }      
+   = begin
+     assert { odd_not_swap (update_divergence_status (unset_this_iter vars)) =
+  odd_not_swap (unset_this_iter vars) };
+   end    
+   
+   let lemma inner_iter_fun_odd_not_lt_divergent_has (vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+   requires { not is_halving vars }
+   (* requires reset { vars.this_iter' = false } *)
+   requires { not (is_ba_lt_bb vars) }
+   requires { is_divergent vars }
+   requires { has_diverged vars } 
+   ensures { inner_iter_fun' vars = odd_not_swap (unset_this_iter vars) }   
+   ensures { inner_iter_fun vars = inc_j (odd_not_swap (unset_this_iter vars)) }      
+   = begin 
+   assert { odd_not_swap (update_divergence_status (unset_this_iter vars)) =
+  odd_not_swap (unset_this_iter vars) };
+   end 
+   
+  let lemma bt_halving ( vars : iter_vars ) 
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 } 
+  requires { is_halving vars } 
+  ensures { (b_t (inc_j (inner_iter_fun' vars))) = (b_t vars) }
+  ensures { (b_t (inner_iter_fun vars)) = (b_t vars) }  
+  = begin end
+  
+  let function updated_a (vars : iter_vars) : int 
+  = updated_x vars.a' vars.b' vars.f0' vars.g0'
+  
+  let function updated_b (vars : iter_vars) : int 
+  = updated_x vars.a' vars.b' vars.f1' vars.g1'
+
+  let lemma halving_at ( vars : iter_vars ) 
+    requires  { (vars.j' - 1) >= 0 }  
+    requires { is_halving vars }
+    ensures {  a_t (halving_step vars) = a_t vars } 
+    = begin end 
+
+  let lemma exact_div_at_half ( vars : iter_vars ) 
+    requires  { (vars.j' - 1) >= 0 }  
+    requires { divides (2 * factor_at (vars.j' - 1)) (updated_a vars) }
+    ensures {  a_t (inc_j vars) = ED.div (a_t vars) 2 } 
+    = begin end 
+    
+  let lemma same_sign_halving ( vars : iter_vars)
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }  
+  requires { is_halving vars } 
+  requires { divides (2 * factor_at (vars.j' - 1)) (updated_a vars) }  
+  ensures { same_sign (a_t vars) (a_t (inc_j (inner_iter_fun' vars))) }
+  ensures { same_sign (b_t vars) (b_t (inc_j (inner_iter_fun' vars))) }  
+  ensures { same_sign (a_t vars) (a_t (inner_iter_fun vars)) }
+  ensures { same_sign (b_t vars) (b_t (inner_iter_fun vars)) }    
+  = begin end  
+  
+  let function ba_0 (vars : iter_vars) : int 
+    requires  { vars.k' > 1 } 
+    requires { ((vars.n' - vars.k') - 1) >= 0 }  
+  = approx vars.a' vars.n' vars.k'
+  
+  let function bb_0 (vars : iter_vars) : int 
+    requires  { vars.k' > 1 } 
+    requires { ((vars.n' - vars.k') - 1) >= 0 }    
+  = approx vars.b' vars.n' vars.k'  
+  
+  let predicate a_t_exact_div (vars : iter_vars) : bool 
+  requires  { (vars.j' - 1) >= 0 }  
+  = divides (factor_at (vars.j' - 1)) (updated_a vars)
+  
+  let predicate b_t_exact_div (vars : iter_vars) : bool 
+  requires  { (vars.j' - 1) >= 0 }
+  = divides (factor_at (vars.j' - 1)) (updated_b vars)
+  
+  let function updated_ba (vars : iter_vars) : int 
+      requires  { vars.k' > 1 } 
+      requires { ((vars.n' - vars.k') - 1) >= 0 }  
+  = updated_x (ba_0 vars) (bb_0 vars) vars.f0' vars.g0'    
+
+let function updated_bb (vars : iter_vars) : int
+      requires  { vars.k' > 1 } 
+    requires { ((vars.n' - vars.k') - 1) >= 0 }  
+  = updated_x (ba_0 vars) (bb_0 vars) vars.f1' vars.g1'
+  
+  let predicate ba_t_exact_div (vars : iter_vars) : bool 
+    requires  { vars.k' > 1 } 
+    requires { ((vars.n' - vars.k') - 1) >= 0 }   
+  = divides (factor_at (vars.j' - 1)) (ba_0 vars)
+  
+  let predicate bb_t_exact_div (vars : iter_vars) : bool 
+    requires  { vars.k' > 1 } 
+    requires { ((vars.n' - vars.k') - 1) >= 0 }   
+  = divides (factor_at (vars.j' - 1)) (bb_0 vars)
+  
+  let lemma is_divergent_diverged (vars : iter_vars )
+   requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }   
+  requires { not (is_halving vars) } 
+  requires { is_divergent vars }
+  ensures { has_diverged (inner_iter_fun' vars) } 
+  ensures { has_diverged (inc_j (inner_iter_fun' vars)) } 
+  ensures { has_diverged (inc_j (inner_iter_fun vars)) }   
+  = begin end
+
+  let lemma inj_iter (vars1 vars2 : iter_vars)
+  requires { vars1 = vars2 }
+  ensures { vars1.a' =   (vars2).a' }
+  ensures { vars1.b' =   (vars2).b' }
+  ensures { vars1.k' =   (vars2).k' }
+  ensures { vars1.n' =   (vars2).n' }
+  ensures { vars1.j' =   (vars2).j' }
+  ensures { vars1.ba' =  (vars2).ba' }
+  ensures { vars1.bb' =  (vars2).bb' }
+  ensures { vars1.f0' =  (vars2).f0' }
+  ensures { vars1.g0' =  (vars2).g0' }
+  ensures { vars1.f1' =  (vars2).f1' }
+  ensures { vars1.g1' =  (vars2).g1' }
+  ensures { vars1.bf0' = (vars2).bf0' }
+  ensures { vars1.bg0' = (vars2).bg0' }
+  ensures { vars1.bf1' = (vars2).bf1' }
+  ensures { vars1.bg1' = (vars2).bg1' }
+  ensures { vars1.bu' =  (vars2).bu' }
+  ensures { vars1.bv' =  (vars2).bv' }
+  ensures { vars1.this_iter' = (vars2).this_iter' }
+  ensures { vars1.divergence' = (vars2).divergence' }  
+  = begin end 
+  
+  let lemma iter_inj (vars1 vars2 :iter_vars)
+   
+  requires { vars1.a' =   (vars2).a' }
+  requires { vars1.b' =   (vars2).b' }
+  requires { vars1.k' =   (vars2).k' }
+  requires { vars1.n' =   (vars2).n' }
+  requires { vars1.j' =   (vars2).j' }
+  requires { vars1.ba' =  (vars2).ba' }
+  requires { vars1.bb' =  (vars2).bb' }
+  requires { vars1.f0' =  (vars2).f0' }
+  requires { vars1.g0' =  (vars2).g0' }
+  requires { vars1.f1' =  (vars2).f1' }
+  requires { vars1.g1' =  (vars2).g1' }
+  requires { vars1.bf0' = (vars2).bf0' }
+  requires { vars1.bg0' = (vars2).bg0' }
+  requires { vars1.bf1' = (vars2).bf1' }
+  requires { vars1.bg1' = (vars2).bg1' }
+  requires { vars1.bu' =  (vars2).bu' }
+  requires { vars1.bv' =  (vars2).bv' }
+  requires { vars1.this_iter' = (vars2).this_iter' }
+  requires { vars1.divergence' = (vars2).divergence' }  
+  ensures { vars1 = vars2 }
+  = begin end 
+
+  let lemma inversion_divergence ( vars : iter_vars) 
+    requires j_bounds { 1 <= vars.j' <= vars.k' - 1 }     
+    requires { has_diverged (inc_j (inner_iter_fun vars)) }
+    ensures { (has_diverged vars) \/ ( (not (has_diverged vars)) /\ is_divergent vars ) }
+  = begin end
+  
+  let rec function iter n f x =
+    requires { n >= 0 }
+    variant { n }
+    if n = 0 then x
+    else f ( iter (n - 1) f x )
+    
+  lemma help_f1 : forall x : int. abs (2 * x) = 2 * abs x
+  (* lemma help_inner_dec_len : *)
+    let ebin_gcd (y k : int) : int
+    requires { m >= 3 }
+    requires { ED.mod m 2 = 1 }
+    requires { 0 <= y < m }
+    requires { k > 1 }
+    (* by subst_all ; assert (congr (of_int (mont_red m (to_int v) ((k - 1) * ceil_div ((2 * len m) - 1) (k - 1)))) bv m)
+           by apply  mod_scaleRL with (power 2 ((k - 1) * ((ceil_div ((2 * len m) - 1) (k - 1) + 1) - 1))) *)
+   
+    ensures { gcd y m = 1 -> ED.mod (result * y) m = 1 }
+    ensures { gcd y m <> 1 -> result = 0 } 
+  =
+    let ref a : int = y in let ref b : int = m in
+    let ref u : t = of_int 1 in let ref v :t = of_int 0 in
+    let ref bu : t = u in let ref bv :t = v in
+    
+    assert { ED.mod (m+1) 2 = 0 };
+    assert { coprime 2 m };
+    assert { k - 1 >= 0 };
+
+    let end_ = ceil_div (2 * (len m) - 1) (k - 1) in
+    for i = 1 to end_ do
+        (* rem *)
+        invariant outer_gcd { gcd a b = gcd y m } 
+        (* by rem; subst_all; assert ( (ED.div ((a * f0) + (b * g0)) (power 2 (k - 1))) = xt a b f0 g0 (k - 1) ) *)
+        invariant congr_a_bu { congr a (bu*y) m } 
+        (* rem *)
+        invariant congr_b_bv { congr b (bv*y) m } 
+        (* rem *)
+        invariant outer_congr_u_bv { congr u ((power 2 ((k-1)*(i-1))) * bu) m }
+        (* rem *)
+        invariant outer_congr_v_bv { congr v ((power 2 ((k-1)*(i-1))) * bv) m }        
+        
+        (* rem *)
+        invariant outer_b_odd { ED.mod b 2 = 1 } 
+        invariant outer_dec_len {  a = 0 \/ ((len y + len m) >= len a + len b + (i-1)*(k-1)) } 
+        invariant bounded_len_y_m { len y + len m <= 2 * len m }
+        
+        invariant outer_a_geq_0 { a >= 0 } 
+        invariant outer_b_geq_0 { b >= 0 } 
+        invariant i_geq_1 { i - 1 >= 0}
+        
+        let n : int = max (len a) (max (len b) (2*k)) in
+        let ref ba : int = approx a n k in 
+        let ref bb : int = approx b n k in 
+      
+        let ref f0 : int = 1 in
+        let ref f1 : int = 0 in
+        let ref g0 : int = 0 in
+        let ref g1 : int = 1 in
+    
+        let ghost ref bf0 : int = f0 in
+        let ghost ref bf1 : int = f1 in
+        let ghost ref bg0 : int = g0 in
+        let ghost ref bg1 : int = g1 in
+
+        let (*ghost*) ref divergence : bool = false in
+        let ghost ref this_iter : bool = false in
+        let ref vars : iter_vars = (mk_iter a b k n 1 ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence) in 
+                  
+        assert { not (n = 2 * k) -> k - 1 <= len a + len b };          
+        label Entering_inner_loop in
+        (* rem in comments stands for 
+           remove iter_a, iter_b, iter_k, iter_n, iter_j, iter_ba, iter_bb, iter_f0, iter_g0, iter_f1, iter_g1, iter_bf0, iter_bg0, iter_bf1, iter_bg1, iter_bu, iter_bv, iter_this_iter, iter_div, iter_vars
+*)
+        for j = 1 to k - 1 do
+          (* even by subst_all; apply inner_gcd_even *)
+          (* odd by auto 3; on unsolved rewrite <- gcd_inner_odd with k *)
+          invariant gcd_inner { gcd a b = gcd (xt a b f0 g0 (j-1)) (xt a b f1 g1 (j-1)) }  
+          invariant b_t_odd { ED.mod (xt a b f1 g1 (j-1)) 2 = 1 }
+          (* even by rewrite xt_half'; on third apply divides_factors; on third inline_goal; split_all_full + provers *)
+          (* odd by subst_all ; inv_bezout_odd_u' *)
+          invariant congr_at_bu { congr (xt a b f0 g0 (j - 1)) (bu*y) m }  
+          invariant congr_bt_bv { congr (xt a b f1 g1 (j - 1)) (bv*y) m }  
+          
+          invariant congr_neg_at_bu { (xt a b f0 g0 (j - 1)) < 0 -> congr ( - (xt a b f0 g0 (j - 1))) ((- bu)*y) m }  
+          invariant congr_neg_bt_bv { (xt a b f1 g1 (j - 1)) < 0 -> congr ( - (xt a b f1 g1 (j - 1))) ((- bv)*y) m } 
+                    
+          invariant congr_u_bu { congr (updated_x (to_int u) (to_int v) f0 g0) ((factor_at ((k-1)*(i-1) + j - 1 )) * bu) m } 
+          invariant congr_v_bv { congr (updated_x (to_int u) (to_int v) f1 g1) ((factor_at ((k-1)*(i-1) + j - 1 )) * bv) m }   
+          
+          
+          invariant bb_odd { ED.mod bb 2 = 1 } 
+       
+          invariant inner_bound_len_y_m{ len y + len m <= 2 * len m}
+          (* odd by subst_all; destruct_rec H1 *)
+          (*
+          invariant inner_dec_len_div_free { not divergence -> (xt a b f0 g0 (j-1)) = 0 \/ (regular' a b f0 g0 f1 g1 (j-1)) } 
+          invariant inner_dec_len_div { divergence -> (xt a b f0 g0 (j-1)) = 0 \/ (regular' a b f0 g0 f1 g1 (j-1)) }   *)
+                  
+          invariant { divergence -> (n = len a \/ n = len b) /\ n > 2*k }
+          (* invariant { divergence -> (h a b f0 g0 f1 g1 (j-1) k n) } *)
+          invariant n2k_not_div {  n = (2 * k) -> not divergence } 
+          
+          invariant n2k_abar { n = (2 * k) -> approx a n k = ba at Entering_inner_loop }
+          invariant n2k_bbar { n = (2 * k) -> approx b n k = bb at Entering_inner_loop }     
+          (* init by subst_all ; rewrite H approx_2k_eq *)     
+          (* even by rewrite xt_half' ; on third apply divides_factors *)
+          (* odd by rem; subst_all; rewrite xt_sub' on forth assert ( (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) = xt a b f0 g0 (j - 1) ) *)
+         
+          invariant n2k_atabar { n = (2 * k) -> (xt a b f0 g0 (j-1)) = ba } 
+          (* init by subst_all ; rewrite H approx_2k_eq *)            
+          invariant n2k_btbbar { n = (2 * k) -> (xt a b f1 g1 (j-1)) = bb }           
+        
+          (* odd by subst_all; destruct_rec H1 apply inner_dec_len_div_free_priv_20 with (vars.k'),divergence *)
+          invariant inner_dec_len { n = (2 * k) -> (xt a b f0 g0 (j-1)) = 0 \/ (regular' a b f0 g0 f1 g1 (j-1)) } 
+        
+          invariant congr_f0_bf0 { congr f0 ((factor_at (j-1)) * bf0) m }
+          invariant congr_f1_bf1 { congr f1 ((factor_at (j-1)) * bf1) m }
+          invariant congr_g0_bg0 { congr g0 ((factor_at (j-1)) * bg0) m }
+          invariant congr_g1_bg1 { congr g1 ((factor_at (j-1)) * bg1) m }
+          
+          invariant bounds_fg0 { abs f0 + abs g0 <= factor_at (j-1) }
+          (* even by subst_all ; rewrite help_f1 *)
+          invariant bounds_fg1 { abs f1 + abs g1 <= factor_at (j-1) }          
+          (* even by subst_all *)
+          (* odd by rem subst_all; apply divides_odd *)
+          invariant factor_ahatt { divides (factor_at (j-1)) (updated_x a b f0 g0) }
+          (* even by subst_all *)
+          invariant factor_bhatt { divides (factor_at (j-1)) (updated_x a b f1 g1) }
+          (* odd by subst_all *)
+          invariant factor_bahatt { divides (factor_at (j-1)) (updated_x (ba at Entering_inner_loop) (bb at Entering_inner_loop) f0 g0) }
+          invariant factor_bbhatt { divides (factor_at (j-1)) (updated_x (ba at Entering_inner_loop) (bb at Entering_inner_loop) f1 g1) }
+          (* off by subst_all; rewrite xt_sub' *)
+          invariant bat_is_ba { xt (ba at Entering_inner_loop) (bb at Entering_inner_loop) f0 g0 (j-1) = ba }
+          invariant bbt_is_bb { xt (ba at Entering_inner_loop) (bb at Entering_inner_loop) f1 g1 (j-1) = bb }     
+          (* rem *)     
+          invariant bd_pos { not divergence -> (xt a b f0 g0 (j-1)) >= 0 /\ (xt a b f1 g1 (j-1)) >= 0 } 
+          
+          invariant i_geq_1 { i - 1 >= 0}  
+          
+          (* rem *)
+          invariant cases_ab { ((xt a b f0 g0 (j-1)) >= 0 /\ (xt a b f1 g1 (j-1)) >= 0) 
+                            || ((xt a b f0 g0 (j-1)) >= 0 /\ (xt a b f1 g1 (j-1)) < 0) 
+                            || ((xt a b f0 g0 (j-1)) < 0 /\ (xt a b f1 g1 (j-1)) >= 0) }
+          (* invariant lemma28 { forall alpha : int. alpha >= -> abs ( (xt a b f0 g0 (j-1)) ) < factor_at alpha -> abs ( (xt a b f1 g1 (j-1)) ) < factor_at alpha } *)
+          (*
+          invariant { this_iter -> divergence -> (xt a b f0 g0 (j-1)) <= (power 2 (n - k - 1)) }
+          invariant min_bf_div { not divergence -> mint a b f0 g0 f1 g1 (j - 1) <= min a b } *)
+           
+           (*invariant inv_a { vars.a' = a at Entering_inner_loop }
+           invariant inv_ *)
+           invariant is_done_inv { vars.a' = 0 -> a_t vars = 0 }
+           invariant iter_a { vars.a' =   a }
+           invariant iter_b { vars.b' =   b }
+           invariant iter_k { vars.k' =   k }
+           invariant iter_n { vars.n' =   n }
+           invariant iter_j { vars.j' =   j }
+           invariant iter_ba { vars.ba' =  ba }
+           invariant iter_bb{ vars.bb' =  bb }
+           invariant iter_f0 { vars.f0' =  f0 }
+           invariant iter_g0 { vars.g0' =  g0 }
+           invariant iter_f1 { vars.f1' =  f1 }
+           invariant iter_g1 { vars.g1' =  g1 }
+           invariant iter_bf0 { vars.bf0' = bf0 }
+           invariant iter_bg0 { vars.bg0' = bg0 }
+           invariant iter_bf1 { vars.bf1' = bf1 }
+           invariant iter_bg1 { vars.bg1' = bg1 }
+           invariant iter_bu { vars.bu' =  bu }
+           invariant iter_bv { vars.bv' =  bv }
+           invariant iter_this_iter{ vars.this_iter' = this_iter }
+           invariant iter_div { vars.divergence' = divergence }  
+           invariant iter_vars { vars = iter (j - 1) inner_iter_fun (vars at Entering_inner_loop) }
+
+
+          label Beg in
+          
+          
+          this_iter <- false;
+
+          (* even by apply parity_approx_even *)
+          assert parity { congr (xt a b f0 g0 (j-1)) (xt (ba at Entering_inner_loop) (bb at Entering_inner_loop) f0 g0 (j-1)) 2 
+            by parity_approx' a b f0 g0 n j k
+          }; 
+          (* assert parity' { parity_approx vars }; *)
+
+          (if (ED.mod ba 2 = 0) then begin
+                  assert { is_halving vars };
+                  
+                  ba <- ED.div ba 2;
+                  bu <- mont_div_mod bu;
+                  (bf0,bg0) <- (div_mod bf0 m),(div_mod bg0 m);
+                              
+                  end
+           else 
+             [@vc:sp]
+             begin  
+                 assert not_halving { not (is_halving vars) };
+                 
+                 if not divergence then (assert not_div { not (has_diverged vars) };) else (assert div { has_diverged vars }; );
+                 if (is_divergent vars)
+                 then (begin
+                   assert is_div { is_divergent vars /\ is_divergent' a b j ba bb f0 g0 f1 g1 };
+                   (if (not divergence) then (begin
+                     assert not_div { not (has_diverged vars) };
+                     this_iter <- true;
+                     end;)
+                     else (assert div2 { has_diverged vars }););
+                   divergence <- true; 
+                   end;)
+                   else (assert not_is_div { not ( is_divergent vars) /\ not (is_divergent' a b j ba bb f0 g0 f1 g1 ) }; 
+                         (*assert { not (has_diverged vars) }; *) );
+                 if ba < bb then (begin 
+                     assert is_lt { is_ba_lt_bb vars };
+                     (ba,bb) <- (bb,ba);
+                     (f0,g0,f1,g1) <- (f1,g1,f0,g0);
+                     (bf0,bg0,bf1,bg1) <- (bf1,bg1,bf0,bg0);
+                     (bu,bv) <- (bv,bu);                
+                     end;)
+                     else (assert not_lt { not (is_ba_lt_bb vars) }; assert not_swap { not (is_swap vars) };);
+                  let a' = ED.div (ba - bb) 2 in let bu' = mont_div_mod (sub bu bv) in
+                  (f0,g0) <- (f0 - f1, g0 - g1); 
+                  (bf0,bg0) <- (bf0 - bf1, bg0 - bg1);
+                  (bf0,bg0) <- (div_mod bf0 m),(div_mod bg0 m); 
+                  
+                  ba <- a';
+                  bu <- bu';
+                  end;
+                  
+                  ); 
+        
+
+        (f1,g1 <- 2*f1,2*g1);
+        vars <- mk_iter a b k n (j + 1) ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence;
+
+        (* odd by rewrite inner_iter_fun_odd destruct_rec H25; rewrite odd_step_lt; destruct_rec H46/H47 
+        then rewrite by the corresponding update lemma + apply iter_inj + compute in goal*)
+        assert vars_iter { vars =  inner_iter_fun (vars at Beg) 
+          
+        };
+        assert is_done_inner {(a at Beg) = 0 -> a = 0 };
+        done ensures thm { not (n = 2 * k) -> not (a_t vars = 0) -> good vars }; 
+        
+        (a,b) <- ((ED.div (a*f0 + b*g0) (power 2 (k - 1))),((ED.div (a*f1 + b*g1) (power 2 (k - 1)))));
+        
+        (* by rewrite H H4 unfold xt unfold updated_x *)
+        assert a_def { a = a_t vars by (a = a_t vars
+           by a_t vars = xt (vars.a') (vars.b') (vars.f0') (vars.g0') (((k - 1) + 1) - 1)  
+           so (((k - 1) + 1) - 1) = k - 1
+           so xt (vars.a') (vars.b') (vars.f0') (vars.g0') (((k - 1) + 1) - 1) = xt (vars.a') (vars.b') (vars.f0') (vars.g0') (k - 1)        
+           so a_t vars = xt (vars.a') (vars.b') (vars.f0') (vars.g0') (k - 1)   
+          ) 
+        
+        
+        }; 
+        assert is_done_outer {(a at Entering_inner_loop) = 0 -> a = 0 };
+        
+        (* by rewrite H H5 unfold xt unfold updated_x *)
+        assert is_done_b_outer { b = b_t vars by b_t vars = xt (vars.a') (vars.b') (vars.f1') (vars.g1') (((k - 1) + 1) - 1)  
+           so (((k - 1) + 1) - 1) = k - 1
+           so xt (vars.a') (vars.b') (vars.f1') (vars.g1') (((k - 1) + 1) - 1) = xt (vars.a') (vars.b') (vars.f1') (vars.g1') (k - 1)        
+           so b_t vars = xt (vars.a') (vars.b') (vars.f1') (vars.g1') (k - 1)   
+          
+        };
+        if a < 0 then 
+          (a,f0,g0,bu) <- (-a,-f0,-g0, sub (of_int 0) bu);
+        if b < 0 then
+          (b,f1,g1,bv) <- (-b,-f1,-g1, sub (of_int 0) bv);
+          
+        let u' : int = (ED.mod ((to_int u)*f0+(to_int v)*g0) m) in
+        let v' : int = (ED.mod ((to_int u)*f1 + (to_int v)*g1) m) in 
+
+        (u, v) <- (of_int u',of_int v');
+
+
+      done;
+
+      v <- of_int (mont_red m (to_int v) ((k-1)*end_));
+      
+      assert { a = 0 };
+      assert { gcd a b = b }; 
+     
+
+    if b <> 1 then 0 else (to_int v)
+
+
+end
+
+

@@ -1,0 +1,153 @@
+
+module FitLen
+
+  use int.Int
+
+  (* use EDDivisibility *)
+  use number.Divisibility
+  use int.EuclideanDivision as ED
+  use int.Power
+  use util.Util 
+  use int.Abs
+   
+   
+  let predicate fit_in_reg (x r : int) : bool =
+    requires { r >= 0 }
+    x < (power 2 r)
+    
+  let function len (x : int) : int =
+    (* requires { x >= 0 } *)
+    ensures { abs x < power 2 result } 
+    ensures { forall k : int. k >= 0 -> abs x < power 2 k -> result <= k } 
+    ensures { result >= 0 }
+    let ref x = abs x in 
+    (* if x = 0 then return 1; *)
+    let ref m = 0 in 
+    while not (x < (power 2 m)) do
+      invariant { m >= 0 }
+      invariant { forall k : int. 0 <= k < m -> not (x < power 2 k) }
+      variant { (x - (power 2 m)) } 
+      m <- m + 1;
+    done;
+    m 
+
+  lemma len_fit : forall x r : int. x > 0 -> r >= 0 -> fit_in_reg (power 2 r) (r + 1)
+  lemma power_bound : forall x r : int. r >= 0 -> 0 <= x <= power 2 r -> fit_in_reg x (r + 1)
+  lemma power_bound_lt : forall x r : int. r >= 0 -> 0 <= x < power 2 r -> fit_in_reg x r
+  lemma fit_bound : forall x r : int. x > 0 -> r > 0  -> fit_in_reg x r -> len x <= r 
+    
+
+  lemma div_len : forall x : int. x >= 0 -> (ED.div x (power 2 (len x))) = 0 
+ 
+  lemma len_sub : forall x y : int. 0 <= y <= x -> len (x - y) <= len x
+
+  lemma len_geq : forall x y : int. 0 <= y <= x -> len y <= len x
+  lemma len_gt : forall x y : int. x >= 0 -> 0 < y < power 2 x -> len y < x + 1 
+  lemma len_gt' : forall x y : int. x >= 0 -> 0 < y <= power 2 x -> len y <= x + 1
+  lemma len_gt_pow : forall x y : int. x >= 0 -> power 2 x < y -> x + 1 <= len y
+  lemma len_power2 : forall k : int. k >= 0 -> len (power 2 k) = k + 1
+  lemma len_gt_pow2 : forall x k : int. k >= 1 -> 0 <= x < power 2 k -> len x <= k
+  
+  lemma len_ge_div : 
+    forall x y k: int. 
+    0 <= y <= x -> 
+    0 < k -> 
+    len (ED.div y k) <= (len (ED.div x k))
+    
+    
+  (* lemma div_neg : forall x k : int. k <> 0 -> x > 1 -> - ED.div x k = ED.div (- x) k *)
+      
+  lemma len_div2 : forall x : int. x > 1 -> len x = len (ED.div x 2) + 1
+  lemma len_neg : forall x : int. len x = len (- x)
+  lemma len_abs : forall x : int. len x = len (abs x)  
+  
+  lemma abs_len : forall x : int. abs (len x) = len x
+  lemma len_div2_neg : forall x : int. abs x > 1 -> ED.mod x 2 = 0 -> len x = len (ED.div x 2) + 1
+  (* lemma len_sub_neg : forall x y : int. 0 <= abs y <= abs x -> len (x - y) <= len x   *)
+  (* lemma len_div2_neg : forall x : int. x < -1 -> len x = len (ED.div x 2) + 1 *)
+    
+  lemma len_mul2 : forall x : int. x > 0 -> len x + 1 = len (2 * x) 
+  lemma len_pow2_neg : forall k : int. k >= 0 -> len (- (power 2 k)) = k + 1
+  lemma len_gt_pow2_neg : forall x k : int. k >= 1 -> 0 > x > - power 2 k -> len x <= k  
+  (* lemma len_mul2_neg : forall x : int. x < 0 -> len x + 1 = len (2 * x) *)
+
+  lemma lenL : forall x : int. 0 < x -> power 2 (abs (len x) - 1) <= x
+
+  use int.MinMax 
+  
+  lemma len_min : forall x y : int. 0 < x -> 0 < y -> abs (len (min x y)) = min (abs (len x)) (abs (len y))
+  lemma len_max : forall x y : int. 0 < x -> 0 < y -> abs (len (max x y)) = max (abs (len x)) (abs (len y))  
+
+  lemma len_b : forall x k : int. 0 < k -> abs x < (power 2 k) -> abs (len x) <= k
+
+  lemma len_up: forall x : int. 0 < x -> x < power 2 (abs (len x))
+  lemma len_gt0 : forall x : int. x <> 0 -> len x > 0
+  lemma len_lt : forall x y : int. 0 < x -> 0 < y -> len (abs x) < len (abs y) -> x < y 
+
+  lemma len_le_pow2 : forall x j : int. len x <= j -> x < power 2 j  
+
+  
+  lemma end_0 : forall a b y m : int.
+    a >= 0 -> b > 0 -> 
+    len y + len m <= 2 * len m ->
+    (exists x:int.
+        x >= 0 &&
+          (len y + len m) =
+           (len a + len b + (2 * len m) + x - 1)) ->
+    a = 0 
+    
+   lemma end_0v2 : forall a b k q : int.
+    a >= 0 -> b > 0 -> 
+    k <= q ->
+    (exists x:int.
+        x >= 0 &&
+          k = (len a + len b + q + x - 1)) ->
+    a = 0 
+    
+    lemma end_0v3 : forall a b k q1 q2 : int.
+    a >= 0 -> b > 0 -> 
+    k <= q1 <= q2 ->
+    (exists x:int.
+        x >= 0 &&
+          k = (len a + len b + q2 + x - 1)) ->
+    a = 0 
+
+  let lemma len_leq_init (a b y m: int)
+    requires { len y + len m >= len a + len b } 
+    requires { len a + len b >= (len (ED.div (b - a) 2) + len a) }
+    ensures { (len y + len m) >= (len (ED.div (b - a) 2) + len a)}
+  = begin end
+  
+  let lemma len_dec (a b y m i j k : int)
+    requires { (exists x:int.
+                x >= 0 
+                && (len y + len m) =
+                   ((((((len a + len b) + (i * (k - 1))) + j) + x) - (k - 1)) - 1))     
+               \/ a = 0 }
+    requires {  b >= 0  }
+    requires { a >= 0 } 
+    requires { not a < b }
+    ensures { (exists x:int.
+                 x >= 0 
+                 && (len y + len m) =
+                      ((((((len (ED.div (a - b) 2) + len b) + (i * (k - 1))) + (j + 1)) + x)
+                      - (k - 1)) - 1)) 
+               \/ ED.div (a - b) 2 = 0 }
+    = begin 
+      assert { not (ED.div (a - b) 2) = 0 -> forall x: int.
+             x >= 0 
+             && (len y + len m) =
+                ((((((len a + len b) + (i * (k - 1))) + j) + x) - (k - 1)) - 1)
+             -> (len y + len m) =
+                ((((((len (ED.div (a - b) 2) + len b) + (i * (k - 1))) + (j + 1))
+                + (((len a - len (ED.div (a - b) 2)) - 1) + x)) - (k - 1)) - 1)};
+
+      assert { forall x: int. 
+             (a - b) > 1 ->
+              x >= 0 ->
+              ((len a - (len (ED.div (a - b) 2) + 1)) + x) >= 0 
+           };
+      end
+
+
+end

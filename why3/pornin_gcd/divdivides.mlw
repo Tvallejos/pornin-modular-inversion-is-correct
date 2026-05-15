@@ -1,0 +1,216 @@
+module Div_divides
+  use int.Int
+  use int.EuclideanDivision as ED
+
+  (* use EDDivisibility *)
+  (* use EDParity *)
+  use number.Divisibility
+  use number.Parity
+  
+  lemma odd_sub_div : forall a b : int. odd a -> odd b -> divides 2 (a - b)
+  lemma mod21_sub_div : forall a b : int. ED.mod a 2 = 1 -> ED.mod b 2 = 1 -> divides 2 (a - b)
+  
+  lemma div_comp : forall a b k : int. divides b a -> divides k (ED.div a b) -> divides (b*k) a
+  
+  lemma div_divides : forall a b : int. b <> 0 -> divides b a -> b * (ED.div a b) = a 
+  
+  lemma divides_factors : forall a k1 k2 : int. k1 <> 0 -> divides k1 a -> divides k2 (ED.div a k1) -> divides (k2 * k1) a 
+  
+  lemma divides_sub : forall a b k : int. divides k a -> divides k b -> divides k (a - b) 
+
+  lemma divides_factorK : forall a k. k <> 0 -> ED.div (a * k) k = a
+  
+  lemma divides_add : forall a b k : int. divides k a -> divides k b -> divides k (a + b) 
+  
+  lemma dividesP : forall k a : int. divides k a <-> exists q:int. a = q * k
+  
+  (* why isn't this lemma solved automatically? *)
+  (* by rewrite dividesP *)
+  let lemma div_sub (a b k : int)
+   requires { k <> 0 } 
+   requires { divides k a }
+   requires { divides k b }
+   ensures { ED.div (a - b) k = ED.div a k - ED.div b k }
+  = begin
+    assert { exists q1 q2. a = q1 * k /\ b = q2 * k  /\ a - b = (q1 - q2) * k };
+    end 
+
+  let lemma div_add (a b k : int)
+   requires { k <> 0 } 
+   requires { divides k a }
+   requires { divides k b }
+   ensures { ED.div (a + b) k = ED.div a k + ED.div b k }
+  = begin
+    assert { exists q1 q2. a = q1 * k /\ b = q2 * k };
+    end     
+  
+  lemma div_mult: forall x y:int [ED.div (x * y) x].
+          x > 0 /\ y >= 0 ->
+          ED.div (x * y) x = y 
+  
+  lemma div_mult_factor_pos : forall x y z:int [ED.div (z * x) (z * y)].
+          y <> 0 -> z > 0 ->
+          ED.div (x * z) (y * z) = ED.div x y
+
+  lemma div_factor_divisor : forall a b : int. b <> 0 -> (ED.div (a*b) b) = a 
+  
+  lemma div_negH : forall a b : int. b <> 0 -> divides b a -> - ED.div a b = ED.div (-a) b
+  
+  let lemma div_negL (a b : int) 
+   requires { b <> 0 }
+   requires { divides b a } 
+   ensures { - ED.div a b = ED.div a (- b) }
+  = begin 
+    assert { - ED.div a b  = ED.div (-a) b };
+    assert { exists k. a = k * b };
+  end
+  
+  (* by rewrite dividesP *)
+  let lemma div_mult_factor_neg (a b k : int) 
+    requires { b <> 0 }
+    requires { k < 0  } 
+    requires { divides b a } 
+    ensures { ED.div (a * k) (b * k) = ED.div a b }
+  = begin 
+    assert { ED.div (a * k) (b * k) = (-1)*(- ED.div (a * k) (b * k)) };
+    assert { (-1)*(- ED.div (a * k) (b * k)) = (ED.div (- (a * k)) (- (b * k))) };
+    
+    
+  end
+  
+  lemma divides_multl : forall a b c: int. divides (a * b) c -> divides a c
+  lemma divides_multr : forall a b c: int. divides (a * b) c -> divides b c  
+
+  (* why isn't this lemma solved automatically? *)
+  (* by rewrite dividesP *)
+  lemma split_factor_divisor : forall a x y : int [ED.div a (x * y)].
+    x <> 0 -> y <> 0 ->
+    divides (x * y) a ->  
+    ED.div a (x * y) = ED.div (ED.div a y) x
+    
+  let lemma div_factors_comm (a b k: int)
+    requires { b <> 0 } 
+    requires { divides b a } 
+    ensures { k * ED.div a b = ED.div (k * a) b }
+  = begin 
+    assert { exists c. a = c * b };
+    assert { forall c : int. a = c * b -> ED.div a b = c };
+    assert { forall c : int. a = c * b -> ED.div (k * a) b = k * c };    
+   end
+   
+  let lemma div_lt_mono (a b k : int)
+    requires { b <> 0 } 
+    requires { k > 0 }
+    requires { divides k a } 
+    requires { divides k b } 
+    requires { a > b } 
+    ensures { ED.div a k > ED.div b k } 
+  = begin 
+    assert { exists q1. a = q1 * k };
+    assert { exists q2. b = q2 * k };   
+    assert {  k*ED.div a k > k* ED.div b k };
+  
+   end
+   
+  use int.Abs
+  
+      
+  lemma div_gt : forall x y : int. y <> 0 -> 0 <= x < y -> ED.div x y = 0
+  
+  lemma gt_div : 
+    forall x y k: int. 
+    0 <= y <= x -> 
+    0 < k -> 
+    (ED.div y k) <= (ED.div x k)
+  
+  
+  let lemma abs_multC (a b : int)
+
+    ensures { abs (a * b) = abs a * abs b }
+  = begin
+   
+  end   
+  
+  let lemma div_neg (a k : int) 
+    requires { k > 0 }
+    ensures { ED.div a k <= ED.div (abs a) k + 1 }
+  = begin end
+  
+  let lemma abs_div (a k : int)
+    requires { k <> 0 } 
+    requires { k > 0 }
+    requires { divides k a }
+    ensures { abs (ED.div a k) <= ED.div (abs a) k + 1 }
+  = begin
+   
+  end
+  
+  let lemma abs_div_le (a k : int)
+    requires { k <> 0 } 
+    requires { k > 0 }
+    requires { divides k a }
+    ensures { abs (ED.div a k) <= ED.div (abs a) k  }
+  = begin
+   
+  end  
+  
+  let lemma abs_div_strong (a k : int)
+    requires { k > 0 }
+    requires { divides k a }
+    ensures { abs (ED.div a k) = ED.div (abs a) k }
+  = begin
+     
+  end   
+  
+  
+  let lemma abs_div2 (a b k : int)
+    requires { k <> 0 } 
+    requires { k > 0 }
+    requires { divides k a }
+    requires { divides k b } 
+    ensures { abs (ED.div (a + b) k) <= ED.div (abs a + abs b) k + 1 }
+  = begin
+   
+  end 
+  
+  let lemma abs_div3 (a k : int)
+    requires { k > 0 }
+    requires { divides k a }
+    ensures { abs (ED.div a k) = ED.div (abs a) k }
+  = begin
+   
+  end 
+  
+  let lemma abs_add (a b : int) 
+    ensures { abs (a + b) <= abs a + abs b } 
+  = begin end 
+    
+   
+  let lemma abs_sub_bounds_gt (a b k : int)
+    requires { a >= 0 }
+    requires { b < 0 } 
+    requires { abs ( a - b) < k }
+    ensures { a <= k }
+    ensures { b > - k }
+  = begin end
+  
+   let lemma abs_sub_bounds_geq (a b k : int)
+    requires { a >= 0 }
+    requires { b < 0 } 
+    requires { abs ( a - b) <= k }
+    ensures { a <= k }
+    ensures { b >= - k }
+  = begin end 
+  
+  
+   let lemma div_abs_add_leq (a b f0 g0 k j : int)
+    requires { abs a < k }
+    requires { abs b < k }
+    requires { j > 0 } 
+    ensures { ED.div ( (abs a * abs f0 + abs b * abs g0) ) j <= ED.div ( k * (abs f0 + abs g0)) j }
+  = begin 
+    assert { (abs a * abs f0 + abs b * abs g0) <= ( k * (abs f0 + abs g0)) };
+  end 
+   
+  
+end

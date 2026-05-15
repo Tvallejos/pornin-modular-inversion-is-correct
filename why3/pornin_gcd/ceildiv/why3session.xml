@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"https://www.why3.org/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC5" version="1.2.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="ceildiv.mlw"/>
+<theory name="Ceil_div" proved="true">
+ <goal name="ceil_div&#39;vc" expl="VC for ceil_div" proved="true">
+ <proof prover="0"><result status="valid" time="0.016572" steps="705"/></proof>
+ </goal>
+ <goal name="ceil_div_bound" proved="true">
+ <proof prover="0"><result status="valid" time="0.014830" steps="6415"/></proof>
+ </goal>
+ <goal name="ceil_div_mult" proved="true">
+ <proof prover="0"><result status="valid" time="0.162335" steps="47653"/></proof>
+ </goal>
+ <goal name="ceil_div_mult_bound" proved="true">
+ <proof prover="0"><result status="valid" time="0.023337" steps="912"/></proof>
+ </goal>
+ <goal name="ceil_div_mult_2" proved="true">
+ <proof prover="0"><result status="valid" time="0.165433" steps="51175"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>
