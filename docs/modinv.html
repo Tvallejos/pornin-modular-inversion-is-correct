@@ -1,0 +1,871 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>modinv.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre><span class="keyword">module</span> <a name="Modinv_">Modinv</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+
+  <span class="comment">(* use number.Prime *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> number.<a href="number.html#Gcd_">Gcd</a>
+  <span class="comment">(* use number.Parity *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Coprime_">Coprime</a>
+  <span class="keyword">use</span> int.<a href="int.html#Power_">Power</a> <span class="comment">(* todo: remove and replace by factor_at *)</span>
+  <span class="keyword">use</span> congr.<a href="congr.html#Congr_">Congr</a>
+  <span class="keyword">use</span> fitlen.<a href="fitlen.html#FitLen_">FitLen</a>
+  <span class="keyword">use</span> int.<a href="int.html#MinMax_">MinMax</a>
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+  <span class="keyword">use</span> ceildiv.<a href="ceildiv.html#Ceil_div_">Ceil_div</a>
+  <span class="keyword">use</span> montred.<a href="montred.html#Mont_red_">Mont_red</a>
+  <span class="keyword">use</span> factorat.<a href="factorat.html#Factor_at_">Factor_at</a>
+  <span class="keyword">use</span> util.<a href="util.html#Util_">Util</a>
+  <span class="keyword">use</span> divdivides.<a href="divdivides.html#Div_divides_">Div_divides</a>
+  <span class="keyword">use</span> bool.<a href="bool.html#Bool_">Bool</a>
+
+  <span class="keyword">use</span> invariantsnotation.<a href="invariantsnotation.html#Xt_">Xt</a>
+  <span class="keyword">use</span> innerinvariants.<a href="innerinvariants.html#InnerInv_">InnerInv</a>
+  <span class="keyword">use</span> outerinvariants.<a href="outerinvariants.html#OuterInv_">OuterInv</a>
+  <span class="keyword">use</span> non_div_proof.<a href="non_div_proof.html#Nondiv_proof_">Nondiv_proof</a>
+
+  <span class="keyword">type</span> <a name="iter_vars_28">iter_vars</a> =
+    { <a name="a'_29">a&#39;</a> : int;
+      <a name="b'_30">b&#39;</a> : int;
+      <a name="k'_31">k&#39;</a> : int;
+      <a name="n'_32">n&#39;</a> : int;
+      <a name="j'_33">j&#39;</a> : int;
+      <a name="ba'_34">ba&#39;</a> : int;
+      <a name="bb'_35">bb&#39;</a> : int;
+      <a name="f0'_36">f0&#39;</a> : int;
+      <a name="g0'_37">g0&#39;</a> : int;
+      <a name="f1'_38">f1&#39;</a> : int;
+      <a name="g1'_39">g1&#39;</a> : int;
+<span class="keyword">ghost</span> <a name="bf0'_40">bf0&#39;</a> : int;
+<span class="keyword">ghost</span> <a name="bg0'_41">bg0&#39;</a> : int;
+<span class="keyword">ghost</span> <a name="bf1'_42">bf1&#39;</a> : int;
+<span class="keyword">ghost</span> <a name="bg1'_43">bg1&#39;</a> : int;
+      <a name="bu'_44">bu&#39;</a> : <a href="modops.html#t_9">t</a>;
+      <a name="bv'_45">bv&#39;</a> : <a href="modops.html#t_9">t</a>;
+<span class="keyword">ghost</span> <a name="this_iter'_46">this_iter&#39;</a> : bool;
+ <a name="divergence'_47">divergence&#39;</a> : bool;
+    }
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="mk_iter_50">mk_iter</a> (a b k n j ba bb f0 g0 f1 g1 :int) (<span class="keyword">ghost</span> bf0 : int) (<span class="keyword">ghost</span> bg0 : int) (<span class="keyword">ghost</span> bf1 : int) (<span class="keyword">ghost</span> bg1 : int) (bu bv : <a href="modops.html#t_9">t</a>) (<span class="keyword">ghost</span> this_iter : bool) (divergence : bool) : <a href="#iter_vars_28">iter_vars</a>
+  = {
+    <a href="#a'_29">a&#39;</a> = a;
+    <a href="#b'_30">b&#39;</a> = b;
+    <a href="#k'_31">k&#39;</a> = k;
+    <a href="#n'_32">n&#39;</a> = n;
+    <a href="#j'_33">j&#39;</a> = j;
+    <a href="#ba'_34">ba&#39;</a> = ba;
+    <a href="#bb'_35">bb&#39;</a> = bb;
+    <a href="#f0'_36">f0&#39;</a> = f0;
+    <a href="#g0'_37">g0&#39;</a> = g0 ;
+    <a href="#f1'_38">f1&#39;</a> = f1 ;
+    <a href="#g1'_39">g1&#39;</a> = g1 ;
+    <a href="#bf0'_40">bf0&#39;</a> = bf0;
+    <a href="#bg0'_41">bg0&#39;</a> = bg0 ;
+    <a href="#bf1'_42">bf1&#39;</a> = bf1;
+    <a href="#bg1'_43">bg1&#39;</a> = bg1;
+    <a href="#bu'_44">bu&#39;</a> = bu ;
+    <a href="#bv'_45">bv&#39;</a> = bv;
+    <a href="#this_iter'_46">this_iter&#39;</a> = this_iter;
+    <a href="#divergence'_47">divergence&#39;</a> = divergence;
+
+    }
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="a_t_74">a_t</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+      <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = (<a href="invariantsnotation.html#xt_33">xt</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1))
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="b_t_78">b_t</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+      <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = (<a href="invariantsnotation.html#xt_33">xt</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1))
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_halving'_83">is_halving&#39;</a> (ba : int) : bool =
+    ED.<a href="int.html#mod_174">mod</a> ba 2 <a href="int.html#infix%20=_16">=</a> 0
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_halving_86">is_halving</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+  = <a href="#is_halving'_83">is_halving&#39;</a> (vars.<a href="#ba'_34">ba&#39;</a>)
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="halving_step_89">halving_step</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  =
+  <span class="keyword">let</span> ba = ED.<a href="int.html#div_170">div</a> vars.<a href="#ba'_34">ba&#39;</a> 2 <span class="keyword">in</span>
+  <span class="keyword">let</span> bu = <a href="innerinvariants.html#mont_div_mod_29">mont_div_mod</a> vars.<a href="#bu'_44">bu&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> bf0 = (<a href="congr.html#div_mod_127">div_mod</a> vars.<a href="#bf0'_40">bf0&#39;</a> <a href="innerinvariants.html#m_25">m</a>) <span class="keyword">in</span>
+  <span class="keyword">let</span> bg0 = (<a href="congr.html#div_mod_127">div_mod</a> vars.<a href="#bg0'_41">bg0&#39;</a> <a href="innerinvariants.html#m_25">m</a>) <span class="keyword">in</span>
+  <span class="keyword">let</span> f1 = 2<a href="int.html#infix%20*_20">*</a>vars.<a href="#f1'_38">f1&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> g1 = 2<a href="int.html#infix%20*_20">*</a>vars.<a href="#g1'_39">g1&#39;</a> <span class="keyword">in</span>
+  <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> ba vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> f1 g1 bf0 bg0 vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> bu vars.<a href="#bv'_45">bv&#39;</a> <span class="keyword">false</span> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="swap_99">swap</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  = <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#ba'_34">ba&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> vars.<a href="#bf0'_40">bf0&#39;</a> vars.<a href="#bg0'_41">bg0&#39;</a> vars.<a href="#bv'_45">bv&#39;</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#this_iter'_46">this_iter&#39;</a> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_divergent'_102">is_divergent&#39;</a> (a b j ba bb f0 g0 f1 g1 : int) : bool
+  <span class="keyword">requires</span> j_geq_1 { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  =   (<a href="bool.html#orb_14">orb</a> (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) ((<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)))) (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3E=_26">&gt;=</a> bb) ((<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)))))
+  <span class="comment">(*is_divergent (mk_iter a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence)*)</span>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_divergent_109">is_divergent</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  =
+  <span class="keyword">let</span> ba = vars.<a href="#ba'_34">ba&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> bb = vars.<a href="#bb'_35">bb&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> a = vars.<a href="#a'_29">a&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> b = vars.<a href="#b'_30">b&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> f0 = vars.<a href="#f0'_36">f0&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> g0 = vars.<a href="#g0'_37">g0&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> f1 = vars.<a href="#f1'_38">f1&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> g1 = vars.<a href="#g1'_39">g1&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> j = vars.<a href="#j'_33">j&#39;</a> <span class="keyword">in</span>
+  <a href="#is_divergent'_102">is_divergent&#39;</a> a b j ba bb f0 g0 f1 g1
+
+  <span class="keyword">lemma</span> <a name="divergent_dec_w'lemma_117">divergent_dec_w</a> : <span class="keyword">forall</span> vs : <a href="#iter_vars_28">iter_vars</a>. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="#j'_33">j&#39;</a> vs <a href="int.html#infix%20-_23">-</a> 1 -&gt; <a href="#is_divergent_109">is_divergent</a> vs \/ ((<span class="keyword">not</span> <a href="#is_divergent_109">is_divergent</a> vs))
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="has_diverged_119">has_diverged</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+  = vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="has_diverged'_122">has_diverged&#39;</a> (a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 : int) (bu bv : <a href="modops.html#t_9">t</a>) (this_iter divergence : bool) : bool
+  = <a href="#has_diverged_119">has_diverged</a> (<a href="#mk_iter_50">mk_iter</a> a b k n j ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence)
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="set_this_iter_125">set_this_iter</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  = <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> vars.<a href="#ba'_34">ba&#39;</a> vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> vars.<a href="#bf0'_40">bf0&#39;</a> vars.<a href="#bg0'_41">bg0&#39;</a> vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#bv'_45">bv&#39;</a> <span class="keyword">true</span> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="unset_this_iter_128">unset_this_iter</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+    <span class="keyword">ensures</span> { result.<a href="#this_iter'_46">this_iter&#39;</a> = <span class="keyword">false</span> }
+  = <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> vars.<a href="#ba'_34">ba&#39;</a> vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> vars.<a href="#bf0'_40">bf0&#39;</a> vars.<a href="#bg0'_41">bg0&#39;</a> vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#bv'_45">bv&#39;</a> <span class="keyword">false</span> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="set_divergence_132">set_divergence</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  = <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> vars.<a href="#ba'_34">ba&#39;</a> vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> vars.<a href="#bf0'_40">bf0&#39;</a> vars.<a href="#bg0'_41">bg0&#39;</a> vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#bv'_45">bv&#39;</a> vars.<a href="#this_iter'_46">this_iter&#39;</a> <span class="keyword">true</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="inc_j_135">inc_j</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  <span class="keyword">ensures</span> { result.<a href="#a'_29">a&#39;</a> = vars.<a href="#a'_29">a&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#b'_30">b&#39;</a> = vars.<a href="#b'_30">b&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#k'_31">k&#39;</a> = vars.<a href="#k'_31">k&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#n'_32">n&#39;</a> = vars.<a href="#n'_32">n&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#j'_33">j&#39;</a> = vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20+_19">+</a> 1 }
+  <span class="keyword">ensures</span> { result.<a href="#ba'_34">ba&#39;</a> = vars.<a href="#ba'_34">ba&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bb'_35">bb&#39;</a> = vars.<a href="#bb'_35">bb&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#f0'_36">f0&#39;</a> = vars.<a href="#f0'_36">f0&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#g0'_37">g0&#39;</a> = vars.<a href="#g0'_37">g0&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#f1'_38">f1&#39;</a> = vars.<a href="#f1'_38">f1&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#g1'_39">g1&#39;</a> = vars.<a href="#g1'_39">g1&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bf0'_40">bf0&#39;</a> = vars.<a href="#bf0'_40">bf0&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bg0'_41">bg0&#39;</a> = vars.<a href="#bg0'_41">bg0&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bf1'_42">bf1&#39;</a> = vars.<a href="#bf1'_42">bf1&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bg1'_43">bg1&#39;</a> = vars.<a href="#bg1'_43">bg1&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bu'_44">bu&#39;</a> = vars.<a href="#bu'_44">bu&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#bv'_45">bv&#39;</a> = vars.<a href="#bv'_45">bv&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#this_iter'_46">this_iter&#39;</a> = vars.<a href="#this_iter'_46">this_iter&#39;</a> }
+  <span class="keyword">ensures</span> { result.<a href="#divergence'_47">divergence&#39;</a> = vars.<a href="#divergence'_47">divergence&#39;</a> }
+  = <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20+_19">+</a> 1) vars.<a href="#ba'_34">ba&#39;</a> vars.<a href="#bb'_35">bb&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> vars.<a href="#bf0'_40">bf0&#39;</a> vars.<a href="#bg0'_41">bg0&#39;</a> vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#bv'_45">bv&#39;</a> vars.<a href="#this_iter'_46">this_iter&#39;</a> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="update_divergence_status_157">update_divergence_status</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  =  <span class="keyword">if</span> <a href="#is_divergent_109">is_divergent</a> vars <span class="keyword">then</span>
+      <span class="keyword">begin</span> <span class="keyword">if</span> <a href="#has_diverged_119">has_diverged</a> vars
+            <span class="keyword">then</span> vars <span class="comment">(* divergence already set to true *)</span>
+            <span class="keyword">else</span> <a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> vars)
+      <span class="keyword">end</span>
+      <span class="keyword">else</span> vars
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_not_divergent_166">update_not_divergent</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_divergent_109">is_divergent</a> vars) }
+    <span class="keyword">ensures</span> { <a href="#update_divergence_status_157">update_divergence_status</a> vars = vars }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_divergent_has_172">update_divergent_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+    <span class="keyword">requires</span> { <a href="#has_diverged_119">has_diverged</a> vars }
+    <span class="keyword">ensures</span> { <a href="#update_divergence_status_157">update_divergence_status</a> vars = vars }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_divergent_not_has_179">update_divergent_not_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars) }
+    <span class="keyword">ensures</span> { <a href="#update_divergence_status_157">update_divergence_status</a> vars = <a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> vars)}
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="odd_not_swap_187">odd_not_swap</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  =
+  <span class="keyword">let</span> ba&#39; = ED.<a href="int.html#div_170">div</a> (vars.<a href="#ba'_34">ba&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#bb'_35">bb&#39;</a>) 2 <span class="keyword">in</span>
+  <span class="keyword">let</span> bu&#39; = <a href="innerinvariants.html#mont_div_mod_29">mont_div_mod</a> (<a href="innerinvariants.html#sub_29">sub</a> vars.<a href="#bu'_44">bu&#39;</a> vars.<a href="#bv'_45">bv&#39;</a>) <span class="keyword">in</span>
+  <span class="keyword">let</span> f0&#39; = vars.<a href="#f0'_36">f0&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#f1'_38">f1&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> g0&#39; = vars.<a href="#g0'_37">g0&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#g1'_39">g1&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> bf0&#39; = <a href="congr.html#div_mod_127">div_mod</a> (vars.<a href="#bf0'_40">bf0&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#bf1'_42">bf1&#39;</a>) <a href="innerinvariants.html#m_25">m</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> bg0&#39; = <a href="congr.html#div_mod_127">div_mod</a> (vars.<a href="#bg0'_41">bg0&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#bg1'_43">bg1&#39;</a>) <a href="innerinvariants.html#m_25">m</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> f1&#39; = 2<a href="int.html#infix%20*_20">*</a>vars.<a href="#f1'_38">f1&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> g1&#39; = 2<a href="int.html#infix%20*_20">*</a>vars.<a href="#g1'_39">g1&#39;</a> <span class="keyword">in</span>
+  <a href="#mk_iter_50">mk_iter</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#k'_31">k&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> ba&#39; vars.<a href="#bb'_35">bb&#39;</a> f0&#39; g0&#39; f1&#39; g1&#39; bf0&#39; bg0&#39; vars.<a href="#bf1'_42">bf1&#39;</a> vars.<a href="#bg1'_43">bg1&#39;</a> bu&#39; vars.<a href="#bv'_45">bv&#39;</a> vars.<a href="#this_iter'_46">this_iter&#39;</a> vars.<a href="#divergence'_47">divergence&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_ba_lt_bb_199">is_ba_lt_bb</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+  = vars.<a href="#ba'_34">ba&#39;</a> <a href="int.html#infix%20%3C_21">&lt;</a> vars.<a href="#bb'_35">bb&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_swap_202">is_swap</a> ( vars : <a href="#iter_vars_28">iter_vars</a> ) : bool
+  = <a href="bool.html#andb_8">andb</a> (vars.<a href="#ba'_34">ba&#39;</a> <a href="int.html#infix%20%3C_21">&lt;</a> vars.<a href="#bb'_35">bb&#39;</a>) (<span class="keyword">not</span> (<a href="#is_halving_86">is_halving</a> vars))
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="same_sign_205">same_sign</a> (x y : int)
+  = <a href="bool.html#orb_14">orb</a> (<a href="bool.html#andb_8">andb</a> (x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0) (y <a href="int.html#infix%20%3E=_26">&gt;=</a> 0)) (<a href="bool.html#andb_8">andb</a> (x <a href="int.html#infix%20%3C_21">&lt;</a> 0) (y <a href="int.html#infix%20%3C_21">&lt;</a> 0))
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_synchronous_208">is_synchronous</a> ( vars : <a href="#iter_vars_28">iter_vars</a> ) : bool
+  <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <span class="keyword">let</span> a = vars.<a href="#a'_29">a&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> b = vars.<a href="#b'_30">b&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> f0 = vars.<a href="#f0'_36">f0&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> g0 = vars.<a href="#g0'_37">g0&#39;</a> <span class="keyword">in</span>
+    <span class="keyword">let</span> f1 = vars.<a href="#f1'_38">f1&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> g1 = vars.<a href="#g1'_39">g1&#39;</a> <span class="keyword">in</span> <span class="keyword">let</span> j = vars.<a href="#j'_33">j&#39;</a> <span class="keyword">in</span>
+  <span class="keyword">let</span> a_t = <a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+  <span class="keyword">let</span> b_t = <a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+  <a href="#same_sign_205">same_sign</a> (b_t <a href="int.html#infix%20-_23">-</a> a_t) (vars.<a href="#bb'_35">bb&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#ba'_34">ba&#39;</a>)
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="odd_step_216">odd_step</a> (vars: <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+  <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <span class="keyword">let</span> vars&#39; = <a href="#update_divergence_status_157">update_divergence_status</a> vars <span class="keyword">in</span>
+  <span class="keyword">if</span> <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars&#39;
+    <span class="keyword">then</span> <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> vars&#39;)
+    <span class="keyword">else</span> <a href="#odd_not_swap_187">odd_not_swap</a> vars&#39;
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_swap_223">update_swap</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars &lt;-&gt; <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> (<a href="#update_divergence_status_157">update_divergence_status</a> vars) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="odd_step_lt_228">odd_step_lt</a> (vars: <a href="#iter_vars_28">iter_vars</a>)
+  <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  <span class="keyword">requires</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars  }
+  <span class="keyword">ensures</span> { <a href="#odd_step_216">odd_step</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> vars)) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="odd_step_not_lt_234">odd_step_not_lt</a> (vars: <a href="#iter_vars_28">iter_vars</a>)
+  <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }
+  <span class="keyword">ensures</span> { <a href="#odd_step_216">odd_step</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> vars) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="this_iter_lt_240">this_iter_lt</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">ensures</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars = <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="inner_iter_fun'_244">inner_iter_fun&#39;</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+      <span class="keyword">requires</span> j_geq_1 { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+      <span class="comment">(* requires reset { vars.this_iter&#39; = false }    *)</span>
+  = <span class="keyword">let</span> vars&#39; = <a href="#unset_this_iter_128">unset_this_iter</a> vars <span class="keyword">in</span> <span class="keyword">if</span> <a href="#is_halving_86">is_halving</a> vars&#39; <span class="keyword">then</span> <a href="#halving_step_89">halving_step</a> vars&#39; <span class="keyword">else</span> <a href="#odd_step_216">odd_step</a> vars&#39;
+  <span class="comment">(*
+  adding the following three lemmas makes the solvers unable to prove assertion 
+  assert vars_iter { vars =  inner_iter_fun (vars at Beg) }; *)</span>
+
+  <span class="keyword">lemma</span> <a name="inner_iter_fun'_a_cst'lemma_252">inner_iter_fun&#39;_a_cst</a> : <span class="keyword">forall</span> vs : <a href="#iter_vars_28">iter_vars</a>. 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 -&gt; <a href="#a'_29">a&#39;</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vs) = vs.<a href="#a'_29">a&#39;</a>
+  <span class="keyword">lemma</span> <a name="inner_iter_fun'_b_cst'lemma_253">inner_iter_fun&#39;_b_cst</a> : <span class="keyword">forall</span> vs : <a href="#iter_vars_28">iter_vars</a>. 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 -&gt; <a href="#b'_30">b&#39;</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vs) = vs.<a href="#b'_30">b&#39;</a>
+  <span class="keyword">lemma</span> <a name="inner_iter_fun'_j_cst'lemma_254">inner_iter_fun&#39;_j_cst</a> : <span class="keyword">forall</span> vs : <a href="#iter_vars_28">iter_vars</a>. 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 -&gt; <a href="#j'_33">j&#39;</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vs) = vs.<a href="#j'_33">j&#39;</a>
+  <span class="keyword">lemma</span> <a name="inner_iter_fun'_k_cst'lemma_255">inner_iter_fun&#39;_k_cst</a> : <span class="keyword">forall</span> vs : <a href="#iter_vars_28">iter_vars</a>. 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vs.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 -&gt; <a href="#k'_31">k&#39;</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vs) = vs.<a href="#k'_31">k&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="inner_iter_fun_258">inner_iter_fun</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : <a href="#iter_vars_28">iter_vars</a>
+      <span class="keyword">requires</span> j_geq_1 { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+      <span class="comment">(* requires reset { vars.this_iter&#39; = false }    *)</span>
+  = <a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars)
+    <span class="comment">(* cannot increase j on the imperative side *)</span>
+    <span class="comment">(* inner_iter_fun&#39; vars *)</span>
+
+  <span class="comment">(* missing restiction for j (t) *)</span>
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="decreasing_266">decreasing</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+  = <span class="keyword">let</span> r = <a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars) <span class="keyword">in</span>
+  <a href="fitlen.html#len_18">len</a> (<a href="#a_t_74">a_t</a> r) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#b_t_78">b_t</a> r) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="#a_t_74">a_t</a> vars) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#b_t_78">b_t</a> vars) <a href="int.html#infix%20-_23">-</a> 1
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="regular_271">regular</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+      <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="fitlen.html#len_18">len</a> (<a href="#a_t_74">a_t</a> vars) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#b_t_78">b_t</a> vars) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="fitlen.html#len_18">len</a> (vars.<a href="#a'_29">a&#39;</a>) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (vars.<a href="#b'_30">b&#39;</a>) <a href="int.html#infix%20-_23">-</a> (vars.<a href="#j'_33">j&#39;</a><a href="int.html#infix%20-_23">-</a>1)
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="good_275">good</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+      <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="fitlen.html#len_18">len</a> (<a href="#a_t_74">a_t</a> vars) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#b_t_78">b_t</a> vars) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="fitlen.html#len_18">len</a> (vars.<a href="#a'_29">a&#39;</a>) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (vars.<a href="#b'_30">b&#39;</a>) <a href="int.html#infix%20-_23">-</a> (vars.<a href="#k'_31">k&#39;</a><a href="int.html#infix%20-_23">-</a>1)
+
+   <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="parity_approx_279">parity_approx</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool =
+    <span class="keyword">requires</span> { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <a href="invariantsnotation.html#parity_approx'_132">parity_approx&#39;</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#j'_33">j&#39;</a> vars.<a href="#k'_31">k&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="parity_approx_even_285">parity_approx_even</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">ensures</span> { <a href="#parity_approx_279">parity_approx</a> vars }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="comment">(* let predicate lasting_good (vars : iter_vars)
+  = forall t. vars.j&#39; &lt;= t &lt;= (vars.k&#39; - 1) + 1 -&gt;  *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="good_impl_regular_294">good_impl_regular</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#good_275">good</a> vars }
+    <span class="keyword">ensures</span> { <a href="#regular_271">regular</a> vars}
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="good_impl_good'_300">good_impl_good&#39;</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#good_275">good</a> vars }
+    <span class="keyword">ensures</span> { <a href="invariantsnotation.html#good'_413">good&#39;</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> (vars.<a href="#j'_33">j&#39;</a><a href="int.html#infix%20-_23">-</a>1) vars.<a href="#k'_31">k&#39;</a> }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="regular_impl_regular'_306">regular_impl_regular&#39;</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#regular_271">regular</a> vars }
+    <span class="keyword">ensures</span> { <a href="invariantsnotation.html#regular'_405">regular&#39;</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a> (vars.<a href="#j'_33">j&#39;</a><a href="int.html#infix%20-_23">-</a>1) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="regular_impl_reg_312">regular_impl_reg</a> (vars : <a href="#iter_vars_28">iter_vars</a>) (a b f0 g0 f1 g1 j : int)
+    <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#good_275">good</a> vars }
+    <span class="keyword">requires</span> { a = vars.<a href="#a'_29">a&#39;</a> }
+    <span class="keyword">requires</span> { b = vars.<a href="#b'_30">b&#39;</a> }
+    <span class="keyword">requires</span> { f0 = vars.<a href="#f0'_36">f0&#39;</a> }
+    <span class="keyword">requires</span> { g0 = vars.<a href="#g0'_37">g0&#39;</a> }
+    <span class="keyword">requires</span> { f1 = vars.<a href="#f1'_38">f1&#39;</a> }
+    <span class="keyword">requires</span> { g1 = vars.<a href="#g1'_39">g1&#39;</a> }
+    <span class="keyword">requires</span> { j = vars.<a href="#j'_33">j&#39;</a> }
+    <span class="keyword">ensures</span> { <a href="invariantsnotation.html#regular'_405">regular&#39;</a> a b f0 g0 f1 g1 (j<a href="int.html#infix%20-_23">-</a>1) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_status_ba_325">update_status_ba</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { (<a href="#update_divergence_status_157">update_divergence_status</a> vars).<a href="#ba'_34">ba&#39;</a> = vars.<a href="#ba'_34">ba&#39;</a> }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_status_bb_330">update_status_bb</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { (<a href="#update_divergence_status_157">update_divergence_status</a> vars).<a href="#bb'_35">bb&#39;</a> = vars.<a href="#bb'_35">bb&#39;</a> }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="update_status_gt_335">update_status_gt</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+      <span class="keyword">requires</span> j_geq_1 { vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  <span class="keyword">ensures</span> { ((<a href="#update_divergence_status_157">update_divergence_status</a> vars).<a href="#ba'_34">ba&#39;</a> <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="#update_divergence_status_157">update_divergence_status</a> vars).<a href="#bb'_35">bb&#39;</a>) &lt;-&gt; vars.<a href="#ba'_34">ba&#39;</a> <a href="int.html#infix%20%3C_21">&lt;</a> vars.<a href="#bb'_35">bb&#39;</a> }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_halving_340">inner_iter_fun_halving</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false }  *)</span>
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#halving_step_89">halving_step</a> vars }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#halving_step_89">halving_step</a> vars) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_348">inner_iter_fun_odd</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_step_216">odd_step</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_step_216">odd_step</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_lt_356">inner_iter_fun_odd_lt</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)))) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_not_lt_divergent_not_has_365">inner_iter_fun_odd_not_lt_divergent_not_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }
+   <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)))) }
+   = <span class="keyword">begin</span>
+     <span class="keyword">assert</span> {   <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) =
+  <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) };
+
+     <span class="keyword">assert</span> {   <a href="#odd_step_216">odd_step</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) =
+  <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) };
+
+   <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_lt_divergent_not_has_383">inner_iter_fun_odd_lt_divergent_not_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars }
+   <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)))) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> ( <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#set_this_iter_125">set_this_iter</a> (<a href="#set_divergence_132">set_divergence</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))))) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_lt_divergent_has_394">inner_iter_fun_odd_lt_divergent_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars }
+   <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">requires</span> {  (<a href="#has_diverged_119">has_diverged</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) }
+   = <span class="keyword">begin</span>
+     <span class="keyword">assert</span> {   <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) =
+  <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) };
+   <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_lt_not_divergent_408">inner_iter_fun_odd_lt_not_divergent</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#swap_99">swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars))) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_not_lt_not_divergent_419">inner_iter_fun_odd_not_lt_not_divergent</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) }
+   = <span class="keyword">begin</span>
+     <span class="keyword">assert</span> { <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) =
+  <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) };
+   <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_iter_fun_odd_not_lt_divergent_has_432">inner_iter_fun_odd_not_lt_divergent_has</a> (vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+   <span class="keyword">requires</span> { <span class="keyword">not</span> <a href="#is_halving_86">is_halving</a> vars }
+   <span class="comment">(* requires reset { vars.this_iter&#39; = false } *)</span>
+   <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }
+   <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+   <span class="keyword">requires</span> { <a href="#has_diverged_119">has_diverged</a> vars }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars = <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) }
+   <span class="keyword">ensures</span> { <a href="#inner_iter_fun_258">inner_iter_fun</a> vars = <a href="#inc_j_135">inc_j</a> (<a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) }
+   = <span class="keyword">begin</span>
+   <span class="keyword">assert</span> { <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#update_divergence_status_157">update_divergence_status</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars)) =
+  <a href="#odd_not_swap_187">odd_not_swap</a> (<a href="#unset_this_iter_128">unset_this_iter</a> vars) };
+   <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="bt_halving_446">bt_halving</a> ( vars : <a href="#iter_vars_28">iter_vars</a> )
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+  <span class="keyword">requires</span> { <a href="#is_halving_86">is_halving</a> vars }
+  <span class="keyword">ensures</span> { (<a href="#b_t_78">b_t</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars))) = (<a href="#b_t_78">b_t</a> vars) }
+  <span class="keyword">ensures</span> { (<a href="#b_t_78">b_t</a> (<a href="#inner_iter_fun_258">inner_iter_fun</a> vars)) = (<a href="#b_t_78">b_t</a> vars) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="updated_a_453">updated_a</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+  = <a href="invariantsnotation.html#updated_x_19">updated_x</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="updated_b_456">updated_b</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+  = <a href="invariantsnotation.html#updated_x_19">updated_x</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="halving_at_459">halving_at</a> ( vars : <a href="#iter_vars_28">iter_vars</a> )
+    <span class="keyword">requires</span>  { (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="#is_halving_86">is_halving</a> vars }
+    <span class="keyword">ensures</span> {  <a href="#a_t_74">a_t</a> (<a href="#halving_step_89">halving_step</a> vars) = <a href="#a_t_74">a_t</a> vars }
+    = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="exact_div_at_half_465">exact_div_at_half</a> ( vars : <a href="#iter_vars_28">iter_vars</a> )
+    <span class="keyword">requires</span>  { (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_a_453">updated_a</a> vars) }
+    <span class="keyword">ensures</span> {  <a href="#a_t_74">a_t</a> (<a href="#inc_j_135">inc_j</a> vars) = ED.<a href="int.html#div_170">div</a> (<a href="#a_t_74">a_t</a> vars) 2 }
+    = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="same_sign_halving_471">same_sign_halving</a> ( vars : <a href="#iter_vars_28">iter_vars</a>)
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+  <span class="keyword">requires</span> { <a href="#is_halving_86">is_halving</a> vars }
+  <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_a_453">updated_a</a> vars) }
+  <span class="keyword">ensures</span> { <a href="#same_sign_205">same_sign</a> (<a href="#a_t_74">a_t</a> vars) (<a href="#a_t_74">a_t</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars))) }
+  <span class="keyword">ensures</span> { <a href="#same_sign_205">same_sign</a> (<a href="#b_t_78">b_t</a> vars) (<a href="#b_t_78">b_t</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars))) }
+  <span class="keyword">ensures</span> { <a href="#same_sign_205">same_sign</a> (<a href="#a_t_74">a_t</a> vars) (<a href="#a_t_74">a_t</a> (<a href="#inner_iter_fun_258">inner_iter_fun</a> vars)) }
+  <span class="keyword">ensures</span> { <a href="#same_sign_205">same_sign</a> (<a href="#b_t_78">b_t</a> vars) (<a href="#b_t_78">b_t</a> (<a href="#inner_iter_fun_258">inner_iter_fun</a> vars)) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="ba_0_481">ba_0</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+    <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="invariantsnotation.html#approx_114">approx</a> vars.<a href="#a'_29">a&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#k'_31">k&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="bb_0_486">bb_0</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+    <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="invariantsnotation.html#approx_114">approx</a> vars.<a href="#b'_30">b&#39;</a> vars.<a href="#n'_32">n&#39;</a> vars.<a href="#k'_31">k&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="a_t_exact_div_491">a_t_exact_div</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+  <span class="keyword">requires</span>  { (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_a_453">updated_a</a> vars)
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="b_t_exact_div_495">b_t_exact_div</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+  <span class="keyword">requires</span>  { (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_b_456">updated_b</a> vars)
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="updated_ba_499">updated_ba</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+      <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+      <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#ba_0_481">ba_0</a> vars) (<a href="#bb_0_486">bb_0</a> vars) vars.<a href="#f0'_36">f0&#39;</a> vars.<a href="#g0'_37">g0&#39;</a>
+
+<span class="keyword">let</span> <span class="keyword">function</span> <a name="updated_bb_504">updated_bb</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : int
+      <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#ba_0_481">ba_0</a> vars) (<a href="#bb_0_486">bb_0</a> vars) vars.<a href="#f1'_38">f1&#39;</a> vars.<a href="#g1'_39">g1&#39;</a>
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="ba_t_exact_div_509">ba_t_exact_div</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+    <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#ba_0_481">ba_0</a> vars)
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="bb_t_exact_div_514">bb_t_exact_div</a> (vars : <a href="#iter_vars_28">iter_vars</a>) : bool
+    <span class="keyword">requires</span>  { vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { ((vars.<a href="#n'_32">n&#39;</a> <a href="int.html#infix%20-_23">-</a> vars.<a href="#k'_31">k&#39;</a>) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#bb_0_486">bb_0</a> vars)
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="is_divergent_diverged_519">is_divergent_diverged</a> (vars : <a href="#iter_vars_28">iter_vars</a> )
+   <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+  <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="#is_halving_86">is_halving</a> vars) }
+  <span class="keyword">requires</span> { <a href="#is_divergent_109">is_divergent</a> vars }
+  <span class="keyword">ensures</span> { <a href="#has_diverged_119">has_diverged</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars) }
+  <span class="keyword">ensures</span> { <a href="#has_diverged_119">has_diverged</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun'_244">inner_iter_fun&#39;</a> vars)) }
+  <span class="keyword">ensures</span> { <a href="#has_diverged_119">has_diverged</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun_258">inner_iter_fun</a> vars)) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inj_iter_528">inj_iter</a> (vars1 vars2 : <a href="#iter_vars_28">iter_vars</a>)
+  <span class="keyword">requires</span> { vars1 = vars2 }
+  <span class="keyword">ensures</span> { vars1.<a href="#a'_29">a&#39;</a> =   (vars2).<a href="#a'_29">a&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#b'_30">b&#39;</a> =   (vars2).<a href="#b'_30">b&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#k'_31">k&#39;</a> =   (vars2).<a href="#k'_31">k&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#n'_32">n&#39;</a> =   (vars2).<a href="#n'_32">n&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#j'_33">j&#39;</a> =   (vars2).<a href="#j'_33">j&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#ba'_34">ba&#39;</a> =  (vars2).<a href="#ba'_34">ba&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bb'_35">bb&#39;</a> =  (vars2).<a href="#bb'_35">bb&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#f0'_36">f0&#39;</a> =  (vars2).<a href="#f0'_36">f0&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#g0'_37">g0&#39;</a> =  (vars2).<a href="#g0'_37">g0&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#f1'_38">f1&#39;</a> =  (vars2).<a href="#f1'_38">f1&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#g1'_39">g1&#39;</a> =  (vars2).<a href="#g1'_39">g1&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bf0'_40">bf0&#39;</a> = (vars2).<a href="#bf0'_40">bf0&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bg0'_41">bg0&#39;</a> = (vars2).<a href="#bg0'_41">bg0&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bf1'_42">bf1&#39;</a> = (vars2).<a href="#bf1'_42">bf1&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bg1'_43">bg1&#39;</a> = (vars2).<a href="#bg1'_43">bg1&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bu'_44">bu&#39;</a> =  (vars2).<a href="#bu'_44">bu&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#bv'_45">bv&#39;</a> =  (vars2).<a href="#bv'_45">bv&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#this_iter'_46">this_iter&#39;</a> = (vars2).<a href="#this_iter'_46">this_iter&#39;</a> }
+  <span class="keyword">ensures</span> { vars1.<a href="#divergence'_47">divergence&#39;</a> = (vars2).<a href="#divergence'_47">divergence&#39;</a> }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="iter_inj_551">iter_inj</a> (vars1 vars2 :<a href="#iter_vars_28">iter_vars</a>)
+
+  <span class="keyword">requires</span> { vars1.<a href="#a'_29">a&#39;</a> =   (vars2).<a href="#a'_29">a&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#b'_30">b&#39;</a> =   (vars2).<a href="#b'_30">b&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#k'_31">k&#39;</a> =   (vars2).<a href="#k'_31">k&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#n'_32">n&#39;</a> =   (vars2).<a href="#n'_32">n&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#j'_33">j&#39;</a> =   (vars2).<a href="#j'_33">j&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#ba'_34">ba&#39;</a> =  (vars2).<a href="#ba'_34">ba&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bb'_35">bb&#39;</a> =  (vars2).<a href="#bb'_35">bb&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#f0'_36">f0&#39;</a> =  (vars2).<a href="#f0'_36">f0&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#g0'_37">g0&#39;</a> =  (vars2).<a href="#g0'_37">g0&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#f1'_38">f1&#39;</a> =  (vars2).<a href="#f1'_38">f1&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#g1'_39">g1&#39;</a> =  (vars2).<a href="#g1'_39">g1&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bf0'_40">bf0&#39;</a> = (vars2).<a href="#bf0'_40">bf0&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bg0'_41">bg0&#39;</a> = (vars2).<a href="#bg0'_41">bg0&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bf1'_42">bf1&#39;</a> = (vars2).<a href="#bf1'_42">bf1&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bg1'_43">bg1&#39;</a> = (vars2).<a href="#bg1'_43">bg1&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bu'_44">bu&#39;</a> =  (vars2).<a href="#bu'_44">bu&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#bv'_45">bv&#39;</a> =  (vars2).<a href="#bv'_45">bv&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#this_iter'_46">this_iter&#39;</a> = (vars2).<a href="#this_iter'_46">this_iter&#39;</a> }
+  <span class="keyword">requires</span> { vars1.<a href="#divergence'_47">divergence&#39;</a> = (vars2).<a href="#divergence'_47">divergence&#39;</a> }
+  <span class="keyword">ensures</span> { vars1 = vars2 }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inversion_divergence_575">inversion_divergence</a> ( vars : <a href="#iter_vars_28">iter_vars</a>)
+    <span class="keyword">requires</span> j_bounds { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#j'_33">j&#39;</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> vars.<a href="#k'_31">k&#39;</a> <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#has_diverged_119">has_diverged</a> (<a href="#inc_j_135">inc_j</a> (<a href="#inner_iter_fun_258">inner_iter_fun</a> vars)) }
+    <span class="keyword">ensures</span> { (<a href="#has_diverged_119">has_diverged</a> vars) \/ ( (<span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars)) /\ <a href="#is_divergent_109">is_divergent</a> vars ) }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">rec</span> <span class="keyword">function</span> <a name="iter_581">iter</a> n f x =
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">variant</span> { n }
+    <span class="keyword">if</span> n <a href="int.html#infix%20=_16">=</a> 0 <span class="keyword">then</span> x
+    <span class="keyword">else</span> f ( iter (n <a href="int.html#infix%20-_23">-</a> 1) f x )
+
+  <span class="keyword">lemma</span> <a name="help_f1'lemma_587">help_f1</a> : <span class="keyword">forall</span> x : int. <a href="int.html#abs_52">abs</a> (2 <a href="int.html#infix%20*_20">*</a> x) = 2 <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> x
+  <span class="comment">(* lemma help_inner_dec_len : *)</span>
+    <span class="keyword">let</span> <a name="ebin_gcd_589">ebin_gcd</a> (y k : int) : int
+    <span class="keyword">requires</span> { <a href="innerinvariants.html#m_25">m</a> <a href="int.html#infix%20%3E=_26">&gt;=</a> 3 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> <a href="innerinvariants.html#m_25">m</a> 2 = 1 }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> y <a href="int.html#infix%20%3C_21">&lt;</a> <a href="innerinvariants.html#m_25">m</a> }
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="comment">(* by subst_all ; assert (congr (of_int (mont_red m (to_int v) ((k - 1) * ceil_div ((2 * len m) - 1) (k - 1)))) bv m)
+           by apply  mod_scaleRL with (power 2 ((k - 1) * ((ceil_div ((2 * len m) - 1) (k - 1) + 1) - 1))) *)</span>
+
+    <span class="keyword">ensures</span> { <a href="number.html#gcd_111">gcd</a> y <a href="innerinvariants.html#m_25">m</a> = 1 -&gt; ED.<a href="int.html#mod_174">mod</a> (result <a href="int.html#infix%20*_20">*</a> y) <a href="innerinvariants.html#m_25">m</a> = 1 }
+    <span class="keyword">ensures</span> { <a href="number.html#gcd_111">gcd</a> y <a href="innerinvariants.html#m_25">m</a> &lt;&gt; 1 -&gt; result = 0 }
+  =
+    <span class="keyword">let</span> ref a : int = y <span class="keyword">in</span> <span class="keyword">let</span> ref b : int = <a href="innerinvariants.html#m_25">m</a> <span class="keyword">in</span>
+    <span class="keyword">let</span> ref u : <a href="modops.html#t_9">t</a> = <a href="innerinvariants.html#of_int_29">of_int</a> 1 <span class="keyword">in</span> <span class="keyword">let</span> ref v :<a href="modops.html#t_9">t</a> = <a href="innerinvariants.html#of_int_29">of_int</a> 0 <span class="keyword">in</span>
+    <span class="keyword">let</span> ref bu : <a href="modops.html#t_9">t</a> = u <span class="keyword">in</span> <span class="keyword">let</span> ref bv :<a href="modops.html#t_9">t</a> = v <span class="keyword">in</span>
+
+    <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="innerinvariants.html#m_25">m</a><a href="int.html#infix%20+_19">+</a>1) 2 = 0 };
+    <span class="keyword">assert</span> { <a href="number.html#coprime_190">coprime</a> 2 <a href="innerinvariants.html#m_25">m</a> };
+    <span class="keyword">assert</span> { k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 };
+
+    <span class="keyword">let</span> end_ = <a href="ceildiv.html#ceil_div_7">ceil_div</a> (2 <a href="int.html#infix%20*_20">*</a> (<a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a>) <a href="int.html#infix%20-_23">-</a> 1) (k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+    <span class="keyword">for</span> i = 1 <span class="keyword">to</span> end_ <span class="keyword">do</span>
+        <span class="comment">(* rem *)</span>
+        <span class="keyword">invariant</span> outer_gcd { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> y <a href="innerinvariants.html#m_25">m</a> }
+        <span class="comment">(* by rem; subst_all; assert ( (ED.div ((a * f0) + (b * g0)) (power 2 (k - 1))) = xt a b f0 g0 (k - 1) ) *)</span>
+        <span class="keyword">invariant</span> congr_a_bu { <a href="congr.html#congr_15">congr</a> a (bu<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+        <span class="comment">(* rem *)</span>
+        <span class="keyword">invariant</span> congr_b_bv { <a href="congr.html#congr_15">congr</a> b (bv<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+        <span class="comment">(* rem *)</span>
+        <span class="keyword">invariant</span> outer_congr_u_bv { <a href="congr.html#congr_15">congr</a> u ((<a href="int.html#power_348">power</a> 2 ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> bu) <a href="innerinvariants.html#m_25">m</a> }
+        <span class="comment">(* rem *)</span>
+        <span class="keyword">invariant</span> outer_congr_v_bv { <a href="congr.html#congr_15">congr</a> v ((<a href="int.html#power_348">power</a> 2 ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> bv) <a href="innerinvariants.html#m_25">m</a> }
+
+        <span class="comment">(* rem *)</span>
+        <span class="keyword">invariant</span> outer_b_odd { ED.<a href="int.html#mod_174">mod</a> b 2 = 1 }
+        <span class="keyword">invariant</span> outer_dec_len {  a = 0 \/ ((<a href="fitlen.html#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a>) <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b <a href="int.html#infix%20+_19">+</a> (i<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(k<a href="int.html#infix%20-_23">-</a>1)) }
+        <span class="keyword">invariant</span> bounded_len_y_m { <a href="fitlen.html#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> 2 <a href="int.html#infix%20*_20">*</a> <a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a> }
+
+        <span class="keyword">invariant</span> outer_a_geq_0 { a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+        <span class="keyword">invariant</span> outer_b_geq_0 { b <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+        <span class="keyword">invariant</span> i_geq_1 { i <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0}
+
+        <span class="keyword">let</span> n : int = <a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2<a href="int.html#infix%20*_20">*</a>k)) <span class="keyword">in</span>
+        <span class="keyword">let</span> ref ba : int = <a href="invariantsnotation.html#approx_114">approx</a> a n k <span class="keyword">in</span>
+        <span class="keyword">let</span> ref bb : int = <a href="invariantsnotation.html#approx_114">approx</a> b n k <span class="keyword">in</span>
+
+        <span class="keyword">let</span> ref f0 : int = 1 <span class="keyword">in</span>
+        <span class="keyword">let</span> ref f1 : int = 0 <span class="keyword">in</span>
+        <span class="keyword">let</span> ref g0 : int = 0 <span class="keyword">in</span>
+        <span class="keyword">let</span> ref g1 : int = 1 <span class="keyword">in</span>
+
+        <span class="keyword">let</span> <span class="keyword">ghost</span> ref bf0 : int = f0 <span class="keyword">in</span>
+        <span class="keyword">let</span> <span class="keyword">ghost</span> ref bf1 : int = f1 <span class="keyword">in</span>
+        <span class="keyword">let</span> <span class="keyword">ghost</span> ref bg0 : int = g0 <span class="keyword">in</span>
+        <span class="keyword">let</span> <span class="keyword">ghost</span> ref bg1 : int = g1 <span class="keyword">in</span>
+
+        <span class="keyword">let</span> <span class="comment">(*ghost*)</span> ref divergence : bool = <span class="keyword">false</span> <span class="keyword">in</span>
+        <span class="keyword">let</span> <span class="keyword">ghost</span> ref this_iter : bool = <span class="keyword">false</span> <span class="keyword">in</span>
+        <span class="keyword">let</span> ref vars : <a href="#iter_vars_28">iter_vars</a> = (<a href="#mk_iter_50">mk_iter</a> a b k n 1 ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence) <span class="keyword">in</span>
+
+        <span class="keyword">assert</span> { <span class="keyword">not</span> (n = 2 <a href="int.html#infix%20*_20">*</a> k) -&gt; k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b };
+        <span class="keyword">label</span> Entering_inner_loop <span class="keyword">in</span>
+        <span class="comment">(* rem in comments stands for 
+           remove iter_a, iter_b, iter_k, iter_n, iter_j, iter_ba, iter_bb, iter_f0, iter_g0, iter_f1, iter_g1, iter_bf0, iter_bg0, iter_bf1, iter_bg1, iter_bu, iter_bv, iter_this_iter, iter_div, iter_vars
+*)</span>
+        <span class="keyword">for</span> j = 1 <span class="keyword">to</span> k <a href="int.html#infix%20-_23">-</a> 1 <span class="keyword">do</span>
+          <span class="comment">(* even by subst_all; apply inner_gcd_even *)</span>
+          <span class="comment">(* odd by auto 3; on unsolved rewrite &lt;- gcd_inner_odd with k *)</span>
+          <span class="keyword">invariant</span> gcd_inner { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) }
+          <span class="keyword">invariant</span> b_t_odd { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) 2 = 1 }
+          <span class="comment">(* even by rewrite xt_half&#39;; on third apply divides_factors; on third inline_goal; split_all_full + provers *)</span>
+          <span class="comment">(* odd by subst_all ; inv_bezout_odd_u&#39; *)</span>
+          <span class="keyword">invariant</span> congr_at_bu { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (bu<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_bt_bv { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) (bv<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+
+          <span class="keyword">invariant</span> congr_neg_at_bu { (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20%3C_21">&lt;</a> 0 -&gt; <a href="congr.html#congr_15">congr</a> ( <a href="int.html#prefix%20-_18">-</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))) ((<a href="int.html#prefix%20-_18">-</a> bu)<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_neg_bt_bv { (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20%3C_21">&lt;</a> 0 -&gt; <a href="congr.html#congr_15">congr</a> ( <a href="int.html#prefix%20-_18">-</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1))) ((<a href="int.html#prefix%20-_18">-</a> bv)<a href="int.html#infix%20*_20">*</a>y) <a href="innerinvariants.html#m_25">m</a> }
+
+          <span class="keyword">invariant</span> congr_u_bu { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="innerinvariants.html#to_int_29">to_int</a> u) (<a href="innerinvariants.html#to_int_29">to_int</a> v) f0 g0) ((<a href="factorat.html#factor_at_9">factor_at</a> ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1 )) <a href="int.html#infix%20*_20">*</a> bu) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_v_bv { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="innerinvariants.html#to_int_29">to_int</a> u) (<a href="innerinvariants.html#to_int_29">to_int</a> v) f1 g1) ((<a href="factorat.html#factor_at_9">factor_at</a> ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1 )) <a href="int.html#infix%20*_20">*</a> bv) <a href="innerinvariants.html#m_25">m</a> }
+
+          <span class="keyword">invariant</span> bb_odd { ED.<a href="int.html#mod_174">mod</a> bb 2 = 1 }
+
+          <span class="keyword">invariant</span> inner_bound_len_y_m{ <a href="fitlen.html#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a> <a href="int.html#infix%20%3C=_25">&lt;=</a> 2 <a href="int.html#infix%20*_20">*</a> <a href="fitlen.html#len_18">len</a> <a href="innerinvariants.html#m_25">m</a>}
+          <span class="comment">(* odd by subst_all; destruct_rec H1 *)</span>
+          <span class="comment">(*
+          invariant inner_dec_len_div_free { not divergence -&gt; (xt a b f0 g0 (j-1)) = 0 \/ (regular&#39; a b f0 g0 f1 g1 (j-1)) } 
+          invariant inner_dec_len_div { divergence -&gt; (xt a b f0 g0 (j-1)) = 0 \/ (regular&#39; a b f0 g0 f1 g1 (j-1)) }   *)</span>
+
+          <span class="keyword">invariant</span> { divergence -&gt; (n = <a href="fitlen.html#len_18">len</a> a \/ n = <a href="fitlen.html#len_18">len</a> b) /\ n <a href="int.html#infix%20%3E_24">&gt;</a> 2<a href="int.html#infix%20*_20">*</a>k }
+          <span class="comment">(* invariant { divergence -&gt; (h a b f0 g0 f1 g1 (j-1) k n) } *)</span>
+          <span class="keyword">invariant</span> n2k_not_div {  n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; <span class="keyword">not</span> divergence }
+
+          <span class="keyword">invariant</span> n2k_abar { n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; <a href="invariantsnotation.html#approx_114">approx</a> a n k = ba <span class="keyword">at</span> Entering_inner_loop }
+          <span class="keyword">invariant</span> n2k_bbar { n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; <a href="invariantsnotation.html#approx_114">approx</a> b n k = bb <span class="keyword">at</span> Entering_inner_loop }
+          <span class="comment">(* init by subst_all ; rewrite H approx_2k_eq *)</span>
+          <span class="comment">(* even by rewrite xt_half&#39; ; on third apply divides_factors *)</span>
+          <span class="comment">(* odd by rem; subst_all; rewrite xt_sub&#39; on forth assert ( (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) = xt a b f0 g0 (j - 1) ) *)</span>
+
+          <span class="keyword">invariant</span> n2k_atabar { n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) = ba }
+          <span class="comment">(* init by subst_all ; rewrite H approx_2k_eq *)</span>
+          <span class="keyword">invariant</span> n2k_btbbar { n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) = bb }
+
+          <span class="comment">(* odd by subst_all; destruct_rec H1 apply inner_dec_len_div_free_priv_20 with (vars.k&#39;),divergence *)</span>
+          <span class="keyword">invariant</span> inner_dec_len { n = (2 <a href="int.html#infix%20*_20">*</a> k) -&gt; (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) = 0 \/ (<a href="invariantsnotation.html#regular'_405">regular&#39;</a> a b f0 g0 f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) }
+
+          <span class="keyword">invariant</span> congr_f0_bf0 { <a href="congr.html#congr_15">congr</a> f0 ((<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20*_20">*</a> bf0) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_f1_bf1 { <a href="congr.html#congr_15">congr</a> f1 ((<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20*_20">*</a> bf1) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_g0_bg0 { <a href="congr.html#congr_15">congr</a> g0 ((<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20*_20">*</a> bg0) <a href="innerinvariants.html#m_25">m</a> }
+          <span class="keyword">invariant</span> congr_g1_bg1 { <a href="congr.html#congr_15">congr</a> g1 ((<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20*_20">*</a> bg1) <a href="innerinvariants.html#m_25">m</a> }
+
+          <span class="keyword">invariant</span> bounds_fg0 { <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) }
+          <span class="comment">(* even by subst_all ; rewrite help_f1 *)</span>
+          <span class="keyword">invariant</span> bounds_fg1 { <a href="int.html#abs_52">abs</a> f1 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g1 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) }
+          <span class="comment">(* even by subst_all *)</span>
+          <span class="comment">(* odd by rem subst_all; apply divides_odd *)</span>
+          <span class="keyword">invariant</span> factor_ahatt { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+          <span class="comment">(* even by subst_all *)</span>
+          <span class="keyword">invariant</span> factor_bhatt { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) }
+          <span class="comment">(* odd by subst_all *)</span>
+          <span class="keyword">invariant</span> factor_bahatt { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (ba <span class="keyword">at</span> Entering_inner_loop) (bb <span class="keyword">at</span> Entering_inner_loop) f0 g0) }
+          <span class="keyword">invariant</span> factor_bbhatt { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (ba <span class="keyword">at</span> Entering_inner_loop) (bb <span class="keyword">at</span> Entering_inner_loop) f1 g1) }
+          <span class="comment">(* off by subst_all; rewrite xt_sub&#39; *)</span>
+          <span class="keyword">invariant</span> bat_is_ba { <a href="invariantsnotation.html#xt_33">xt</a> (ba <span class="keyword">at</span> Entering_inner_loop) (bb <span class="keyword">at</span> Entering_inner_loop) f0 g0 (j<a href="int.html#infix%20-_23">-</a>1) = ba }
+          <span class="keyword">invariant</span> bbt_is_bb { <a href="invariantsnotation.html#xt_33">xt</a> (ba <span class="keyword">at</span> Entering_inner_loop) (bb <span class="keyword">at</span> Entering_inner_loop) f1 g1 (j<a href="int.html#infix%20-_23">-</a>1) = bb }
+          <span class="comment">(* rem *)</span>
+          <span class="keyword">invariant</span> bd_pos { <span class="keyword">not</span> divergence -&gt; (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 /\ (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+
+          <span class="keyword">invariant</span> i_geq_1 { i <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0}
+
+          <span class="comment">(* rem *)</span>
+          <span class="keyword">invariant</span> cases_ab { ((<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 /\ (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0)
+                            || ((<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 /\ (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3C_21">&lt;</a> 0)
+                            || ((<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3C_21">&lt;</a> 0 /\ (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0) }
+          <span class="comment">(* invariant lemma28 { forall alpha : int. alpha &gt;= -&gt; abs ( (xt a b f0 g0 (j-1)) ) &lt; factor_at alpha -&gt; abs ( (xt a b f1 g1 (j-1)) ) &lt; factor_at alpha } *)</span>
+          <span class="comment">(*
+          invariant { this_iter -&gt; divergence -&gt; (xt a b f0 g0 (j-1)) &lt;= (power 2 (n - k - 1)) }
+          invariant min_bf_div { not divergence -&gt; mint a b f0 g0 f1 g1 (j - 1) &lt;= min a b } *)</span>
+
+           <span class="comment">(*invariant inv_a { vars.a&#39; = a at Entering_inner_loop }
+           invariant inv_ *)</span>
+           <span class="keyword">invariant</span> is_done_inv { vars.<a href="#a'_29">a&#39;</a> = 0 -&gt; <a href="#a_t_74">a_t</a> vars = 0 }
+           <span class="keyword">invariant</span> iter_a { vars.<a href="#a'_29">a&#39;</a> =   a }
+           <span class="keyword">invariant</span> iter_b { vars.<a href="#b'_30">b&#39;</a> =   b }
+           <span class="keyword">invariant</span> iter_k { vars.<a href="#k'_31">k&#39;</a> =   k }
+           <span class="keyword">invariant</span> iter_n { vars.<a href="#n'_32">n&#39;</a> =   n }
+           <span class="keyword">invariant</span> iter_j { vars.<a href="#j'_33">j&#39;</a> =   j }
+           <span class="keyword">invariant</span> iter_ba { vars.<a href="#ba'_34">ba&#39;</a> =  ba }
+           <span class="keyword">invariant</span> iter_bb{ vars.<a href="#bb'_35">bb&#39;</a> =  bb }
+           <span class="keyword">invariant</span> iter_f0 { vars.<a href="#f0'_36">f0&#39;</a> =  f0 }
+           <span class="keyword">invariant</span> iter_g0 { vars.<a href="#g0'_37">g0&#39;</a> =  g0 }
+           <span class="keyword">invariant</span> iter_f1 { vars.<a href="#f1'_38">f1&#39;</a> =  f1 }
+           <span class="keyword">invariant</span> iter_g1 { vars.<a href="#g1'_39">g1&#39;</a> =  g1 }
+           <span class="keyword">invariant</span> iter_bf0 { vars.<a href="#bf0'_40">bf0&#39;</a> = bf0 }
+           <span class="keyword">invariant</span> iter_bg0 { vars.<a href="#bg0'_41">bg0&#39;</a> = bg0 }
+           <span class="keyword">invariant</span> iter_bf1 { vars.<a href="#bf1'_42">bf1&#39;</a> = bf1 }
+           <span class="keyword">invariant</span> iter_bg1 { vars.<a href="#bg1'_43">bg1&#39;</a> = bg1 }
+           <span class="keyword">invariant</span> iter_bu { vars.<a href="#bu'_44">bu&#39;</a> =  bu }
+           <span class="keyword">invariant</span> iter_bv { vars.<a href="#bv'_45">bv&#39;</a> =  bv }
+           <span class="keyword">invariant</span> iter_this_iter{ vars.<a href="#this_iter'_46">this_iter&#39;</a> = this_iter }
+           <span class="keyword">invariant</span> iter_div { vars.<a href="#divergence'_47">divergence&#39;</a> = divergence }
+           <span class="keyword">invariant</span> iter_vars { vars = <a href="#iter_581">iter</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="#inner_iter_fun_258">inner_iter_fun</a> (vars <span class="keyword">at</span> Entering_inner_loop) }
+
+          <span class="keyword">label</span> Beg <span class="keyword">in</span>
+
+          this_iter &lt;- <span class="keyword">false</span>;
+
+          <span class="comment">(* even by apply parity_approx_even *)</span>
+          <span class="keyword">assert</span> parity { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#xt_33">xt</a> (ba <span class="keyword">at</span> Entering_inner_loop) (bb <span class="keyword">at</span> Entering_inner_loop) f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) 2
+            <span class="keyword">by</span> <a href="invariantsnotation.html#parity_approx'_132">parity_approx&#39;</a> a b f0 g0 n j k
+          };
+          <span class="comment">(* assert parity&#39; { parity_approx vars }; *)</span>
+
+          (<span class="keyword">if</span> (ED.<a href="int.html#mod_174">mod</a> ba 2 <a href="int.html#infix%20=_16">=</a> 0) <span class="keyword">then</span> <span class="keyword">begin</span>
+                  <span class="keyword">assert</span> { <a href="#is_halving_86">is_halving</a> vars };
+
+                  ba &lt;- ED.<a href="int.html#div_170">div</a> ba 2;
+                  bu &lt;- <a href="innerinvariants.html#mont_div_mod_29">mont_div_mod</a> bu;
+                  (bf0,bg0) &lt;- (<a href="congr.html#div_mod_127">div_mod</a> bf0 <a href="innerinvariants.html#m_25">m</a>),(<a href="congr.html#div_mod_127">div_mod</a> bg0 <a href="innerinvariants.html#m_25">m</a>);
+
+                  <span class="keyword">end</span>
+           <span class="keyword">else</span>
+             <span class="attribute">[@vc:sp]</span>
+             <span class="keyword">begin</span>
+                 <span class="keyword">assert</span> not_halving { <span class="keyword">not</span> (<a href="#is_halving_86">is_halving</a> vars) };
+
+                 <span class="keyword">if</span> <span class="keyword">not</span> divergence <span class="keyword">then</span> (<span class="keyword">assert</span> not_div { <span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars) };) <span class="keyword">else</span> (<span class="keyword">assert</span> div { <a href="#has_diverged_119">has_diverged</a> vars }; );
+                 <span class="keyword">if</span> (<a href="#is_divergent_109">is_divergent</a> vars)
+                 <span class="keyword">then</span> (<span class="keyword">begin</span>
+                   <span class="keyword">assert</span> is_div { <a href="#is_divergent_109">is_divergent</a> vars /\ <a href="#is_divergent'_102">is_divergent&#39;</a> a b j ba bb f0 g0 f1 g1 };
+                   (<span class="keyword">if</span> (<span class="keyword">not</span> divergence) <span class="keyword">then</span> (<span class="keyword">begin</span>
+                     <span class="keyword">assert</span> not_div { <span class="keyword">not</span> (<a href="#has_diverged_119">has_diverged</a> vars) };
+                     this_iter &lt;- <span class="keyword">true</span>;
+                     <span class="keyword">end</span>;)
+                     <span class="keyword">else</span> (<span class="keyword">assert</span> div2 { <a href="#has_diverged_119">has_diverged</a> vars }););
+                   divergence &lt;- <span class="keyword">true</span>;
+                   <span class="keyword">end</span>;)
+                   <span class="keyword">else</span> (<span class="keyword">assert</span> not_is_div { <span class="keyword">not</span> ( <a href="#is_divergent_109">is_divergent</a> vars) /\ <span class="keyword">not</span> (<a href="#is_divergent'_102">is_divergent&#39;</a> a b j ba bb f0 g0 f1 g1 ) };
+                         <span class="comment">(*assert { not (has_diverged vars) }; *)</span> );
+                 <span class="keyword">if</span> ba <a href="int.html#infix%20%3C_21">&lt;</a> bb <span class="keyword">then</span> (<span class="keyword">begin</span>
+                     <span class="keyword">assert</span> is_lt { <a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars };
+                     (ba,bb) &lt;- (bb,ba);
+                     (f0,g0,f1,g1) &lt;- (f1,g1,f0,g0);
+                     (bf0,bg0,bf1,bg1) &lt;- (bf1,bg1,bf0,bg0);
+                     (bu,bv) &lt;- (bv,bu);
+                     <span class="keyword">end</span>;)
+                     <span class="keyword">else</span> (<span class="keyword">assert</span> not_lt { <span class="keyword">not</span> (<a href="#is_ba_lt_bb_199">is_ba_lt_bb</a> vars) }; <span class="keyword">assert</span> not_swap { <span class="keyword">not</span> (<a href="#is_swap_202">is_swap</a> vars) };);
+                  <span class="keyword">let</span> a&#39; = ED.<a href="int.html#div_170">div</a> (ba <a href="int.html#infix%20-_23">-</a> bb) 2 <span class="keyword">in</span> <span class="keyword">let</span> bu&#39; = <a href="innerinvariants.html#mont_div_mod_29">mont_div_mod</a> (<a href="innerinvariants.html#sub_29">sub</a> bu bv) <span class="keyword">in</span>
+                  (f0,g0) &lt;- (f0 <a href="int.html#infix%20-_23">-</a> f1, g0 <a href="int.html#infix%20-_23">-</a> g1);
+                  (bf0,bg0) &lt;- (bf0 <a href="int.html#infix%20-_23">-</a> bf1, bg0 <a href="int.html#infix%20-_23">-</a> bg1);
+                  (bf0,bg0) &lt;- (<a href="congr.html#div_mod_127">div_mod</a> bf0 <a href="innerinvariants.html#m_25">m</a>),(<a href="congr.html#div_mod_127">div_mod</a> bg0 <a href="innerinvariants.html#m_25">m</a>);
+
+                  ba &lt;- a&#39;;
+                  bu &lt;- bu&#39;;
+                  <span class="keyword">end</span>;
+
+                  );
+
+        (f1,g1 &lt;- 2<a href="int.html#infix%20*_20">*</a>f1,2<a href="int.html#infix%20*_20">*</a>g1);
+        vars &lt;- <a href="#mk_iter_50">mk_iter</a> a b k n (j <a href="int.html#infix%20+_19">+</a> 1) ba bb f0 g0 f1 g1 bf0 bg0 bf1 bg1 bu bv this_iter divergence;
+
+        <span class="comment">(* odd by rewrite inner_iter_fun_odd destruct_rec H25; rewrite odd_step_lt; destruct_rec H46/H47 
+        then rewrite by the corresponding update lemma + apply iter_inj + compute in goal*)</span>
+        <span class="keyword">assert</span> vars_iter { vars =  <a href="#inner_iter_fun_258">inner_iter_fun</a> (vars <span class="keyword">at</span> Beg)
+
+        };
+        <span class="keyword">assert</span> is_done_inner {(a <span class="keyword">at</span> Beg) = 0 -&gt; a = 0 };
+        <span class="keyword">done</span> <span class="keyword">ensures</span> thm { <span class="keyword">not</span> (n = 2 <a href="int.html#infix%20*_20">*</a> k) -&gt; <span class="keyword">not</span> (<a href="#a_t_74">a_t</a> vars = 0) -&gt; <a href="#good_275">good</a> vars };
+
+        (a,b) &lt;- ((ED.<a href="int.html#div_170">div</a> (a<a href="int.html#infix%20*_20">*</a>f0 <a href="int.html#infix%20+_19">+</a> b<a href="int.html#infix%20*_20">*</a>g0) (<a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1))),((ED.<a href="int.html#div_170">div</a> (a<a href="int.html#infix%20*_20">*</a>f1 <a href="int.html#infix%20+_19">+</a> b<a href="int.html#infix%20*_20">*</a>g1) (<a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1)))));
+
+        <span class="comment">(* by rewrite H H4 unfold xt unfold updated_x *)</span>
+        <span class="keyword">assert</span> a_def { a = <a href="#a_t_74">a_t</a> vars <span class="keyword">by</span> (a = <a href="#a_t_74">a_t</a> vars
+           <span class="keyword">by</span> <a href="#a_t_74">a_t</a> vars = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f0'_36">f0&#39;</a>) (vars.<a href="#g0'_37">g0&#39;</a>) (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)
+           <span class="keyword">so</span> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = k <a href="int.html#infix%20-_23">-</a> 1
+           <span class="keyword">so</span> <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f0'_36">f0&#39;</a>) (vars.<a href="#g0'_37">g0&#39;</a>) (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f0'_36">f0&#39;</a>) (vars.<a href="#g0'_37">g0&#39;</a>) (k <a href="int.html#infix%20-_23">-</a> 1)
+           <span class="keyword">so</span> <a href="#a_t_74">a_t</a> vars = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f0'_36">f0&#39;</a>) (vars.<a href="#g0'_37">g0&#39;</a>) (k <a href="int.html#infix%20-_23">-</a> 1)
+          )
+
+        };
+        <span class="keyword">assert</span> is_done_outer {(a <span class="keyword">at</span> Entering_inner_loop) = 0 -&gt; a = 0 };
+
+        <span class="comment">(* by rewrite H H5 unfold xt unfold updated_x *)</span>
+        <span class="keyword">assert</span> is_done_b_outer { b = <a href="#b_t_78">b_t</a> vars <span class="keyword">by</span> <a href="#b_t_78">b_t</a> vars = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f1'_38">f1&#39;</a>) (vars.<a href="#g1'_39">g1&#39;</a>) (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)
+           <span class="keyword">so</span> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = k <a href="int.html#infix%20-_23">-</a> 1
+           <span class="keyword">so</span> <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f1'_38">f1&#39;</a>) (vars.<a href="#g1'_39">g1&#39;</a>) (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f1'_38">f1&#39;</a>) (vars.<a href="#g1'_39">g1&#39;</a>) (k <a href="int.html#infix%20-_23">-</a> 1)
+           <span class="keyword">so</span> <a href="#b_t_78">b_t</a> vars = <a href="invariantsnotation.html#xt_33">xt</a> (vars.<a href="#a'_29">a&#39;</a>) (vars.<a href="#b'_30">b&#39;</a>) (vars.<a href="#f1'_38">f1&#39;</a>) (vars.<a href="#g1'_39">g1&#39;</a>) (k <a href="int.html#infix%20-_23">-</a> 1)
+
+        };
+        <span class="keyword">if</span> a <a href="int.html#infix%20%3C_21">&lt;</a> 0 <span class="keyword">then</span>
+          (a,f0,g0,bu) &lt;- (<a href="int.html#prefix%20-_18">-</a>a,<a href="int.html#prefix%20-_18">-</a>f0,<a href="int.html#prefix%20-_18">-</a>g0, <a href="innerinvariants.html#sub_29">sub</a> (<a href="innerinvariants.html#of_int_29">of_int</a> 0) bu);
+        <span class="keyword">if</span> b <a href="int.html#infix%20%3C_21">&lt;</a> 0 <span class="keyword">then</span>
+          (b,f1,g1,bv) &lt;- (<a href="int.html#prefix%20-_18">-</a>b,<a href="int.html#prefix%20-_18">-</a>f1,<a href="int.html#prefix%20-_18">-</a>g1, <a href="innerinvariants.html#sub_29">sub</a> (<a href="innerinvariants.html#of_int_29">of_int</a> 0) bv);
+
+        <span class="keyword">let</span> u&#39; : int = (ED.<a href="int.html#mod_174">mod</a> ((<a href="innerinvariants.html#to_int_29">to_int</a> u)<a href="int.html#infix%20*_20">*</a>f0<a href="int.html#infix%20+_19">+</a>(<a href="innerinvariants.html#to_int_29">to_int</a> v)<a href="int.html#infix%20*_20">*</a>g0) <a href="innerinvariants.html#m_25">m</a>) <span class="keyword">in</span>
+        <span class="keyword">let</span> v&#39; : int = (ED.<a href="int.html#mod_174">mod</a> ((<a href="innerinvariants.html#to_int_29">to_int</a> u)<a href="int.html#infix%20*_20">*</a>f1 <a href="int.html#infix%20+_19">+</a> (<a href="innerinvariants.html#to_int_29">to_int</a> v)<a href="int.html#infix%20*_20">*</a>g1) <a href="innerinvariants.html#m_25">m</a>) <span class="keyword">in</span>
+
+        (u, v) &lt;- (<a href="innerinvariants.html#of_int_29">of_int</a> u&#39;,<a href="innerinvariants.html#of_int_29">of_int</a> v&#39;);
+
+      <span class="keyword">done</span>;
+
+      v &lt;- <a href="innerinvariants.html#of_int_29">of_int</a> (<a href="montred.html#mont_red_9">mont_red</a> <a href="innerinvariants.html#m_25">m</a> (<a href="innerinvariants.html#to_int_29">to_int</a> v) ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>end_));
+
+      <span class="keyword">assert</span> { a = 0 };
+      <span class="keyword">assert</span> { <a href="number.html#gcd_111">gcd</a> a b = b };
+
+    <span class="keyword">if</span> b <a href="int.html#infix%20=_16">&lt;&gt;</a> 1 <span class="keyword">then</span> 0 <span class="keyword">else</span> (<a href="innerinvariants.html#to_int_29">to_int</a> v)
+
+<span class="keyword">end</span>
+
+</pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

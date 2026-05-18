@@ -1,0 +1,450 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>invariantsnotation.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre><span class="keyword">module</span> <a name="Xt_">Xt</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> number.<a href="number.html#Parity_">Parity</a>
+  <span class="keyword">use</span> int.<a href="int.html#Power_">Power</a>
+  <span class="keyword">use</span> congr.<a href="congr.html#Congr_">Congr</a>
+  <span class="keyword">use</span> fitlen.<a href="fitlen.html#FitLen_">FitLen</a>
+  <span class="keyword">use</span> int.<a href="int.html#MinMax_">MinMax</a>
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+  <span class="keyword">use</span> factorat.<a href="factorat.html#Factor_at_">Factor_at</a>
+  <span class="keyword">use</span> util.<a href="util.html#Util_">Util</a>
+  <span class="keyword">use</span> divdivides.<a href="divdivides.html#Div_divides_">Div_divides</a>
+
+<span class="comment">(*               *)</span>
+<span class="comment">(*   updated_x   *)</span>
+<span class="comment">(*               *)</span>
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="updated_x_19">updated_x</a> (a b f0 g0 : int) : int
+    = a<a href="int.html#infix%20*_20">*</a>f0 <a href="int.html#infix%20+_19">+</a> b<a href="int.html#infix%20*_20">*</a>g0
+  <span class="keyword">lemma</span> <a name="updated_init_a'lemma_21">updated_init_a</a> : <span class="keyword">forall</span> a b : int. <a href="#updated_x_19">updated_x</a> a b 1 0 = a
+  <span class="keyword">lemma</span> <a name="updated_init_b'lemma_22">updated_init_b</a> : <span class="keyword">forall</span> a b : int. <a href="#updated_x_19">updated_x</a> a b 0 1 = b
+  <span class="keyword">lemma</span> <a name="updated_double'lemma_23">updated_double</a> : <span class="keyword">forall</span> a b f0 g0 : int. <a href="#updated_x_19">updated_x</a> a b (2 <a href="int.html#infix%20*_20">*</a> f0) (2 <a href="int.html#infix%20*_20">*</a> g0) = 2 <a href="int.html#infix%20*_20">*</a> <a href="#updated_x_19">updated_x</a> a b f0 g0
+  <span class="keyword">lemma</span> <a name="updated_sub'lemma_24">updated_sub</a> : <span class="keyword">forall</span> a b f0 g0 f1 g1 : int. <a href="#updated_x_19">updated_x</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) = <a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1
+
+<span class="comment">(*         *)</span>
+<span class="comment">(*   x_t   *)</span>
+<span class="comment">(*         *)</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="xt_33">xt</a>(a b f0 g0 t: int) : int
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  = (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> t))
+
+  <span class="keyword">lemma</span> <a name="unfold_xt'lemma_37">unfold_xt</a> : <span class="keyword">forall</span> a b f0 g0 t : int.
+    t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+    (<a href="#xt_33">xt</a> a b f0 g0 t) = (ED.<a href="int.html#div_113">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> t))
+
+  <span class="keyword">lemma</span> <a name="xt_init_a'lemma_41">xt_init_a</a> : <span class="keyword">forall</span> a b : int. (<a href="#xt_33">xt</a> a b 1 0 0) = a
+  <span class="keyword">lemma</span> <a name="xt_init_b'lemma_42">xt_init_b</a> : <span class="keyword">forall</span> a b : int. (<a href="#xt_33">xt</a> a b 0 1 0) = b
+
+  <span class="keyword">lemma</span> <a name="pow_rewr'lemma_44">pow_rewr</a> : <span class="keyword">forall</span> x k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="int.html#power_348">power</a> x (k <a href="int.html#infix%20+_19">+</a> 1) = x <a href="int.html#infix%20*_20">*</a> <a href="int.html#power_348">power</a> x k
+
+  <span class="keyword">lemma</span> <a name="xt_half'lemma_46">xt_half</a> : <span class="keyword">forall</span> a b f0 g0 t: int. t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> t) (<a href="#updated_x_19">updated_x</a> a b f0 g0) -&gt; <a href="#xt_33">xt</a> a b f0 g0 (t <a href="int.html#infix%20+_19">+</a> 1) = ED.<a href="int.html#div_113">div</a> (<a href="#xt_33">xt</a> a b f0 g0 t) 2
+
+  <span class="keyword">lemma</span> <a name="xt_half''lemma_48">xt_half&#39;</a> : <span class="keyword">forall</span> a b f0 g0 t: int. t <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (t <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f0 g0) -&gt; (<a href="#xt_33">xt</a> a b f0 g0 ((t <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) = ED.<a href="int.html#div_113">div</a> (<a href="#xt_33">xt</a> a b f0 g0 (t <a href="int.html#infix%20-_23">-</a> 1)) 2
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="xt_double_half_50">xt_double_half</a> (a b f0 g0 t : int)
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { <a href="#xt_33">xt</a> a b (2<a href="int.html#infix%20*_20">*</a>f0) (2<a href="int.html#infix%20*_20">*</a>g0) (t <a href="int.html#infix%20+_19">+</a> 1) = (<a href="#xt_33">xt</a> a b f0 g0 t) }
+    = <span class="keyword">begin</span>
+      <span class="keyword">assert</span> { <a href="#xt_33">xt</a> a b (2<a href="int.html#infix%20*_20">*</a>f0) (2<a href="int.html#infix%20*_20">*</a>g0) (t <a href="int.html#infix%20+_19">+</a> 1) = ED.<a href="int.html#div_170">div</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="#updated_x_19">updated_x</a> a b f0 g0) (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> t) };
+      <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="xt_double_half'_57">xt_double_half&#39;</a> (a b f0 g0 t : int)
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { <a href="#xt_33">xt</a> a b (2<a href="int.html#infix%20*_20">*</a>f0) (2<a href="int.html#infix%20*_20">*</a>g0) ((t <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = (<a href="#xt_33">xt</a> a b f0 g0 (t <a href="int.html#infix%20-_23">-</a> 1)) }
+    = <span class="keyword">begin</span>
+      <span class="comment">(*assert { xt a b (2*f0) (2*g0) ((t + 1) - 1) = div (2 * updated_x a b f0 g0) (2 * factor_at t) };*)</span>
+      <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="xt_sub_64">xt_sub</a> (a b f0 g0 f1 g1 t : int)
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 t) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 t) (<a href="#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> t)) 2 = 1 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> t)) 2 = 1 }
+
+    <span class="comment">(* by rewrite unfold_xt updated_sub factor_at_S split_factor_divisor *)</span>
+    <span class="keyword">ensures</span>  { <a href="#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) (t <a href="int.html#infix%20+_19">+</a> 1) = ED.<a href="int.html#div_170">div</a> (<a href="#xt_33">xt</a> a b f0 g0 t <a href="int.html#infix%20-_23">-</a> <a href="#xt_33">xt</a> a b f1 g1 t) 2 }
+    = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> 2 (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> t) <a href="int.html#infix%20-_23">-</a> ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> t)) };
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> 2 (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> t)) };
+    <span class="comment">(* by apply divides_factors *)</span>
+    <span class="keyword">assert</span>  { <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> t) (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) };
+
+    <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="xt_sub'_81">xt_sub&#39;</a> (a b f0 g0 f1 g1 t : int)
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 (t <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 (t <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> (t<a href="int.html#infix%20-_23">-</a>1))) 2 = 1 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (t<a href="int.html#infix%20-_23">-</a>1))) 2 = 1 }
+    <span class="keyword">ensures</span>  { <a href="#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) ((t <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = ED.<a href="int.html#div_170">div</a> (<a href="#xt_33">xt</a> a b f0 g0 (t <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> <a href="#xt_33">xt</a> a b f1 g1 (t<a href="int.html#infix%20-_23">-</a>1)) 2 }
+    = <span class="keyword">begin</span>
+
+    <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="divides_odd_92">divides_odd</a> (a b f0 g0 f1 g1 j : int)
+    <span class="keyword">requires</span> { (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+    <span class="keyword">ensures</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1)) }
+  = <span class="keyword">begin</span>
+   <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) 2 = 1 };
+   <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) 2 = 1 };
+   <span class="keyword">assert</span> { (<a href="#updated_x_19">updated_x</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1)) = (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) };
+   <span class="keyword">assert</span> { (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) = (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) };
+   <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) };
+   <span class="keyword">assert</span> { (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) = (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20-_23">-</a> (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)))};
+   <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> 2  (ED.<a href="int.html#div_170">div</a> (<a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) };
+
+  <span class="keyword">end</span>
+
+<span class="comment">(*            *)</span>
+<span class="comment">(*   approx   *)</span>
+<span class="comment">(*            *)</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="approx_114">approx</a> (x n k : int) : int
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  =
+    <span class="keyword">let</span> factor = (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1)) <span class="keyword">in</span>
+    (ED.<a href="int.html#mod_174">mod</a> x factor) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> x (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1)))
+
+  <span class="keyword">lemma</span> <a name="unfold_approx'lemma_121">unfold_approx</a> : <span class="keyword">forall</span> x n k : int. k <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+  (<a href="#approx_114">approx</a> x n k) = <span class="keyword">let</span> factor = (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1)) <span class="keyword">in</span> (ED.<a href="int.html#mod_114">mod</a> x factor) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_113">div</a> x (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1)))
+
+  <span class="keyword">lemma</span> <a name="unfold_approx''lemma_124">unfold_approx&#39;</a> : <span class="keyword">forall</span> x n k : int. k <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+  (<a href="#approx_114">approx</a> x n k) = <span class="keyword">let</span> factor = (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1)) <span class="keyword">in</span> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_113">div</a> x (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_114">mod</a> x factor)
+
+  <span class="keyword">lemma</span> <a name="approx_parity'lemma_127">approx_parity</a> : <span class="keyword">forall</span> x n k : int. k <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; x &lt;&gt; 0 -&gt; ED.<a href="int.html#mod_114">mod</a> x 2 = ED.<a href="int.html#mod_114">mod</a> (<a href="#approx_114">approx</a> x n k) 2
+
+  <span class="keyword">lemma</span> <a name="init_partity'lemma_129">init_partity</a> : <span class="keyword">forall</span> a b n k. k <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; (n <a href="int.html#infix%20-_23">-</a> k) <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; ED.<a href="int.html#mod_114">mod</a> (<a href="#xt_33">xt</a> a b 1 0 0) 2 = ED.<a href="int.html#mod_114">mod</a> (<a href="#approx_114">approx</a> a n k) 2
+
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="parity_approx'_132">parity_approx&#39;</a> (a b f0 g0 n j k : int) : bool =
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <a href="congr.html#congr_15">congr</a> (<a href="#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) 2
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="parity_approx_even'_138">parity_approx_even&#39;</a> (a b f0 g0 n j k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> j <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">ensures</span> { <a href="#parity_approx'_132">parity_approx&#39;</a> a b f0 g0 n j k }
+  = <span class="keyword">begin</span>
+      <span class="keyword">let</span> af0 : int = (ED.<a href="int.html#mod_174">mod</a> a (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> f0 <span class="keyword">in</span>
+      <span class="keyword">let</span> bg0 : int = (ED.<a href="int.html#mod_174">mod</a> b (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> g0 <span class="keyword">in</span>
+      <span class="keyword">let</span> t : int = ED.<a href="int.html#div_170">div</a> (af0 <a href="int.html#infix%20+_19">+</a> bg0) (<a href="int.html#power_348">power</a> 2 (j<a href="int.html#infix%20-_23">-</a>1)) <span class="keyword">in</span>
+      <span class="keyword">let</span> rest_a : int = ED.<a href="int.html#div_170">div</a> a (<a href="int.html#power_348">power</a> 2 ((n <a href="int.html#infix%20-_23">-</a> k) <a href="int.html#infix%20-_23">-</a> 1)) <span class="keyword">in</span>
+      <span class="keyword">let</span> rest_b : int = ED.<a href="int.html#div_170">div</a> b (<a href="int.html#power_348">power</a> 2 ((n <a href="int.html#infix%20-_23">-</a> k) <a href="int.html#infix%20-_23">-</a> 1)) <span class="keyword">in</span>
+      <span class="keyword">let</span> factor : int = <a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+      <span class="keyword">let</span> i_a : int = ED.<a href="int.html#mod_174">mod</a> a factor <span class="keyword">in</span>
+      <span class="keyword">let</span> i_b : int = ED.<a href="int.html#mod_174">mod</a> b factor <span class="keyword">in</span>
+
+      <span class="keyword">assert</span> {  <a href="congr.html#congr_15">congr</a> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) t 2
+                   <span class="comment">(* by rewrite unfold_xt unfold_approx&#39; unfold_approx&#39;; unfold updated_x *)</span>
+                <span class="keyword">by</span> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 (j<a href="int.html#infix%20-_23">-</a>1))
+                    =  ED.<a href="int.html#div_170">div</a> ((((factor <a href="int.html#infix%20*_20">*</a> rest_a) <a href="int.html#infix%20+_19">+</a> i_a) <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (((factor <a href="int.html#infix%20*_20">*</a> rest_b) <a href="int.html#infix%20+_19">+</a> i_b) <a href="int.html#infix%20*_20">*</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))
+                <span class="keyword">so</span> ((((factor <a href="int.html#infix%20*_20">*</a> rest_a) <a href="int.html#infix%20+_19">+</a> i_a) <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (((factor <a href="int.html#infix%20*_20">*</a> rest_b) <a href="int.html#infix%20+_19">+</a> i_b) <a href="int.html#infix%20*_20">*</a> g0)) = factor <a href="int.html#infix%20*_20">*</a> (rest_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> rest_b <a href="int.html#infix%20*_20">*</a> g0) <a href="int.html#infix%20+_19">+</a> (i_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> i_b <a href="int.html#infix%20*_20">*</a> g0)
+                <span class="comment">(* by rewrite H1 H Div_mult *)</span>
+                <span class="keyword">so</span> (ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (rest_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> rest_b <a href="int.html#infix%20*_20">*</a> g0) <a href="int.html#infix%20+_19">+</a> (i_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> i_b <a href="int.html#infix%20*_20">*</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))
+                   = <a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1 <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> (rest_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> rest_b <a href="int.html#infix%20*_20">*</a> g0) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#div_170">div</a> (i_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> i_b <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))
+                   <span class="keyword">by</span> (factor = <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1)))
+                   <span class="keyword">so</span> ( ((<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="int.html#power_348">power</a> 2 ((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20*_20">*</a> ((rest_a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (rest_b <a href="int.html#infix%20*_20">*</a> g0))) = <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> ( <a href="int.html#power_348">power</a> 2 ((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> ((rest_a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (rest_b <a href="int.html#infix%20*_20">*</a> g0))  ) ) )
+
+                   )
+                <span class="comment">(* by rewrite unfold_congr H2 H1 H Mod_mult*)</span>
+                <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1 <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> (rest_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> rest_b <a href="int.html#infix%20*_20">*</a> g0) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#div_170">div</a> (i_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> i_b <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) (ED.<a href="int.html#div_170">div</a> (i_a <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> i_b <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) 2
+                  <span class="keyword">by</span> ( <span class="keyword">exists</span> c. c <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 /\ ((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) = c <a href="int.html#infix%20+_19">+</a> 1 /\ (<a href="int.html#power_348">power</a> 2 (c <a href="int.html#infix%20+_19">+</a> 1) = 2 <a href="int.html#infix%20*_20">*</a> <a href="int.html#power_348">power</a> 2 c) /\ ( ((2 <a href="int.html#infix%20*_20">*</a> <a href="int.html#power_348">power</a> 2 c) <a href="int.html#infix%20*_20">*</a> ((rest_a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (rest_b <a href="int.html#infix%20*_20">*</a> g0))) = 2 <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#power_348">power</a> 2 c) <a href="int.html#infix%20*_20">*</a> ((rest_a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (rest_b <a href="int.html#infix%20*_20">*</a> g0)) ) ) )
+                )
+    };
+      <span class="keyword">assert</span> {  <a href="congr.html#congr_15">congr</a> (<a href="#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) t 2
+                 <span class="keyword">by</span> (<a href="#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) = (ED.<a href="int.html#div_170">div</a> ((a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (b <a href="int.html#infix%20*_20">*</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)))
+                 <span class="keyword">so</span> a = factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> a factor
+                 <span class="keyword">so</span> b = factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> b factor
+                 <span class="keyword">so</span> ((a <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (b <a href="int.html#infix%20*_20">*</a> g0)) = (((factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> a factor ) <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> ((factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> b factor ) <a href="int.html#infix%20*_20">*</a> g0))
+                 <span class="keyword">so</span> (((factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> a factor ) <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> ((factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0))
+                    = factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0 <a href="int.html#infix%20+_19">+</a> ((ED.<a href="int.html#mod_174">mod</a> a factor) <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0
+                 <span class="keyword">so</span> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#mod_174">mod</a> b factor <a href="int.html#infix%20*_20">*</a> g0
+                    = factor <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)<a href="int.html#infix%20+_19">+</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)
+                 <span class="keyword">so</span> (factor = <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))))
+                 <span class="keyword">so</span> factor <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)<a href="int.html#infix%20+_19">+</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)
+                    = <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) <a href="int.html#infix%20+_19">+</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)
+                 <span class="comment">(* by rewrite Div_mult *)</span>
+                 <span class="keyword">so</span> ED.<a href="int.html#div_170">div</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) <a href="int.html#infix%20+_19">+</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1))
+                    = ((<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#div_170">div</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1))
+                    <span class="comment">(* by rewrite unfold_congr H Mod_mult *)</span>
+                 <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> (((<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#div_170">div</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)))
+                          (ED.<a href="int.html#div_170">div</a> ((ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20*_20">*</a> f0) <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#mod_174">mod</a> b factor) <a href="int.html#infix%20*_20">*</a> g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)))
+                          2
+
+                     <span class="keyword">by</span> (
+                     ( <a href="int.html#power_348">power</a> 2 (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)))  =  (2 <a href="int.html#infix%20*_20">*</a> <a href="int.html#power_348">power</a> 2 (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)) )
+                     <span class="comment">(* by rewrite H *)</span>
+                     <span class="keyword">so</span> ((<a href="int.html#power_348">power</a> 2 (k<a href="int.html#infix%20-_23">-</a>1<a href="int.html#infix%20-_23">-</a>(j<a href="int.html#infix%20-_23">-</a>1))) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0)) = (2 <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#power_348">power</a> 2 (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> ((ED.<a href="int.html#div_170">div</a> a factor) <a href="int.html#infix%20*_20">*</a> f0 <a href="int.html#infix%20+_19">+</a> (ED.<a href="int.html#div_170">div</a> b factor) <a href="int.html#infix%20*_20">*</a> g0) ))
+
+                     ))
+
+               };
+   <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="close_approx_202">close_approx</a> (a n k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> 2 <a href="int.html#infix%20*_20">*</a> k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="comment">(* by rewrite unfold_approx *)</span>
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (a <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n<a href="int.html#infix%20-_23">-</a>2<a href="int.html#infix%20*_20">*</a>k)<a href="int.html#infix%20*_20">*</a>(<a href="#approx_114">approx</a> a n k))) <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1)  }
+  = <span class="keyword">begin</span>
+
+    <span class="keyword">let</span> pn2k = <a href="int.html#power_348">power</a> 2 (n<a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k) <span class="keyword">in</span>
+    <span class="keyword">let</span> pk1 = <a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1 ) <span class="keyword">in</span>
+    <span class="keyword">let</span> pnk = <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+    <span class="keyword">assert</span> { a <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k) <a href="int.html#infix%20*_20">*</a> (<span class="keyword">let</span> factor = <a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span> ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20+_19">+</a> (factor <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a (<a href="int.html#power_348">power</a> 2 ((n <a href="int.html#infix%20-_23">-</a> k) <a href="int.html#infix%20-_23">-</a> 1)))))
+             = ED.<a href="int.html#mod_174">mod</a> a pnk <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#mod_174">mod</a> a pk1
+             <span class="keyword">by</span> ( (<span class="keyword">let</span> factor = <a href="int.html#power_348">power</a> 2 (k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span> ED.<a href="int.html#mod_174">mod</a> a factor <a href="int.html#infix%20+_19">+</a> (factor <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a (<a href="int.html#power_348">power</a> 2 ((n <a href="int.html#infix%20-_23">-</a> k) <a href="int.html#infix%20-_23">-</a> 1)))) = ED.<a href="int.html#mod_174">mod</a> a pk1 <a href="int.html#infix%20+_19">+</a> pk1 <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a pnk)
+             <span class="keyword">so</span> ( (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> (2 <a href="int.html#infix%20*_20">*</a> k)) <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#mod_174">mod</a> a pk1 <a href="int.html#infix%20+_19">+</a> (pk1 <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a pnk))) = pn2k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#mod_174">mod</a> a pk1 <a href="int.html#infix%20+_19">+</a> pn2k <a href="int.html#infix%20*_20">*</a> pk1 <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a pnk )
+             <span class="comment">(* by rewrite H *)</span>
+             <span class="keyword">so</span> (a <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> (2 <a href="int.html#infix%20*_20">*</a> k)) <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#mod_174">mod</a> a pk1 <a href="int.html#infix%20+_19">+</a> (pk1 <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a pnk)))) = (ED.<a href="int.html#mod_174">mod</a> a pnk <a href="int.html#infix%20-_23">-</a> (pn2k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#mod_174">mod</a> a pk1))
+              };
+    <span class="keyword">assert</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#mod_174">mod</a> a pnk <a href="int.html#infix%20%3C_21">&lt;</a> pnk };
+    <span class="comment">(*by rewrite H*)</span>
+    <span class="keyword">assert</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> pn2k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#mod_174">mod</a> a pk1  <a href="int.html#infix%20%3C_21">&lt;</a> pnk
+                   <span class="keyword">by</span> ED.<a href="int.html#mod_174">mod</a> a pk1 <a href="int.html#infix%20%3C_21">&lt;</a> pk1
+                   <span class="keyword">so</span> pnk = pn2k <a href="int.html#infix%20*_20">*</a> pk1
+    };
+    <span class="keyword">assert</span> { <a href="int.html#abs_52">abs</a>( ED.<a href="int.html#mod_174">mod</a> a pnk <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#mod_174">mod</a> a pk1 ) <a href="int.html#infix%20%3C_21">&lt;</a> pnk };
+
+  <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="approx_2k_eq_230">approx_2k_eq</a> (a k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { <a href="#approx_114">approx</a> a (2<a href="int.html#infix%20*_20">*</a>k) k = a }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="xd_238">xd</a> (a n k: int) : int
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+   = a <a href="int.html#infix%20-_23">-</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k) <a href="int.html#infix%20*_20">*</a> <a href="#approx_114">approx</a> a n k
+
+  <span class="keyword">lemma</span> <a name="unfold_xd'lemma_243">unfold_xd</a> : <span class="keyword">forall</span> a n k : int.
+    k <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt;
+    n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+    (<a href="#xd_238">xd</a> a n k) = a <a href="int.html#infix%20-_23">-</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k) <a href="int.html#infix%20*_20">*</a> <a href="#approx_114">approx</a> a n k
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="id_updated_approx_sub_248">id_updated_approx_sub</a> (a b f0 g0 n k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">ensures</span> { <a href="#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k)) <a href="int.html#infix%20*_20">*</a> (<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0)
+              = ( (<a href="#xd_238">xd</a> a n k) <a href="int.html#infix%20*_20">*</a>f0 <a href="int.html#infix%20+_19">+</a> (<a href="#xd_238">xd</a> b n k)<a href="int.html#infix%20*_20">*</a>g0 ) }
+    = <span class="keyword">begin</span>
+    <span class="keyword">end</span>
+
+ <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="id_approx_sub_256">id_approx_sub</a> (a b f0 g0 n k j : int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0) }
+    <span class="keyword">ensures</span> { <a href="#xt_33">xt</a> a b f0 g0 j <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k)) <a href="int.html#infix%20*_20">*</a> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j)
+              = ED.<a href="int.html#div_170">div</a> ( (<a href="#xd_238">xd</a> a n k)<a href="int.html#infix%20*_20">*</a>f0 <a href="int.html#infix%20+_19">+</a> (<a href="#xd_238">xd</a> b n k)<a href="int.html#infix%20*_20">*</a>g0 ) (<a href="factorat.html#factor_at_9">factor_at</a> j) }
+    = <span class="keyword">begin</span>
+      <span class="comment">(* by rewrite unfold_xt div_sub *)</span>
+      <span class="keyword">assert</span> {  <a href="#xt_33">xt</a> a b f0 g0 j <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k)) <a href="int.html#infix%20*_20">*</a> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j)
+                = ED.<a href="int.html#div_170">div</a> ((<a href="#updated_x_19">updated_x</a> a b f0 g0) <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n<a href="int.html#infix%20-_23">-</a>2<a href="int.html#infix%20*_20">*</a>k))<a href="int.html#infix%20*_20">*</a>(<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0) ) (<a href="factorat.html#factor_at_9">factor_at</a> j)
+                <span class="keyword">by</span> <span class="keyword">not</span> <a href="factorat.html#factor_at_9">factor_at</a> j = 0
+                  /\ <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> (2 <a href="int.html#infix%20*_20">*</a> k)) <a href="int.html#infix%20*_20">*</a> <a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0)};
+      <span class="keyword">assert</span> { ((<a href="#updated_x_19">updated_x</a> a b f0 g0) <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n<a href="int.html#infix%20-_23">-</a>2<a href="int.html#infix%20*_20">*</a>k))<a href="int.html#infix%20*_20">*</a>(<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0) )
+               = ( (<a href="#xd_238">xd</a> a n k) <a href="int.html#infix%20*_20">*</a>f0 <a href="int.html#infix%20+_19">+</a> (<a href="#xd_238">xd</a> b n k)<a href="int.html#infix%20*_20">*</a>g0 ) };
+    <span class="keyword">end</span>
+
+  <span class="comment">(* lemma 2.11 *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="triang_bound_sub_id_275">triang_bound_sub_id</a> (a b f0 g0 n k j : int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0) }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20%3E=_26">&gt;=</a> 2 <a href="int.html#infix%20*_20">*</a> k }
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> j }
+
+    <span class="comment">(* by rewrite Assert2 abs_div3 *)</span>
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (<a href="#xt_33">xt</a> a b f0 g0 j <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> 2<a href="int.html#infix%20*_20">*</a>k)) <a href="int.html#infix%20*_20">*</a> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j))
+              <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1) }
+  = <span class="keyword">begin</span>
+
+    <span class="keyword">let</span> xda = <a href="#xd_238">xd</a> a n k <span class="keyword">in</span>
+    <span class="keyword">let</span> xdaf = xda <a href="int.html#infix%20*_20">*</a> f0 <span class="keyword">in</span>
+    <span class="keyword">let</span> xdb = <a href="#xd_238">xd</a> b n k <span class="keyword">in</span>
+    <span class="keyword">let</span> xdbg = xdb <a href="int.html#infix%20*_20">*</a> g0 <span class="keyword">in</span>
+    <span class="keyword">assert</span> { <a href="int.html#abs_52">abs</a> (<a href="#xt_33">xt</a> a b f0 g0 j <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> (2 <a href="int.html#infix%20*_20">*</a> k)) <a href="int.html#infix%20*_20">*</a> <a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j)) = <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> (xdaf <a href="int.html#infix%20+_19">+</a> xdbg) (<a href="factorat.html#factor_at_9">factor_at</a> j)) };
+    <span class="comment">(* by subst_all ; rewrite &lt;- id_updated_approx_sub *)</span>
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (xdaf <a href="int.html#infix%20+_19">+</a> xdbg) };
+    <span class="keyword">assert</span> { (ED.<a href="int.html#div_170">div</a> ((<a href="int.html#abs_52">abs</a>  xdaf) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> xdbg)) (<a href="factorat.html#factor_at_9">factor_at</a> j))
+             = (ED.<a href="int.html#div_170">div</a> ( ( (<a href="int.html#abs_52">abs</a>  xda) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) ) <a href="int.html#infix%20+_19">+</a> ((<a href="int.html#abs_52">abs</a>  xdb) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0 ))) (<a href="factorat.html#factor_at_9">factor_at</a> j))
+           <span class="keyword">by</span>
+             (<a href="int.html#abs_52">abs</a>  xdaf) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> xdbg )
+             =  ( ( (<a href="int.html#abs_52">abs</a>  xda) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) ) <a href="int.html#infix%20+_19">+</a> ((<a href="int.html#abs_52">abs</a>  xdb) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0 ))) };
+
+    <span class="keyword">let</span> factor = <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+    <span class="keyword">assert</span> { (ED.<a href="int.html#div_170">div</a> ( ( (<a href="int.html#abs_52">abs</a>  (<a href="#xd_238">xd</a> a n k)) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) ) <a href="int.html#infix%20+_19">+</a> ((<a href="int.html#abs_52">abs</a>  (<a href="#xd_238">xd</a> b n k)) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0 ))) (<a href="factorat.html#factor_at_9">factor_at</a> j))  <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> j)
+      <span class="keyword">by</span> (<a href="int.html#abs_52">abs</a> xda) <a href="int.html#infix%20%3C=_25">&lt;=</a> factor /\ (<a href="int.html#abs_52">abs</a> xdb) <a href="int.html#infix%20%3C=_25">&lt;=</a> factor
+      <span class="keyword">so</span> (<a href="int.html#abs_52">abs</a> xda) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20%3C=_25">&lt;=</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0)
+      <span class="keyword">so</span> (<a href="int.html#abs_52">abs</a> xdb) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0) <a href="int.html#infix%20%3C=_25">&lt;=</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0)
+      <span class="keyword">so</span> ( ( (<a href="int.html#abs_52">abs</a>  (<a href="#xd_238">xd</a> a n k)) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) ) <a href="int.html#infix%20+_19">+</a> ((<a href="int.html#abs_52">abs</a>  (<a href="#xd_238">xd</a> b n k)) <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0 ))) <a href="int.html#infix%20%3C=_25">&lt;=</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0))
+
+    };
+
+    <span class="keyword">assert</span> { ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> j)  = ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> g0))) (<a href="factorat.html#factor_at_9">factor_at</a> j)
+      <span class="keyword">by</span> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> g0)) = (factor <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> g0)))
+    };
+
+    <span class="keyword">assert</span> { ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> g0))) (<a href="factorat.html#factor_at_9">factor_at</a> j)  <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> j)) (<a href="factorat.html#factor_at_9">factor_at</a> j)
+           <span class="keyword">by</span> ((<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> g0)) <a href="int.html#infix%20%3C=_25">&lt;=</a>  (<a href="factorat.html#factor_at_9">factor_at</a> j)
+           <span class="comment">(* by apply leq_scale *)</span>
+           <span class="keyword">so</span> (factor <a href="int.html#infix%20*_20">*</a> ((<a href="int.html#abs_52">abs</a> f0) <a href="int.html#infix%20+_19">+</a> (<a href="int.html#abs_52">abs</a> g0))) <a href="int.html#infix%20%3C=_25">&lt;=</a>  (factor <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> j))
+           <span class="keyword">so</span> ( ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0)) (<a href="factorat.html#factor_at_9">factor_at</a> j) <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="factorat.html#factor_at_9">factor_at</a> j) <span class="keyword">by</span> ((0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0))) <span class="keyword">by</span> (factor <a href="int.html#infix%20%3E_24">&gt;</a> 0 /\ <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0) ) ) };
+    <span class="keyword">assert</span> { ED.<a href="int.html#div_170">div</a> (factor <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> j)) (<a href="factorat.html#factor_at_9">factor_at</a> j)  = <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1) };
+  <span class="keyword">end</span>
+
+  <span class="comment">(* todo: remove this definition from modinv.mlw *)</span>
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_halving'_324">is_halving&#39;</a> (ba : int) : bool =
+    ED.<a href="int.html#mod_174">mod</a> ba 2 <a href="int.html#infix%20=_16">=</a> 0
+
+  <span class="keyword">use</span> bool.<a href="bool.html#Bool_">Bool</a>
+
+  <span class="comment">(* todo: remove this definition from modinv.mlw *)</span>
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="is_divergent2_330">is_divergent2</a> (a b j ba bb f0 g0 f1 g1 : int) : bool
+    <span class="keyword">requires</span> odd { <span class="keyword">not</span> (<a href="#is_halving'_324">is_halving&#39;</a> ba) }
+  <span class="keyword">requires</span> j_geq_1 { j <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+  =   (<a href="bool.html#orb_14">orb</a> (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) ((<a href="#xt_33">xt</a> a b f0 g0 j) <a href="int.html#infix%20%3E=_26">&gt;=</a> (<a href="#xt_33">xt</a> a b f1 g1 j))) (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3E=_26">&gt;=</a> bb) ((<a href="#xt_33">xt</a> a b f0 g0 j) <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="#xt_33">xt</a> a b f1 g1 j))))
+
+ <span class="comment">(* lemma 2.12 *)</span>
+<span class="keyword">let</span> <span class="keyword">lemma</span> <a name="bound_dS1_337">bound_dS1</a> (a b f0 g0 f1 g1 n k j : int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 1 }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> j) (<a href="#updated_x_19">updated_x</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f1 g1) }
+   <span class="comment">(* requires { abs (xt a b f1 g1 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f1 g1 j)) 
+              &lt;= power 2 (n - k - 1) }   *)</span>
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> j }
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> f1 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g1 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> j }
+    <span class="keyword">requires</span> { n <a href="int.html#infix%20%3E=_26">&gt;=</a> 2 <a href="int.html#infix%20*_20">*</a> k }
+    <span class="keyword">requires</span> odd { <span class="keyword">not</span> (<a href="#is_halving'_324">is_halving&#39;</a> (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j) ) }
+    <span class="keyword">requires</span> { <a href="#is_divergent2_330">is_divergent2</a> a b j (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j) (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f1 g1 j) f0 g0 f1 g1 }
+
+    <span class="comment">(* by rewrite Assert2 abs_div3 *)</span>
+    <span class="comment">(* requires { abs (xt a b f0 g0 j - (power 2 (n - 2*k)) * (xt (approx a n k) (approx b n k) f0 g0 j)) 
+              &lt;= power 2 (n - k - 1) } *)</span>
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> ( (<a href="#xt_33">xt</a> a b f1 g1 j) <a href="int.html#infix%20-_23">-</a> (<a href="#xt_33">xt</a> a b f0 g0 j)) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (n <a href="int.html#infix%20-_23">-</a> k) }
+  = <span class="keyword">begin</span>
+
+    <span class="keyword">let</span> ba = (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f0 g0 j) <span class="keyword">in</span>
+    <span class="keyword">let</span> bb = (<a href="#xt_33">xt</a> (<a href="#approx_114">approx</a> a n k) (<a href="#approx_114">approx</a> b n k) f1 g1 j) <span class="keyword">in</span>
+    <span class="keyword">let</span> a_t = (<a href="#xt_33">xt</a> a b f0 g0 j) <span class="keyword">in</span>
+    <span class="keyword">let</span> b_t = (<a href="#xt_33">xt</a> a b f1 g1 j) <span class="keyword">in</span>
+    <span class="keyword">let</span> pn2k = <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> (2 <a href="int.html#infix%20*_20">*</a> k)) <span class="keyword">in</span>
+    <span class="keyword">let</span> pnkS1 = <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20-_23">-</a> 1) <span class="keyword">in</span>
+    <span class="comment">(* assert { abs (xt a b f0 g0 j - (power 2 (n - (2 * k)) * xt (approx a n k) (approx b n k) f0 g0 j)) = abs (div (xdaf + xdbg) (factor_at j)) };
+    (* by subst_all ; rewrite &lt;- id_updated_approx_sub *)
+    assert { divides (factor_at j) (xdaf + xdbg) };
+    *)</span>
+    <span class="keyword">assert</span> { ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20-_23">-</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t)  =  (pn2k <a href="int.html#infix%20*_20">*</a> ba <a href="int.html#infix%20-_23">-</a> a_t) <a href="int.html#infix%20-_23">-</a> (pn2k <a href="int.html#infix%20*_20">*</a> bb <a href="int.html#infix%20-_23">-</a> b_t) ) };
+    <span class="keyword">assert</span> { ( <a href="int.html#abs_52">abs</a> (a_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ba) <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> (b_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> bb) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k) )
+        <span class="keyword">by</span> ( <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> ba <a href="int.html#infix%20-_23">-</a> a_t) = <a href="int.html#abs_52">abs</a> (a_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ba) )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> bb <a href="int.html#infix%20-_23">-</a> b_t) = <a href="int.html#abs_52">abs</a> (b_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> bb) )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20-_23">-</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t) ) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> (a_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ba) <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> (b_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> bb) )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> (a_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ba) <a href="int.html#infix%20%3C=_25">&lt;=</a> pnkS1 )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> (b_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> bb) <a href="int.html#infix%20%3C=_25">&lt;=</a> pnkS1 )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> (a_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> ba) <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> (b_t <a href="int.html#infix%20-_23">-</a> pn2k <a href="int.html#infix%20*_20">*</a> bb) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k) )
+     };
+
+    <span class="keyword">assert</span> { (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3E=_26">&gt;=</a> bb) ((<a href="#xt_33">xt</a> a b f0 g0 j) <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="#xt_33">xt</a> a b f1 g1 j))) -&gt; <a href="int.html#abs_52">abs</a> ( b_t <a href="int.html#infix%20-_23">-</a> a_t ) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (n <a href="int.html#infix%20-_23">-</a> k)
+        <span class="keyword">by</span> ( <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20-_23">-</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t) ) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> ba <a href="int.html#infix%20-_23">-</a> a_t) <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> (pn2k <a href="int.html#infix%20*_20">*</a> bb <a href="int.html#infix%20-_23">-</a> b_t) )
+        <span class="keyword">so</span> ( ba <a href="int.html#infix%20-_23">-</a> bb <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 )
+        <span class="keyword">so</span> ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 )
+        <span class="keyword">so</span> ( a_t <a href="int.html#infix%20-_23">-</a> b_t <a href="int.html#infix%20%3C_21">&lt;</a> 0 )
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20-_23">-</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t) ) = ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20+_19">+</a> (b_t <a href="int.html#infix%20-_23">-</a> a_t) ) )
+        <span class="comment">(* so ( 0 &lt;= ba - bb &lt; power 2 k ) *)</span>
+        <span class="keyword">so</span> ( 0 <a href="int.html#infix%20%3C_21">&lt;</a> b_t <a href="int.html#infix%20-_23">-</a> a_t <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k) )
+        <span class="keyword">so</span> ( 0 <a href="int.html#infix%20%3C_21">&lt;</a> b_t <a href="int.html#infix%20-_23">-</a> a_t <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (n <a href="int.html#infix%20-_23">-</a> k) )
+
+    };
+    <span class="keyword">assert</span> { (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) ((<a href="#xt_33">xt</a> a b f0 g0 j) <a href="int.html#infix%20%3E=_26">&gt;=</a> (<a href="#xt_33">xt</a> a b f1 g1 j))) -&gt; <a href="int.html#abs_52">abs</a> ( b_t <a href="int.html#infix%20-_23">-</a> a_t ) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (n <a href="int.html#infix%20-_23">-</a> k)
+        <span class="keyword">by</span> ( (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20%3C_21">&lt;</a> 0 )
+        <span class="keyword">so</span> ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20%3C_21">&lt;</a> 0 )
+        <span class="keyword">so</span> (a_t <a href="int.html#infix%20-_23">-</a> b_t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0)
+        <span class="keyword">so</span> ( <a href="int.html#abs_52">abs</a> ( pn2k <a href="int.html#infix%20*_20">*</a> (ba <a href="int.html#infix%20-_23">-</a> bb) <a href="int.html#infix%20-_23">-</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t) ) = ( pn2k <a href="int.html#infix%20*_20">*</a> (bb <a href="int.html#infix%20-_23">-</a> ba) <a href="int.html#infix%20+_19">+</a> (a_t <a href="int.html#infix%20-_23">-</a> b_t) ) )
+        <span class="keyword">so</span> ( 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> a_t <a href="int.html#infix%20-_23">-</a> b_t <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (n <a href="int.html#infix%20-_23">-</a> k))
+
+    };
+
+  <span class="keyword">end</span>
+
+  <span class="comment">(* t is (j-1)*)</span>
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="regular'_405">regular&#39;</a> (a b f0 g0 f1 g1 t : int) : bool =
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    (<a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f0 g0 t) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f1 g1 t) <a href="int.html#infix%20+_19">+</a> t)
+
+   <span class="keyword">lemma</span> <a name="unfold_regular''lemma_409">unfold_regular&#39;</a> : <span class="keyword">forall</span> a b f0 g0 f1 g1 t.
+    t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; (<a href="#regular'_405">regular&#39;</a> a b f0 g0 f1 g1 t) &lt;-&gt; (<a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f0 g0 t) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f1 g1 t) <a href="int.html#infix%20+_19">+</a> t)
+
+  <span class="comment">(* t is (j-1), k is k*)</span>
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="good'_413">good&#39;</a> (a b f0 g0 f1 g1 t k : int) : bool =
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20-_23">-</a> 1 }
+    (<a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f0 g0 t) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f1 g1 t) <a href="int.html#infix%20+_19">+</a> (k<a href="int.html#infix%20-_23">-</a>1))
+
+  <span class="keyword">lemma</span> <a name="unfold_good''lemma_418">unfold_good&#39;</a> : <span class="keyword">forall</span> a b f0 g0 f1 g1 t k.
+    t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; t <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20-_23">-</a> 1 -&gt; (<a href="#good'_413">good&#39;</a> a b f0 g0 f1 g1 t k) &lt;-&gt;  (<a href="fitlen.html#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f0 g0 t) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="#xt_33">xt</a> a b f1 g1 t) <a href="int.html#infix%20+_19">+</a> (k<a href="int.html#infix%20-_23">-</a>1))
+
+  <span class="comment">(* t is (j-1). K is K *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="good'_regular'_422">good&#39;_regular&#39;</a> (a b f0 g0 f1 g1 t k : int)
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> t <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20-_23">-</a> 1 }
+    <span class="keyword">requires</span> { <a href="#good'_413">good&#39;</a> a b f0 g0 f1 g1 t k }
+    <span class="keyword">ensures</span> { <a href="#regular'_405">regular&#39;</a> a b f0 g0 f1 g1 t }
+    = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="comment">(* t is (j-1) *)</span>
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="maxt_429">maxt</a> (a b f0 g0 f1 g1 t : int) : int
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    = <a href="int.html#max_78">max</a> (<a href="#xt_33">xt</a> a b f0 g0 t) (<a href="#xt_33">xt</a> a b f1 g1 t)
+
+   <span class="keyword">lemma</span> <a name="unfold_maxt'lemma_433">unfold_maxt</a> : <span class="keyword">forall</span> a b f0 g0 f1 g1 t.
+    t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; (<a href="#maxt_429">maxt</a> a b f0 g0 f1 g1 t) = (<a href="relations.html#max_148">max</a> (<a href="#xt_33">xt</a> a b f0 g0 t) (<a href="#xt_33">xt</a> a b f1 g1 t))
+
+  <span class="comment">(* t is (j-1) *)</span>
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="mint_437">mint</a> (a b f0 g0 f1 g1 t : int) : int
+    <span class="keyword">requires</span> { t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    = <a href="int.html#min_74">min</a> (<a href="#xt_33">xt</a> a b f0 g0 t) (<a href="#xt_33">xt</a> a b f1 g1 t)
+
+  <span class="keyword">lemma</span> <a name="unfold_mint'lemma_441">unfold_mint</a> : <span class="keyword">forall</span> a b f0 g0 f1 g1 t.
+    t <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; (<a href="#mint_437">mint</a> a b f0 g0 f1 g1 t) = (<a href="relations.html#min_147">min</a> (<a href="#xt_33">xt</a> a b f0 g0 t) (<a href="#xt_33">xt</a> a b f1 g1 t))
+
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

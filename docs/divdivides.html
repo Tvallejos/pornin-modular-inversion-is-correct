@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>divdivides.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre><span class="keyword">module</span> <a name="Div_divides_">Div_divides</a>
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+
+  <span class="comment">(* use EDDivisibility *)</span>
+  <span class="comment">(* use EDParity *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> number.<a href="number.html#Parity_">Parity</a>
+  
+  <span class="keyword">lemma</span> <a name="odd_sub_div'lemma_10">odd_sub_div</a> : <span class="keyword">forall</span> a b : int. <a href="number.html#odd_12">odd</a> a -&gt; <a href="number.html#odd_12">odd</a> b -&gt; <a href="number.html#divides_42">divides</a> 2 (a <a href="int.html#infix%20-_23">-</a> b)
+  <span class="keyword">lemma</span> <a name="mod21_sub_div'lemma_11">mod21_sub_div</a> : <span class="keyword">forall</span> a b : int. ED.<a href="int.html#mod_114">mod</a> a 2 = 1 -&gt; ED.<a href="int.html#mod_114">mod</a> b 2 = 1 -&gt; <a href="number.html#divides_42">divides</a> 2 (a <a href="int.html#infix%20-_23">-</a> b)
+  
+  <span class="keyword">lemma</span> <a name="div_comp'lemma_13">div_comp</a> : <span class="keyword">forall</span> a b k : int. <a href="number.html#divides_42">divides</a> b a -&gt; <a href="number.html#divides_42">divides</a> k (ED.<a href="int.html#div_113">div</a> a b) -&gt; <a href="number.html#divides_42">divides</a> (b<a href="int.html#infix%20*_20">*</a>k) a
+  
+  <span class="keyword">lemma</span> <a name="div_divides'lemma_15">div_divides</a> : <span class="keyword">forall</span> a b : int. b &lt;&gt; 0 -&gt; <a href="number.html#divides_42">divides</a> b a -&gt; b <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_113">div</a> a b) = a 
+  
+  <span class="keyword">lemma</span> <a name="divides_factors'lemma_17">divides_factors</a> : <span class="keyword">forall</span> a k1 k2 : int. k1 &lt;&gt; 0 -&gt; <a href="number.html#divides_42">divides</a> k1 a -&gt; <a href="number.html#divides_42">divides</a> k2 (ED.<a href="int.html#div_113">div</a> a k1) -&gt; <a href="number.html#divides_42">divides</a> (k2 <a href="int.html#infix%20*_20">*</a> k1) a 
+  
+  <span class="keyword">lemma</span> <a name="divides_sub'lemma_19">divides_sub</a> : <span class="keyword">forall</span> a b k : int. <a href="number.html#divides_42">divides</a> k a -&gt; <a href="number.html#divides_42">divides</a> k b -&gt; <a href="number.html#divides_42">divides</a> k (a <a href="int.html#infix%20-_23">-</a> b) 
+
+  <span class="keyword">lemma</span> <a name="divides_factorK'lemma_21">divides_factorK</a> : <span class="keyword">forall</span> a k. k &lt;&gt; 0 -&gt; ED.<a href="int.html#div_113">div</a> (a <a href="int.html#infix%20*_20">*</a> k) k = a
+  
+  <span class="keyword">lemma</span> <a name="divides_add'lemma_23">divides_add</a> : <span class="keyword">forall</span> a b k : int. <a href="number.html#divides_42">divides</a> k a -&gt; <a href="number.html#divides_42">divides</a> k b -&gt; <a href="number.html#divides_42">divides</a> k (a <a href="int.html#infix%20+_19">+</a> b) 
+  
+  <span class="keyword">lemma</span> <a name="dividesP'lemma_25">dividesP</a> : <span class="keyword">forall</span> k a : int. <a href="number.html#divides_42">divides</a> k a &lt;-&gt; <span class="keyword">exists</span> q:int. a = q <a href="int.html#infix%20*_20">*</a> k
+  
+  <span class="comment">(* why isn&#39;t this lemma solved automatically? *)</span>
+  <span class="comment">(* by rewrite dividesP *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_sub_29">div_sub</a> (a b k : int)
+   <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+   <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+   <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k b }
+   <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) k = ED.<a href="int.html#div_170">div</a> a k <a href="int.html#infix%20-_23">-</a> ED.<a href="int.html#div_170">div</a> b k }
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> q1 q2. a = q1 <a href="int.html#infix%20*_20">*</a> k /\ b = q2 <a href="int.html#infix%20*_20">*</a> k  /\ a <a href="int.html#infix%20-_23">-</a> b = (q1 <a href="int.html#infix%20-_23">-</a> q2) <a href="int.html#infix%20*_20">*</a> k };
+    <span class="keyword">end</span> 
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_add_38">div_add</a> (a b k : int)
+   <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+   <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+   <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k b }
+   <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20+_19">+</a> b) k = ED.<a href="int.html#div_170">div</a> a k <a href="int.html#infix%20+_19">+</a> ED.<a href="int.html#div_170">div</a> b k }
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> q1 q2. a = q1 <a href="int.html#infix%20*_20">*</a> k /\ b = q2 <a href="int.html#infix%20*_20">*</a> k };
+    <span class="keyword">end</span>     
+  
+  <span class="keyword">lemma</span> <a name="div_mult'lemma_47">div_mult</a>: <span class="keyword">forall</span> x y:int [ED.<a href="int.html#div_113">div</a> (x <a href="int.html#infix%20*_20">*</a> y) x].
+          x <a href="int.html#infix%20%3E_24">&gt;</a> 0 /\ y <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+          ED.<a href="int.html#div_113">div</a> (x <a href="int.html#infix%20*_20">*</a> y) x = y 
+  
+  <span class="keyword">lemma</span> <a name="div_mult_factor_pos'lemma_51">div_mult_factor_pos</a> : <span class="keyword">forall</span> x y z:int [ED.<a href="int.html#div_113">div</a> (z <a href="int.html#infix%20*_20">*</a> x) (z <a href="int.html#infix%20*_20">*</a> y)].
+          y &lt;&gt; 0 -&gt; z <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt;
+          ED.<a href="int.html#div_113">div</a> (x <a href="int.html#infix%20*_20">*</a> z) (y <a href="int.html#infix%20*_20">*</a> z) = ED.<a href="int.html#div_113">div</a> x y
+
+  <span class="keyword">lemma</span> <a name="div_factor_divisor'lemma_55">div_factor_divisor</a> : <span class="keyword">forall</span> a b : int. b &lt;&gt; 0 -&gt; (ED.<a href="int.html#div_113">div</a> (a<a href="int.html#infix%20*_20">*</a>b) b) = a 
+  
+  <span class="keyword">lemma</span> <a name="div_negH'lemma_57">div_negH</a> : <span class="keyword">forall</span> a b : int. b &lt;&gt; 0 -&gt; <a href="number.html#divides_42">divides</a> b a -&gt; <a href="int.html#prefix%20-_18">-</a> ED.<a href="int.html#div_113">div</a> a b = ED.<a href="int.html#div_113">div</a> (<a href="int.html#prefix%20-_18">-</a>a) b
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_negL_59">div_negL</a> (a b : int) 
+   <span class="keyword">requires</span> { b &lt;&gt; 0 }
+   <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> b a } 
+   <span class="keyword">ensures</span> { <a href="int.html#prefix%20-_18">-</a> ED.<a href="int.html#div_170">div</a> a b = ED.<a href="int.html#div_170">div</a> a (<a href="int.html#prefix%20-_18">-</a> b) }
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { <a href="int.html#prefix%20-_18">-</a> ED.<a href="int.html#div_170">div</a> a b  = ED.<a href="int.html#div_170">div</a> (<a href="int.html#prefix%20-_18">-</a>a) b };
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> k. a = k <a href="int.html#infix%20*_20">*</a> b };
+  <span class="keyword">end</span>
+  
+  <span class="comment">(* by rewrite dividesP *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_mult_factor_neg_69">div_mult_factor_neg</a> (a b k : int) 
+    <span class="keyword">requires</span> { b &lt;&gt; 0 }
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3C_21">&lt;</a> 0  } 
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> b a } 
+    <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k) = ED.<a href="int.html#div_170">div</a> a b }
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k) = (-1)<a href="int.html#infix%20*_20">*</a>(<a href="int.html#prefix%20-_18">-</a> ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k)) };
+    <span class="keyword">assert</span> { (-1)<a href="int.html#infix%20*_20">*</a>(<a href="int.html#prefix%20-_18">-</a> ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k)) = (ED.<a href="int.html#div_170">div</a> (<a href="int.html#prefix%20-_18">-</a> (a <a href="int.html#infix%20*_20">*</a> k)) (<a href="int.html#prefix%20-_18">-</a> (b <a href="int.html#infix%20*_20">*</a> k))) };
+    
+    
+  <span class="keyword">end</span>
+  
+  <span class="keyword">lemma</span> <a name="divides_multl'lemma_81">divides_multl</a> : <span class="keyword">forall</span> a b c: int. <a href="number.html#divides_42">divides</a> (a <a href="int.html#infix%20*_20">*</a> b) c -&gt; <a href="number.html#divides_42">divides</a> a c
+  <span class="keyword">lemma</span> <a name="divides_multr'lemma_82">divides_multr</a> : <span class="keyword">forall</span> a b c: int. <a href="number.html#divides_42">divides</a> (a <a href="int.html#infix%20*_20">*</a> b) c -&gt; <a href="number.html#divides_42">divides</a> b c  
+
+  <span class="comment">(* why isn&#39;t this lemma solved automatically? *)</span>
+  <span class="comment">(* by rewrite dividesP *)</span>
+  <span class="keyword">lemma</span> <a name="split_factor_divisor'lemma_86">split_factor_divisor</a> : <span class="keyword">forall</span> a x y : int [ED.<a href="int.html#div_113">div</a> a (x <a href="int.html#infix%20*_20">*</a> y)].
+    x &lt;&gt; 0 -&gt; y &lt;&gt; 0 -&gt;
+    <a href="number.html#divides_42">divides</a> (x <a href="int.html#infix%20*_20">*</a> y) a -&gt;  
+    ED.<a href="int.html#div_113">div</a> a (x <a href="int.html#infix%20*_20">*</a> y) = ED.<a href="int.html#div_113">div</a> (ED.<a href="int.html#div_113">div</a> a y) x
+    
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_factors_comm_91">div_factors_comm</a> (a b k: int)
+    <span class="keyword">requires</span> { b &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> b a } 
+    <span class="keyword">ensures</span> { k <a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> a b = ED.<a href="int.html#div_170">div</a> (k <a href="int.html#infix%20*_20">*</a> a) b }
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> c. a = c <a href="int.html#infix%20*_20">*</a> b };
+    <span class="keyword">assert</span> { <span class="keyword">forall</span> c : int. a = c <a href="int.html#infix%20*_20">*</a> b -&gt; ED.<a href="int.html#div_170">div</a> a b = c };
+    <span class="keyword">assert</span> { <span class="keyword">forall</span> c : int. a = c <a href="int.html#infix%20*_20">*</a> b -&gt; ED.<a href="int.html#div_170">div</a> (k <a href="int.html#infix%20*_20">*</a> a) b = k <a href="int.html#infix%20*_20">*</a> c };    
+   <span class="keyword">end</span>
+   
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_lt_mono_101">div_lt_mono</a> (a b k : int)
+    <span class="keyword">requires</span> { b &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a } 
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k b } 
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3E_24">&gt;</a> b } 
+    <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> a k <a href="int.html#infix%20%3E_24">&gt;</a> ED.<a href="int.html#div_170">div</a> b k } 
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> q1. a = q1 <a href="int.html#infix%20*_20">*</a> k };
+    <span class="keyword">assert</span> { <span class="keyword">exists</span> q2. b = q2 <a href="int.html#infix%20*_20">*</a> k };   
+    <span class="keyword">assert</span> {  k<a href="int.html#infix%20*_20">*</a>ED.<a href="int.html#div_170">div</a> a k <a href="int.html#infix%20%3E_24">&gt;</a> k<a href="int.html#infix%20*_20">*</a> ED.<a href="int.html#div_170">div</a> b k };
+  
+   <span class="keyword">end</span>
+   
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+  
+      
+  <span class="keyword">lemma</span> <a name="div_gt'lemma_118">div_gt</a> : <span class="keyword">forall</span> x y : int. y &lt;&gt; 0 -&gt; 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20%3C_21">&lt;</a> y -&gt; ED.<a href="int.html#div_113">div</a> x y = 0
+  
+  <span class="keyword">lemma</span> <a name="gt_div'lemma_120">gt_div</a> : 
+    <span class="keyword">forall</span> x y k: int. 
+    0 <a href="int.html#infix%20%3C=_25">&lt;=</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> x -&gt; 
+    0 <a href="int.html#infix%20%3C_21">&lt;</a> k -&gt; 
+    (ED.<a href="int.html#div_113">div</a> y k) <a href="int.html#infix%20%3C=_25">&lt;=</a> (ED.<a href="int.html#div_113">div</a> x k)
+  
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_multC_127">abs_multC</a> (a b : int)
+
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (a <a href="int.html#infix%20*_20">*</a> b) = <a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> b }
+  = <span class="keyword">begin</span>
+   
+  <span class="keyword">end</span>   
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_neg_134">div_neg</a> (a k : int) 
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> a k <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a) k <a href="int.html#infix%20+_19">+</a> 1 }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_div_139">abs_div</a> (a k : int)
+    <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> a k) <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a) k <a href="int.html#infix%20+_19">+</a> 1 }
+  = <span class="keyword">begin</span>
+   
+  <span class="keyword">end</span>
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_div_le_148">abs_div_le</a> (a k : int)
+    <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> a k) <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a) k  }
+  = <span class="keyword">begin</span>
+   
+  <span class="keyword">end</span>  
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_div_strong_157">abs_div_strong</a> (a k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> a k) = ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a) k }
+  = <span class="keyword">begin</span>
+     
+  <span class="keyword">end</span>   
+  
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_div2_166">abs_div2</a> (a b k : int)
+    <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k b } 
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20+_19">+</a> b) k) <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> b) k <a href="int.html#infix%20+_19">+</a> 1 }
+  = <span class="keyword">begin</span>
+   
+  <span class="keyword">end</span> 
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_div3_176">abs_div3</a> (a k : int)
+    <span class="keyword">requires</span> { k <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a }
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (ED.<a href="int.html#div_170">div</a> a k) = ED.<a href="int.html#div_170">div</a> (<a href="int.html#abs_52">abs</a> a) k }
+  = <span class="keyword">begin</span>
+   
+  <span class="keyword">end</span> 
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_add_184">abs_add</a> (a b : int) 
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> (a <a href="int.html#infix%20+_19">+</a> b) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> b } 
+  = <span class="keyword">begin</span> <span class="keyword">end</span> 
+    
+   
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_sub_bounds_gt_189">abs_sub_bounds_gt</a> (a b k : int)
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { b <a href="int.html#infix%20%3C_21">&lt;</a> 0 } 
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> ( a <a href="int.html#infix%20-_23">-</a> b) <a href="int.html#infix%20%3C_21">&lt;</a> k }
+    <span class="keyword">ensures</span> { a <a href="int.html#infix%20%3C=_25">&lt;=</a> k }
+    <span class="keyword">ensures</span> { b <a href="int.html#infix%20%3E_24">&gt;</a> <a href="int.html#prefix%20-_18">-</a> k }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+  
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_sub_bounds_geq_197">abs_sub_bounds_geq</a> (a b k : int)
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { b <a href="int.html#infix%20%3C_21">&lt;</a> 0 } 
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> ( a <a href="int.html#infix%20-_23">-</a> b) <a href="int.html#infix%20%3C=_25">&lt;=</a> k }
+    <span class="keyword">ensures</span> { a <a href="int.html#infix%20%3C=_25">&lt;=</a> k }
+    <span class="keyword">ensures</span> { b <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="int.html#prefix%20-_18">-</a> k }
+  = <span class="keyword">begin</span> <span class="keyword">end</span> 
+  
+  
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="div_abs_add_leq_206">div_abs_add_leq</a> (a b f0 g0 k j : int)
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20%3C_21">&lt;</a> k }
+    <span class="keyword">requires</span> { <a href="int.html#abs_52">abs</a> b <a href="int.html#infix%20%3C_21">&lt;</a> k }
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20%3E_24">&gt;</a> 0 } 
+    <span class="keyword">ensures</span> { ED.<a href="int.html#div_170">div</a> ( (<a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> b <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> g0) ) j <a href="int.html#infix%20%3C=_25">&lt;=</a> ED.<a href="int.html#div_170">div</a> ( k <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0)) j }
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { (<a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> b <a href="int.html#infix%20*_20">*</a> <a href="int.html#abs_52">abs</a> g0) <a href="int.html#infix%20%3C=_25">&lt;=</a> ( k <a href="int.html#infix%20*_20">*</a> (<a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g0)) };
+  <span class="keyword">end</span> 
+   
+  
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

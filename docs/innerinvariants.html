@@ -1,0 +1,365 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>innerinvariants.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre><span class="keyword">module</span> <a name="InnerInv_">InnerInv</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+
+  <span class="keyword">use</span> number.<a href="number.html#Prime_">Prime</a>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> number.<a href="number.html#Gcd_">Gcd</a>
+  <span class="keyword">use</span> number.<a href="number.html#Parity_">Parity</a>
+  <span class="keyword">use</span> number.<a href="number.html#Coprime_">Coprime</a>
+  <span class="keyword">use</span> int.<a href="int.html#Power_">Power</a>
+  <span class="keyword">use</span> congr.<a href="congr.html#Congr_">Congr</a>
+  <span class="keyword">use</span> fitlen.<a href="fitlen.html#FitLen_">FitLen</a>
+  <span class="keyword">use</span> int.<a href="int.html#MinMax_">MinMax</a>
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+  <span class="keyword">use</span> ceildiv.<a href="ceildiv.html#Ceil_div_">Ceil_div</a>
+  <span class="keyword">use</span> montred.<a href="montred.html#Mont_red_">Mont_red</a>
+  <span class="keyword">use</span> factorat.<a href="factorat.html#Factor_at_">Factor_at</a>
+  <span class="keyword">use</span> util.<a href="util.html#Util_">Util</a>
+  <span class="keyword">use</span> divdivides.<a href="divdivides.html#Div_divides_">Div_divides</a>
+  <span class="keyword">use</span> bool.<a href="bool.html#Bool_">Bool</a>
+
+  <span class="keyword">use</span> invariantsnotation.<a href="invariantsnotation.html#Xt_">Xt</a>
+
+  <span class="keyword">val</span> <span class="keyword">constant</span> <a name="m_25">m</a> : int
+  <span class="keyword">axiom</span> <a name="m_gt3'lemma_26">m_gt3</a> : <a href="#m_25">m</a> <a href="int.html#infix%20%3E=_26">&gt;=</a> 3
+  <span class="keyword">axiom</span> <a name="m_odd'lemma_27">m_odd</a> : ED.<a href="int.html#mod_114">mod</a> <a href="#m_25">m</a> 2 = 1
+
+  <span class="keyword">clone</span> <span class="keyword">export</span> modops.<a href="modops.html#ModOps_">ModOps</a> <span class="keyword">with</span> <span class="keyword">constant</span> <a href="modops.html#m_6">m</a> = <a href="#m_25">m</a> , <span class="keyword">goal</span> <a href="modops.html#m_pos'lemma_7">m_pos</a>, <span class="keyword">axiom</span> .
+
+  <span class="keyword">lemma</span> <a name="congr_m_congr'lemma_31">congr_m_congr</a> : <span class="keyword">forall</span> a b. <a href="modops.html#congr_m_14">congr_m</a> a b -&gt; <a href="congr.html#congr_15">congr</a> a b <a href="#m_25">m</a>
+
+  <span class="keyword">let</span> <a name="update_uv_33">update_uv</a> (u v f0 g0 f1 g1: int) : (int,int) =
+    (f0<a href="int.html#infix%20*_20">*</a>u <a href="int.html#infix%20+_19">+</a> g0<a href="int.html#infix%20*_20">*</a>v, f1<a href="int.html#infix%20*_20">*</a>u <a href="int.html#infix%20+_19">+</a> g1<a href="int.html#infix%20*_20">*</a>v)
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_even_36">congr_even</a> (a y : int) (bu : <a href="modops.html#t_9">t</a>)
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> a (bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { <a href="number.html#coprime_190">coprime</a> 2 <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> a 2 = 0 }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> a 2) (<a href="#mont_div_mod_29">mont_div_mod</a> bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a>  }
+    =  <span class="keyword">begin</span>
+        <span class="keyword">assert</span> { <a href="congr.html#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> a 2) (<a href="#mont_div_mod_29">mont_div_mod</a> bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a>
+          <span class="keyword">by</span> ((<a href="congr.html#congr_15">congr</a> ((ED.<a href="int.html#div_170">div</a> a 2) <a href="int.html#infix%20*_20">*</a> 2) ((<a href="#mont_div_mod_29">mont_div_mod</a> bu <a href="int.html#infix%20*_20">*</a> y) <a href="int.html#infix%20*_20">*</a> 2) <a href="#m_25">m</a>)
+            <span class="keyword">by</span> (ED.<a href="int.html#div_170">div</a> a 2 <a href="int.html#infix%20*_20">*</a> 2 = a)
+              /\
+              <span class="comment">(* by rewrite H *)</span>
+              ( <a href="congr.html#congr_15">congr</a> ((<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu) <a href="int.html#infix%20*_20">*</a> y) <a href="int.html#infix%20*_20">*</a> 2) (bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> <span class="keyword">by</span> ((<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu) <a href="int.html#infix%20*_20">*</a> y) <a href="int.html#infix%20*_20">*</a> 2) = ((2 <a href="int.html#infix%20*_20">*</a> <a href="#mont_div_mod_29">mont_div_mod</a> bu) <a href="int.html#infix%20*_20">*</a> y) )) }
+        <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_barfg0_even_50">congr_barfg0_even</a> (f0 bf0 j: int)
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> f0 (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf0) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> f0 (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> bf0 <a href="#m_25">m</a>) <a href="#m_25">m</a> }
+    = <span class="keyword">begin</span>
+      <span class="keyword">assert</span> { <a href="congr.html#congr_15">congr</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> bf0 <a href="#m_25">m</a>) bf0 <a href="#m_25">m</a> };
+      <span class="keyword">assert</span> { <a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = 2 <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <span class="keyword">by</span> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1};
+      <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_barfg1_even_59">congr_barfg1_even</a> (f1 bf1 j: int)
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> f1 (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf1) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (2 <a href="int.html#infix%20*_20">*</a> f1) (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf1) <a href="#m_25">m</a> }
+    = <span class="keyword">begin</span> <span class="keyword">assert</span> { (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf1) = ((<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf1) <a href="int.html#infix%20*_20">*</a> 2)
+                        <span class="keyword">by</span>  (((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = ((j<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> 1) ) }
+      <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_mut_uf0_68">congr_mut_uf0</a> (u bu  v : <a href="modops.html#t_9">t</a>) (k f0 g0 i j : int)
+  <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) f0 g0)
+                   (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> bu) <a href="#m_25">m</a> }
+  <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (i <a href="int.html#infix%20-_23">-</a> 1) }
+  <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+  <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (k <a href="int.html#infix%20-_23">-</a> 1) }
+  <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) f0 g0)
+                  (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu))
+                  <a href="#m_25">m</a> }
+  = <span class="keyword">begin</span>
+   <span class="keyword">assert</span> {  <a href="congr.html#congr_15">congr</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu)) (<a href="#to_int_29">to_int</a> bu) <a href="#m_25">m</a> };
+   <span class="keyword">assert</span> { (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu))
+             = (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu)))
+             <span class="keyword">by</span> <a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) = (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> 2
+             };
+    <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_mut_uf1_85">congr_mut_uf1</a> (u v bv : <a href="modops.html#t_9">t</a>) (k f1 g1 i j : int)
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (i <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (k <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) f1 g1)
+                     (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> bv)
+                     <a href="#m_25">m</a> }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1))  (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> bv) <a href="#m_25">m</a> }
+    = <span class="keyword">begin</span>
+      <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_mut_odd_96">congr_mut_odd</a> (u v bu bv : <a href="modops.html#t_9">t</a>) (f0 f1 g0 g1 i j k: int)
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (i <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> (k <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) f0 g0) ((<a href="factorat.html#factor_at_9">factor_at</a> ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1 )) <a href="int.html#infix%20*_20">*</a> bu) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) f1 g1) ((<a href="factorat.html#factor_at_9">factor_at</a> ((k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1 )) <a href="int.html#infix%20*_20">*</a> bv) <a href="#m_25">m</a> }
+    <span class="keyword">ensures</span>  { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> (<a href="#to_int_29">to_int</a> u) (<a href="#to_int_29">to_int</a> v) (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1))
+                     (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)  <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv)))
+                     <a href="#m_25">m</a> }
+  = <span class="keyword">begin</span>
+           <span class="keyword">assert</span> { <a href="congr.html#congr_15">congr</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)  <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv)))
+                          ((<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20-_23">-</a> <a href="#to_int_29">to_int</a> bv) <a href="int.html#infix%20*_20">*</a>  (<a href="factorat.html#factor_at_9">factor_at</a> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1)))
+                           <a href="#m_25">m</a>
+
+                  <span class="keyword">by</span> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) = ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> 1
+                     /\ (<a href="congr.html#congr_15">congr</a> (<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20-_23">-</a> <a href="#to_int_29">to_int</a> bv) (<a href="#sub_29">sub</a> bu bv) <a href="#m_25">m</a>)
+                  <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> ((<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20-_23">-</a> <a href="#to_int_29">to_int</a> bv) <a href="int.html#infix%20*_20">*</a>  (<a href="factorat.html#factor_at_9">factor_at</a> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1))) ((<a href="#sub_29">sub</a> bu bv) <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1)) ) <a href="#m_25">m</a>)
+                  <span class="keyword">so</span> (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)  <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv)))
+                     = (2 <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv))) <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1))
+                  <span class="keyword">so</span> <a href="congr.html#congr_15">congr</a> ((2 <a href="int.html#infix%20*_20">*</a> <a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv))) <a href="int.html#infix%20*_20">*</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20-_23">-</a> 1)))
+                           ((<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20-_23">-</a> <a href="#to_int_29">to_int</a> bv) <a href="int.html#infix%20*_20">*</a>  (<a href="factorat.html#factor_at_9">factor_at</a> (((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1)))
+                            <a href="#m_25">m</a>
+                  } ;
+    <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="gcd_odd_lt_121">gcd_odd_lt</a> (a b : int)
+  <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> b 2 = 1 }
+  <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> a 2 = 1 }
+  <span class="keyword">ensures</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) b }
+  = <span class="keyword">begin</span> <span class="keyword">assert</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) b
+                    <span class="keyword">by</span> ED.<a href="int.html#mod_174">mod</a> (a <a href="int.html#infix%20-_23">-</a> b) 2 = 0
+                    <span class="keyword">so</span> <a href="number.html#gcd_111">gcd</a> (a <a href="int.html#infix%20-_23">-</a> b) b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) b /\ <a href="number.html#gcd_111">gcd</a> b a = <a href="number.html#gcd_111">gcd</a> b (a <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20*_20">*</a> b)
+                    <span class="keyword">so</span> <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (a <a href="int.html#infix%20-_23">-</a> b) b };
+    <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inv_bezout_odd_u_131">inv_bezout_odd_u</a> (a b y: int) (bu bv : <a href="modops.html#t_9">t</a>)
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> b 2 = 1 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> a 2 = 1 }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> a (bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> b (bv <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) (<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv)) <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+    = <span class="keyword">begin</span>
+       <span class="keyword">let</span> a&#39; = ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2 <span class="keyword">in</span> <span class="keyword">let</span> bu&#39; = <a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bu bv) <span class="keyword">in</span>
+       <span class="keyword">assert</span> { <a href="congr.html#congr_15">congr</a> a&#39; (y <a href="int.html#infix%20*_20">*</a> bu&#39;) <a href="#m_25">m</a>
+                  <span class="keyword">by</span> <a href="congr.html#congr_15">congr</a> ((<a href="#m_25">m</a> <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20*_20">*</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y)) (<a href="#m_25">m</a> <a href="int.html#infix%20*_20">*</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y) <a href="int.html#infix%20+_19">+</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y)) <a href="#m_25">m</a>
+                  <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y) ((<a href="#m_25">m</a> <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20*_20">*</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y)) <a href="#m_25">m</a> <span class="keyword">by</span> <a href="congr.html#congr_15">congr</a> ((<a href="#m_25">m</a> <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20*_20">*</a> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y)) (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y)  <a href="#m_25">m</a>)
+                  <span class="keyword">so</span> (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y = (bu<a href="int.html#infix%20-_23">-</a>bv)<a href="int.html#infix%20*_20">*</a>y)
+
+                  <span class="keyword">so</span> ((<a href="congr.html#congr_15">congr</a> (bu<a href="int.html#infix%20-_23">-</a>bv) (2 <a href="int.html#infix%20*_20">*</a> bu&#39;) <a href="#m_25">m</a>) <span class="keyword">by</span> (<a href="congr.html#congr_15">congr</a> (<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20-_23">-</a> <a href="#to_int_29">to_int</a> bv) (<a href="#sub_29">sub</a> bu bv) <a href="#m_25">m</a>))
+                  <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> ((bu<a href="int.html#infix%20-_23">-</a>bv)<a href="int.html#infix%20*_20">*</a>y) ((2 <a href="int.html#infix%20*_20">*</a> bu&#39;) <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a>)
+                  <span class="keyword">so</span> (<a href="congr.html#congr_15">congr</a> ((ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) <a href="int.html#infix%20*_20">*</a> 2) (y <a href="int.html#infix%20*_20">*</a> (2 <a href="int.html#infix%20*_20">*</a> bu&#39;)) <a href="#m_25">m</a>
+                    <span class="keyword">by</span> ((<a href="congr.html#congr_15">congr</a> (a <a href="int.html#infix%20-_23">-</a> b) (a&#39; <a href="int.html#infix%20*_20">*</a> 2) <a href="#m_25">m</a> <span class="keyword">by</span> ED.<a href="int.html#mod_174">mod</a> (a <a href="int.html#infix%20-_23">-</a> b) 2 = 0) /\ <a href="congr.html#congr_15">congr</a> (a <a href="int.html#infix%20-_23">-</a> b) (bu<a href="int.html#infix%20*_20">*</a>y <a href="int.html#infix%20-_23">-</a> bv<a href="int.html#infix%20*_20">*</a>y) <a href="#m_25">m</a>)) };
+        <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inv_bezout_odd_u'_150">inv_bezout_odd_u&#39;</a> (a b j y f0 g0 f1 g1: int) (bu bv : <a href="modops.html#t_9">t</a>)
+     <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+     <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+     <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="int.html#power_348">power</a> 2 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) }
+     <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+     <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f0) (2 <a href="int.html#infix%20*_20">*</a> g0) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+     <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+     <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#to_int_29">to_int</a> bv <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+     <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b (f1 <a href="int.html#infix%20-_23">-</a> f0) (g1 <a href="int.html#infix%20-_23">-</a> g0) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bv bu)) <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+   = <span class="keyword">begin</span>
+  <span class="keyword">assert</span> { <a href="congr.html#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> <a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2)
+  (<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> (<a href="#sub_29">sub</a> bv bu)) <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> };
+  <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) 2 = 1 };
+  <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) 2 = 1 };
+  <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="pres_f0_odd_166">pres_f0_odd</a> (f0 f1 j bf0 bf1 : int)
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> f0 (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf0) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> f1 (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> bf1) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (f0 <a href="int.html#infix%20-_23">-</a> f1) (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1) <a href="#m_25">m</a>) <a href="#m_25">m</a>  }
+   = <span class="keyword">begin</span> <span class="keyword">assert</span> {  <a href="congr.html#congr_15">congr</a> (f0 <a href="int.html#infix%20-_23">-</a> f1) (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1) <a href="#m_25">m</a>) <a href="#m_25">m</a>
+                     <span class="keyword">by</span> <a href="congr.html#congr_15">congr</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1) <a href="#m_25">m</a>) ( (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1) ) <a href="#m_25">m</a>
+                     <span class="keyword">by</span> <a href="congr.html#congr_15">congr</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1) <a href="#m_25">m</a>) ( (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20*_20">*</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="congr.html#div_mod_127">div_mod</a> (bf0 <a href="int.html#infix%20-_23">-</a> bf1 ) <a href="#m_25">m</a>)) <a href="#m_25">m</a> };
+     <span class="keyword">end</span>
+
+  <span class="comment">(* gcd *)</span>
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_gcd_even_178">inner_gcd_even</a> (a b f0 g0 f1 g1 j : int)
+    <span class="keyword">requires</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) }
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) 2 = 0 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) 2 = 1 }
+    <span class="keyword">ensures</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) }
+    <span class="comment">(*ensures { gcd a b = gcd (xt a b f0 g0 (j + 1)) (xt a b (2 * f1) (2 * g1) (j + 1)) }*)</span>
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) };
+    <span class="comment">(* assert { (xt a b (2 * f1) (2 * g1) ((j + 1) - 1)) = (xt a b f1 g1 (j - 1)) }; *)</span>
+
+  <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="gcd_inner_odd_193">gcd_inner_odd</a> (a b f0 g0 f1 g1 j k : int)
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                     (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> ED.<a href="int.html#mod_174">mod</a>
+                  (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+                  (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                    2 = 0 }
+    <span class="keyword">ensures</span> {  <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1))
+               = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1))}
+
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = <a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1) };
+    <span class="keyword">assert</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) (j <a href="int.html#infix%20-_23">-</a> 1) = ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0 <a href="int.html#infix%20-_23">-</a> <a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) };
+    <span class="keyword">assert</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) (j <a href="int.html#infix%20-_23">-</a> 1) = (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20-_23">-</a> <a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) }
+  <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="gcd_inner_odd_swap_213">gcd_inner_odd_swap</a> (a b f0 g0 f1 g1 j k : int)
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">requires</span> { (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 1 }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                     (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> ED.<a href="int.html#mod_174">mod</a>
+                  (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+                  (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                    2 = 0 }
+    <span class="keyword">ensures</span> {  <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+               = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b (f0 <a href="int.html#infix%20-_23">-</a> f1) (g0 <a href="int.html#infix%20-_23">-</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1))}
+
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) = <a href="number.html#gcd_111">gcd</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j <a href="int.html#infix%20-_23">-</a> 1)) };
+  <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="inner_bound_at_even_231">inner_bound_at_even</a> (a b f0 g0 j m : int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { b <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { b <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (<a href="fitlen.html#len_18">len</a> m) }
+    <span class="keyword">requires</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (<a href="fitlen.html#len_18">len</a> m) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> 2 (ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1))) }
+    <span class="keyword">ensures</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (<a href="fitlen.html#len_18">len</a> m) }
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) };
+
+  <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_even_bu_244">congr_even_bu</a> (a b f0 g0 j ba y: int) (bu : <a href="modops.html#t_9">t</a>)
+    <span class="comment">(* requires { mod m 2 = 1 } *)</span>
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) ba 2 }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="#to_int_29">to_int</a> bu <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> ba 2 = 0 }
+    <span class="keyword">ensures</span> { <a href="congr.html#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2) (<a href="#to_int_29">to_int</a> (<a href="#mont_div_mod_29">mont_div_mod</a> bu) <a href="int.html#infix%20*_20">*</a> y) <a href="#m_25">m</a> }
+   = <span class="keyword">begin</span> <span class="keyword">assert</span> {<a href="number.html#coprime_190">coprime</a> 2 <a href="#m_25">m</a>} <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="exact_divs_even_f1_253">exact_divs_even_f1</a> (a b f1 g1 j: int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f1 g1) }
+    <span class="keyword">ensures</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1)) }
+   = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+   <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="exact_divs_even_f0_260">exact_divs_even_f0</a> (a b f0 g0 j: int)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 0 }
+    <span class="keyword">ensures</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+   = <span class="keyword">begin</span>
+     <span class="comment">(*assert { divides 2 (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) by ( divides 2 (ED.div (updated_x a b f0 g0) (factor_at (j - 1))) ) };
+     assert { divides (2 * factor_at (j - 1)) (updated_x a b f0 g0) };   *)</span>
+   <span class="keyword">end</span>
+
+  <span class="keyword">lemma</span> <a name="mod_div_test'lemma_271">mod_div_test</a> : <span class="keyword">forall</span> a i. i <a href="int.html#infix%20%3E=_26">&gt;=</a> 1 -&gt; <a href="congr.html#congr_15">congr</a> a (ED.<a href="int.html#mod_114">mod</a> a (<a href="int.html#power_348">power</a> 2 i)) 2
+  <span class="comment">(* lemma mod_div_approx : forall a i : int. i &gt;= 1 -&gt; congr (ED.div a (power 2 i)) (ED.div (mod a (power 2 (i+1))) (power 2 i)) 2    *)</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="not_div_dec_len_even_275">not_div_dec_len_even</a> (y a b f0 g0 f1 g1 i j k : int) (not_div : bool)
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> { not_div = True }
+    <span class="keyword">requires</span> { not_div -&gt; (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 /\ (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 } <span class="comment">(* has not diverged *)</span>
+    <span class="keyword">requires</span> { (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) = 0 \/ (<a href="fitlen.html#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> <a href="#m_25">m</a> <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="fitlen.html#len_18">len</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f1 g1 (j<a href="int.html#infix%20-_23">-</a>1)) <a href="int.html#infix%20+_19">+</a> (k<a href="int.html#infix%20-_23">-</a>1)<a href="int.html#infix%20*_20">*</a>(i<a href="int.html#infix%20-_23">-</a>1) <a href="int.html#infix%20+_19">+</a> j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> (<a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) }
+    <span class="keyword">requires</span> { <a href="congr.html#congr_15">congr</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                      (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1))
+                      2 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> (<a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f0 g0 (j <a href="int.html#infix%20-_23">-</a> 1)) 2 = 0 }
+
+    <span class="keyword">ensures</span> { <a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) = 0 \/
+         (<a href="fitlen.html#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> <a href="#m_25">m</a>)
+                   <a href="int.html#infix%20%3E=_26">&gt;=</a> ((((<a href="fitlen.html#len_18">len</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b f0 g0 ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1))
+                       <a href="int.html#infix%20+_19">+</a> <a href="fitlen.html#len_18">len</a> (<a href="invariantsnotation.html#xt_33">xt</a> a b (2 <a href="int.html#infix%20*_20">*</a> f1) (2 <a href="int.html#infix%20*_20">*</a> g1) ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1)))
+                       <a href="int.html#infix%20+_19">+</a> ((k <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20*_20">*</a> (i <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20-_23">-</a> 1) }
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <span class="keyword">not</span> <a href="factorat.html#factor_at_9">factor_at</a> (j<a href="int.html#infix%20-_23">-</a>1) = 0 };
+    <span class="keyword">assert</span> { <a href="number.html#divides_42">divides</a> ( 2 <a href="int.html#infix%20*_20">*</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1)) (<a href="invariantsnotation.html#updated_x_19">updated_x</a> a b f0 g0) };
+
+  <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="contr_divergence_1_297">contr_divergence_1</a> (a b ba bb : int)
+    <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="bool.html#orb_14">orb</a> (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) (a <a href="int.html#infix%20%3E=_26">&gt;=</a> b)) (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3E=_26">&gt;=</a> bb) (a <a href="int.html#infix%20%3C_21">&lt;</a> b))) }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) }
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3C_21">&lt;</a> b }
+    <span class="keyword">ensures</span> { False }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="contr_divergence_2_304">contr_divergence_2</a> (a b ba bb : int)
+    <span class="keyword">requires</span> { <span class="keyword">not</span> (<a href="bool.html#orb_14">orb</a> (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) (a <a href="int.html#infix%20%3E=_26">&gt;=</a> b)) (<a href="bool.html#andb_8">andb</a> (ba <a href="int.html#infix%20%3E=_26">&gt;=</a> bb) (a <a href="int.html#infix%20%3C_21">&lt;</a> b))) }
+    <span class="keyword">requires</span> { (ba <a href="int.html#infix%20%3C_21">&lt;</a> bb) }
+    <span class="keyword">requires</span> { <span class="keyword">not</span> a <a href="int.html#infix%20%3C_21">&lt;</a> b }
+    <span class="keyword">ensures</span> { False }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="abs_bound_f0g0_odd_311">abs_bound_f0g0_odd</a> (a b k f0 g0 f1 g1 j f01 g01 f11 g11 bb ba bg1 bg0 bg01 bg11 bf1 bf01 bf0 bf11: int)
+    (bv bu1 bu bv1 : <a href="modops.html#t_9">t</a>)
+    <span class="keyword">requires</span> {  (<a href="int.html#abs_52">abs</a> f01 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g01) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { (<a href="int.html#abs_52">abs</a> f11 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g11) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> (j <a href="int.html#infix%20-_23">-</a> 1) }
+    <span class="keyword">requires</span> { j <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">requires</span> {   <span class="keyword">if</span> <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+     (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f01 g01 (j <a href="int.html#infix%20-_23">-</a> 1)
+     <a href="int.html#infix%20%3C_21">&lt;</a> <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+       (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f11 g11 (j <a href="int.html#infix%20-_23">-</a> 1)
+  <span class="keyword">then</span> (bb =
+        <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+        (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f01 g01 (j <a href="int.html#infix%20-_23">-</a> 1) /\
+        ba =
+        <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+        (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f11 g11 (j <a href="int.html#infix%20-_23">-</a> 1)) /\
+       (g1 = g01 /\ g0 = g11 /\ f1 = f01 /\ f0 = f11) /\
+       (bg1 = bg01 /\ bg0 = bg11 /\ bf1 = bf01 /\ bf0 = bf11) /\
+       bv = bu1 /\ bu = bv1
+  <span class="keyword">else</span> ((((((((((bu = bu1 /\ bv = bv1) /\
+                ba =
+                <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+                (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f01 g01
+                (j <a href="int.html#infix%20-_23">-</a> 1)) /\
+               bb =
+               <a href="invariantsnotation.html#xt_33">xt</a> (<a href="invariantsnotation.html#approx_114">approx</a> a (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k)
+               (<a href="invariantsnotation.html#approx_114">approx</a> b (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> a) (<a href="int.html#max_78">max</a> (<a href="fitlen.html#len_18">len</a> b) (2 <a href="int.html#infix%20*_20">*</a> k))) k) f11 g11
+               (j <a href="int.html#infix%20-_23">-</a> 1)) /\
+              f0 = f01) /\
+             f1 = f11) /\
+            g0 = g01) /\
+           g1 = g11) /\
+          bf0 = bf01) /\
+         bf1 = bf11) /\
+        bg0 = bg01) /\
+       bg1 = bg11 }
+    <span class="keyword">ensures</span> { (<a href="int.html#abs_52">abs</a> (f0 <a href="int.html#infix%20-_23">-</a> f1) <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> (g0 <a href="int.html#infix%20-_23">-</a> g1)) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="factorat.html#factor_at_9">factor_at</a> ((j <a href="int.html#infix%20+_19">+</a> 1) <a href="int.html#infix%20-_23">-</a> 1) }
+  = <span class="keyword">begin</span>
+    <span class="keyword">assert</span> { <a href="int.html#abs_52">abs</a> (f0 <a href="int.html#infix%20-_23">-</a> f1) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> f0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> f1 };
+    <span class="keyword">assert</span> { <a href="int.html#abs_52">abs</a> (g0 <a href="int.html#infix%20-_23">-</a> g1) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> g0 <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> g1 };
+
+  <span class="keyword">end</span>
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

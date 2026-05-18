@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>congr.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre>
+<span class="keyword">module</span> <a name="Congr_">Congr</a>
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+
+  <span class="keyword">use</span> number.<a href="number.html#Prime_">Prime</a>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a> 
+  <span class="comment">(* use EDDivisibility *)</span>
+  
+
+  <span class="keyword">use</span> number.<a href="number.html#Parity_">Parity</a>
+  <span class="keyword">use</span> number.<a href="number.html#Coprime_">Coprime</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+
+  
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="congr_15">congr</a> (a b m : int) : bool = 
+    <span class="keyword">requires</span> { m &lt;&gt; 0 }
+    ED.<a href="int.html#mod_174">mod</a> a m <a href="int.html#infix%20=_16">=</a> ED.<a href="int.html#mod_174">mod</a> b m
+    
+  <span class="comment">(*lemma congr_divides : forall a b m : int.
+    m &lt;&gt; 0 -&gt; congr a b m &lt;-&gt; divides m (a - b)*)</span>
+    
+  <span class="comment">(*lemma mod_sum_mod : forall a b m.
+    m &lt;&gt; 0 -&gt; ED.mod (a + b) m = ED.mod ((ED.mod a m) + (ED.mod b m)) m *)</span>
+
+        
+  <span class="keyword">lemma</span> <a name="unfold_congr'lemma_26">unfold_congr</a> : <span class="keyword">forall</span> a b m.
+    m &lt;&gt; 0 -&gt; <a href="#congr_15">congr</a> a b m &lt;-&gt; ED.<a href="int.html#mod_114">mod</a> a m = ED.<a href="int.html#mod_114">mod</a> b m  
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#unfold_congr'lemma_26">unfold_congr</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+
+  <span class="keyword">lemma</span> <a name="mod_x_2_01'lemma_30">mod_x_2_01</a> : <span class="keyword">forall</span> x. ED.<a href="int.html#mod_114">mod</a> x 2 = 0 \/ ED.<a href="int.html#mod_114">mod</a> x 2 = 1 
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_x_2_01'lemma_30">mod_x_2_01</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+  
+  <span class="keyword">lemma</span> <a name="odd_mod2'lemma_33">odd_mod2</a> :
+    <span class="keyword">forall</span> n:int. <a href="number.html#odd_12">odd</a> n &lt;-&gt; ED.<a href="int.html#mod_114">mod</a> n 2 = 1
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#odd_mod2'lemma_33">odd_mod2</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+  
+ <span class="comment">(* cannot be proven by the solvers *)</span>
+  <span class="keyword">lemma</span> <a name="mod_scaleRL'lemma_38">mod_scaleRL</a> : <span class="keyword">forall</span> a b k m. 
+  m &lt;&gt; 0 -&gt;
+    k &lt;&gt; 0 -&gt; <a href="number.html#coprime_190">coprime</a> k m -&gt; <a href="#congr_15">congr</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k) m -&gt; <a href="#congr_15">congr</a> a b m 
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_scaleRL'lemma_38">mod_scaleRL</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+
+ <span class="comment">(* cannot be proven by the solvers *)</span>    
+  <span class="keyword">lemma</span> <a name="mod_scaleLR'lemma_44">mod_scaleLR</a> : <span class="keyword">forall</span> a b k m. 
+  m &lt;&gt; 0 -&gt; 
+    <a href="#congr_15">congr</a> a b m -&gt; <a href="#congr_15">congr</a> (a <a href="int.html#infix%20*_20">*</a> k) (b <a href="int.html#infix%20*_20">*</a> k) m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_scaleLR'lemma_44">mod_scaleLR</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+
+  <span class="comment">(* cannot be proven by the solvers *)</span>  
+  <span class="keyword">lemma</span> <a name="mod_sub'lemma_50">mod_sub</a> : <span class="keyword">forall</span> a b x y m.
+  m &lt;&gt; 0 -&gt;
+    <a href="#congr_15">congr</a> a x m -&gt; <a href="#congr_15">congr</a> b y m -&gt; <a href="#congr_15">congr</a> (a <a href="int.html#infix%20-_23">-</a> b) (x <a href="int.html#infix%20-_23">-</a> y) m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_sub'lemma_50">mod_sub</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+    
+  <span class="keyword">lemma</span> <a name="mod_add'lemma_55">mod_add</a> : <span class="keyword">forall</span> a b x y m.
+  m &lt;&gt; 0 -&gt;
+    <a href="#congr_15">congr</a> a x m -&gt; <a href="#congr_15">congr</a> b y m -&gt; <a href="#congr_15">congr</a> (a <a href="int.html#infix%20+_19">+</a> b) (x <a href="int.html#infix%20+_19">+</a> y) m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_add'lemma_55">mod_add</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+    
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="mod_div_60">mod_div</a> (a b k m : int)
+    <span class="keyword">requires</span> { m &lt;&gt; 0 }
+    <span class="keyword">requires</span> { k &lt;&gt; 0 } 
+    <span class="keyword">requires</span> { <a href="#congr_15">congr</a> a b m }
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k a } 
+    <span class="keyword">requires</span> { <a href="number.html#divides_42">divides</a> k b } 
+    <span class="keyword">requires</span> { <a href="number.html#coprime_190">coprime</a> k m }
+    <span class="keyword">ensures</span> { <a href="#congr_15">congr</a> (ED.<a href="int.html#div_170">div</a> a k) (ED.<a href="int.html#div_170">div</a> b k) m }
+   = <span class="keyword">begin</span> 
+     <span class="keyword">assert</span> {<span class="keyword">exists</span> q1. a = q1 <a href="int.html#infix%20*_20">*</a> k};
+     <span class="keyword">assert</span> {<span class="keyword">exists</span> q2. b = q2 <a href="int.html#infix%20*_20">*</a> k};
+     <span class="keyword">end</span>
+   <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">axiom</span> <a href="#mod_div_60">mod_div</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+
+  <span class="keyword">lemma</span> <a name="eq_congr'lemma_74">eq_congr</a> : <span class="keyword">forall</span> a b m.
+    m &lt;&gt; 0 -&gt; a = b -&gt; <a href="#congr_15">congr</a> a b m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#eq_congr'lemma_74">eq_congr</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+    
+  <span class="keyword">lemma</span> <a name="mod_mult'lemma_78">mod_mult</a>: <span class="keyword">forall</span> x y z:int. 
+    x <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt;
+    <a href="#congr_15">congr</a> (x <a href="int.html#infix%20*_20">*</a> y <a href="int.html#infix%20+_19">+</a> z) z x 
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_mult'lemma_78">mod_mult</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>  
+  
+  <span class="keyword">lemma</span> <a name="congr_trans'lemma_83">congr_trans</a> : <span class="keyword">forall</span> a b c m.
+    m &lt;&gt; 0 -&gt; 
+    <a href="#congr_15">congr</a> a b m -&gt; <a href="#congr_15">congr</a> b c m -&gt; <a href="#congr_15">congr</a> a c m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#congr_trans'lemma_83">congr_trans</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+
+  <span class="comment">(* rewrite unfold congr *)</span>    
+  <span class="keyword">lemma</span> <a name="congr_add_m'lemma_89">congr_add_m</a> : <span class="keyword">forall</span> a m.
+    m <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; <a href="#congr_15">congr</a> a (a <a href="int.html#infix%20+_19">+</a> m) m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#congr_add_m'lemma_89">congr_add_m</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>    
+        
+  <span class="keyword">lemma</span> <a name="mod_idem'lemma_93">mod_idem</a> : <span class="keyword">forall</span> a m.
+    m &lt;&gt; 0 -&gt;
+    (ED.<a href="int.html#mod_114">mod</a> (ED.<a href="int.html#mod_114">mod</a> a m) m) = ED.<a href="int.html#mod_114">mod</a> a m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#mod_idem'lemma_93">mod_idem</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+    
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="congr_mod_98">congr_mod</a> (a b m : int)
+    <span class="keyword">requires</span> { m <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { <a href="#congr_15">congr</a> a b m }
+    <span class="keyword">ensures</span> { <a href="#congr_15">congr</a> a (b <a href="int.html#infix%20+_19">+</a> m) m } 
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { b <a href="int.html#infix%20+_19">+</a> m = m <a href="int.html#infix%20*_20">*</a> 1 <a href="int.html#infix%20+_19">+</a> b };
+    <span class="keyword">assert</span> { ED.<a href="int.html#mod_174">mod</a> (m <a href="int.html#infix%20*_20">*</a> 1 <a href="int.html#infix%20+_19">+</a> b) m = ED.<a href="int.html#mod_174">mod</a> b m };
+    <span class="keyword">end</span>
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">axiom</span> <a href="#congr_mod_98">congr_mod</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+  
+  <span class="keyword">lemma</span> <a name="congr_mult'lemma_108">congr_mult</a> : <span class="keyword">forall</span> a b c d m.
+    m &lt;&gt; 0 -&gt; 
+    <a href="#congr_15">congr</a> a b m -&gt; <a href="#congr_15">congr</a> c (d<a href="int.html#infix%20*_20">*</a>b) m -&gt; <a href="#congr_15">congr</a> c (d<a href="int.html#infix%20*_20">*</a>a) m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#congr_mult'lemma_108">congr_mult</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+  
+  <span class="keyword">lemma</span> <a name="congr_mod_idem'lemma_113">congr_mod_idem</a> : <span class="keyword">forall</span> a b m.
+    m &lt;&gt; 0 -&gt;
+    (<a href="#congr_15">congr</a> (ED.<a href="int.html#mod_114">mod</a> a m) b m) = <a href="#congr_15">congr</a> a b m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#congr_mod_idem'lemma_113">congr_mod_idem</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+  
+  <span class="comment">(* by rewrite unfold_congr!, rewrite hyp, rewrite &lt;- unfold_congr *)</span>  
+  <span class="keyword">lemma</span> <a name="congr_rewr'lemma_119">congr_rewr</a> : <span class="keyword">forall</span> a b c k m.
+    m &lt;&gt; 0 -&gt;
+    k &lt;&gt; 0 -&gt;
+    <a href="#congr_15">congr</a> a b m -&gt;
+    <a href="#congr_15">congr</a> (a<a href="int.html#infix%20*_20">*</a>k) c m -&gt;
+    <a href="#congr_15">congr</a> (b<a href="int.html#infix%20*_20">*</a>k) c m
+  <span class="keyword">meta</span> <span class="string">&quot;remove_unused:dependency&quot;</span> <span class="keyword">lemma</span> <a href="#congr_rewr'lemma_119">congr_rewr</a>, <span class="keyword">predicate</span> <a href="#congr_15">congr</a>
+
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="div_mod_127">div_mod</a> (x m : int) : int 
+    <span class="keyword">requires</span> { m <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> m 2 = 1 }
+    <span class="keyword">ensures</span> { <a href="#congr_15">congr</a> x (2 <a href="int.html#infix%20*_20">*</a> result) m } 
+  = 
+  <span class="keyword">assert</span> { <a href="#congr_15">congr</a> x (2 <a href="int.html#infix%20*_20">*</a> (x <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> (m <a href="int.html#infix%20+_19">+</a> 1) 2))) m 
+    <span class="keyword">by</span> 2 <a href="int.html#infix%20*_20">*</a> (x <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> (m <a href="int.html#infix%20+_19">+</a> 1) 2)) = x <a href="int.html#infix%20*_20">*</a> (m <a href="int.html#infix%20+_19">+</a> 1) /\ <a href="#congr_15">congr</a> x (m<a href="int.html#infix%20*_20">*</a>x <a href="int.html#infix%20+_19">+</a> x) m };
+  x <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_170">div</a> (m <a href="int.html#infix%20+_19">+</a> 1) 2)
+  
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="mont_div_mod_136">mont_div_mod</a> (x m : int) : int
+    <span class="keyword">requires</span> { m <a href="int.html#infix%20%3E_24">&gt;</a> 0 }
+    <span class="keyword">requires</span> { ED.<a href="int.html#mod_174">mod</a> m 2 = 1 }
+    <span class="keyword">requires</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20%3C_21">&lt;</a> m }
+    
+    <span class="keyword">ensures</span> { <a href="#congr_15">congr</a> x (2 <a href="int.html#infix%20*_20">*</a> result) m } 
+    <span class="keyword">ensures</span> { 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> result <a href="int.html#infix%20%3C_21">&lt;</a> m }
+  = 
+  <span class="keyword">if</span> ED.<a href="int.html#mod_174">mod</a> x 2 <a href="int.html#infix%20=_16">=</a> 0 
+  <span class="keyword">then</span> ED.<a href="int.html#div_170">div</a> x 2 
+  <span class="keyword">else</span> (ED.<a href="int.html#div_170">div</a> (x <a href="int.html#infix%20+_19">+</a> m) 2)
+    
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

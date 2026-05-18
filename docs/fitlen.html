@@ -1,0 +1,171 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>fitlen.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre>
+<span class="keyword">module</span> <a name="FitLen_">FitLen</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+
+  <span class="comment">(* use EDDivisibility *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+  <span class="keyword">use</span> int.<a href="int.html#Power_">Power</a>
+  <span class="keyword">use</span> util.<a href="util.html#Util_">Util</a> 
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+
+   
+  <span class="keyword">let</span> <span class="keyword">predicate</span> <a name="fit_in_reg_14">fit_in_reg</a> (x r : int) : bool =
+    <span class="keyword">requires</span> { r <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    x <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="int.html#power_348">power</a> 2 r)
+    
+  <span class="keyword">let</span> <span class="keyword">function</span> <a name="len_18">len</a> (x : int) : int =
+    <span class="comment">(* requires { x &gt;= 0 } *)</span>
+    <span class="keyword">ensures</span> { <a href="int.html#abs_52">abs</a> x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 result } 
+    <span class="keyword">ensures</span> { <span class="keyword">forall</span> k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="int.html#abs_52">abs</a> x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 k -&gt; result <a href="int.html#infix%20%3C=_25">&lt;=</a> k } 
+    <span class="keyword">ensures</span> { result <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+    <span class="keyword">let</span> ref x = <a href="int.html#abs_52">abs</a> x <span class="keyword">in</span> 
+    <span class="comment">(* if x = 0 then return 1; *)</span>
+    <span class="keyword">let</span> ref m = 0 <span class="keyword">in</span> 
+    <span class="keyword">while</span> <span class="keyword">not</span> (x <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="int.html#power_348">power</a> 2 m)) <span class="keyword">do</span>
+      <span class="keyword">invariant</span> { m <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 }
+      <span class="keyword">invariant</span> { <span class="keyword">forall</span> k : int. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> k <a href="int.html#infix%20%3C_21">&lt;</a> m -&gt; <span class="keyword">not</span> (x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 k) }
+      <span class="keyword">variant</span> { (x <a href="int.html#infix%20-_23">-</a> (<a href="int.html#power_348">power</a> 2 m)) } 
+      m &lt;- m <a href="int.html#infix%20+_19">+</a> 1;
+    <span class="keyword">done</span>;
+    m 
+
+  <span class="keyword">lemma</span> <a name="len_fit'lemma_34">len_fit</a> : <span class="keyword">forall</span> x r : int. x <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; r <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="#fit_in_reg_14">fit_in_reg</a> (<a href="int.html#power_348">power</a> 2 r) (r <a href="int.html#infix%20+_19">+</a> 1)
+  <span class="keyword">lemma</span> <a name="power_bound'lemma_35">power_bound</a> : <span class="keyword">forall</span> x r : int. r <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 r -&gt; <a href="#fit_in_reg_14">fit_in_reg</a> x (r <a href="int.html#infix%20+_19">+</a> 1)
+  <span class="keyword">lemma</span> <a name="power_bound_lt'lemma_36">power_bound_lt</a> : <span class="keyword">forall</span> x r : int. r <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 r -&gt; <a href="#fit_in_reg_14">fit_in_reg</a> x r
+  <span class="keyword">lemma</span> <a name="fit_bound'lemma_37">fit_bound</a> : <span class="keyword">forall</span> x r : int. x <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; r <a href="int.html#infix%20%3E_24">&gt;</a> 0  -&gt; <a href="#fit_in_reg_14">fit_in_reg</a> x r -&gt; <a href="#len_18">len</a> x <a href="int.html#infix%20%3C=_25">&lt;=</a> r 
+    
+
+  <span class="keyword">lemma</span> <a name="div_len'lemma_40">div_len</a> : <span class="keyword">forall</span> x : int. x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; (ED.<a href="int.html#div_113">div</a> x (<a href="int.html#power_348">power</a> 2 (<a href="#len_18">len</a> x))) = 0 
+ 
+  <span class="keyword">lemma</span> <a name="len_sub'lemma_42">len_sub</a> : <span class="keyword">forall</span> x y : int. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> x -&gt; <a href="#len_18">len</a> (x <a href="int.html#infix%20-_23">-</a> y) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="#len_18">len</a> x
+
+  <span class="keyword">lemma</span> <a name="len_geq'lemma_44">len_geq</a> : <span class="keyword">forall</span> x y : int. 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> x -&gt; <a href="#len_18">len</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="#len_18">len</a> x
+  <span class="keyword">lemma</span> <a name="len_gt'lemma_45">len_gt</a> : <span class="keyword">forall</span> x y : int. x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; 0 <a href="int.html#infix%20%3C_21">&lt;</a> y <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 x -&gt; <a href="#len_18">len</a> y <a href="int.html#infix%20%3C_21">&lt;</a> x <a href="int.html#infix%20+_19">+</a> 1 
+  <span class="keyword">lemma</span> <a name="len_gt''lemma_46">len_gt&#39;</a> : <span class="keyword">forall</span> x y : int. x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; 0 <a href="int.html#infix%20%3C_21">&lt;</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#power_348">power</a> 2 x -&gt; <a href="#len_18">len</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20+_19">+</a> 1
+  <span class="keyword">lemma</span> <a name="len_gt_pow'lemma_47">len_gt_pow</a> : <span class="keyword">forall</span> x y : int. x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="int.html#power_348">power</a> 2 x <a href="int.html#infix%20%3C_21">&lt;</a> y -&gt; x <a href="int.html#infix%20+_19">+</a> 1 <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="#len_18">len</a> y
+  <span class="keyword">lemma</span> <a name="len_power2'lemma_48">len_power2</a> : <span class="keyword">forall</span> k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="#len_18">len</a> (<a href="int.html#power_348">power</a> 2 k) = k <a href="int.html#infix%20+_19">+</a> 1
+  <span class="keyword">lemma</span> <a name="len_gt_pow2'lemma_49">len_gt_pow2</a> : <span class="keyword">forall</span> x k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 1 -&gt; 0 <a href="int.html#infix%20%3C=_25">&lt;=</a> x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 k -&gt; <a href="#len_18">len</a> x <a href="int.html#infix%20%3C=_25">&lt;=</a> k
+  
+  <span class="keyword">lemma</span> <a name="len_ge_div'lemma_51">len_ge_div</a> : 
+    <span class="keyword">forall</span> x y k: int. 
+    0 <a href="int.html#infix%20%3C=_25">&lt;=</a> y <a href="int.html#infix%20%3C=_25">&lt;=</a> x -&gt; 
+    0 <a href="int.html#infix%20%3C_21">&lt;</a> k -&gt; 
+    <a href="#len_18">len</a> (ED.<a href="int.html#div_113">div</a> y k) <a href="int.html#infix%20%3C=_25">&lt;=</a> (<a href="#len_18">len</a> (ED.<a href="int.html#div_113">div</a> x k))
+    
+    
+  <span class="comment">(* lemma div_neg : forall x k : int. k &lt;&gt; 0 -&gt; x &gt; 1 -&gt; - ED.div x k = ED.div (- x) k *)</span>
+      
+  <span class="keyword">lemma</span> <a name="len_div2'lemma_60">len_div2</a> : <span class="keyword">forall</span> x : int. x <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; <a href="#len_18">len</a> x = <a href="#len_18">len</a> (ED.<a href="int.html#div_113">div</a> x 2) <a href="int.html#infix%20+_19">+</a> 1
+  <span class="keyword">lemma</span> <a name="len_neg'lemma_61">len_neg</a> : <span class="keyword">forall</span> x : int. <a href="#len_18">len</a> x = <a href="#len_18">len</a> (<a href="int.html#prefix%20-_18">-</a> x)
+  <span class="keyword">lemma</span> <a name="len_abs'lemma_62">len_abs</a> : <span class="keyword">forall</span> x : int. <a href="#len_18">len</a> x = <a href="#len_18">len</a> (<a href="int.html#abs_52">abs</a> x)
+
+  <span class="keyword">lemma</span> <a name="abs_len'lemma_64">abs_len</a> : <span class="keyword">forall</span> x : int. <a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x) = <a href="#len_18">len</a> x
+  <span class="keyword">lemma</span> <a name="len_div2_neg'lemma_65">len_div2_neg</a> : <span class="keyword">forall</span> x : int. <a href="int.html#abs_52">abs</a> x <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt; ED.<a href="int.html#mod_114">mod</a> x 2 = 0 -&gt; <a href="#len_18">len</a> x = <a href="#len_18">len</a> (ED.<a href="int.html#div_113">div</a> x 2) <a href="int.html#infix%20+_19">+</a> 1
+  <span class="comment">(* lemma len_sub_neg : forall x y : int. 0 &lt;= abs y &lt;= abs x -&gt; len (x - y) &lt;= len x   *)</span>
+  <span class="comment">(* lemma len_div2_neg : forall x : int. x &lt; -1 -&gt; len x = len (ED.div x 2) + 1 *)</span>
+    
+  <span class="keyword">lemma</span> <a name="len_mul2'lemma_69">len_mul2</a> : <span class="keyword">forall</span> x : int. x <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; <a href="#len_18">len</a> x <a href="int.html#infix%20+_19">+</a> 1 = <a href="#len_18">len</a> (2 <a href="int.html#infix%20*_20">*</a> x) 
+  <span class="keyword">lemma</span> <a name="len_pow2_neg'lemma_70">len_pow2_neg</a> : <span class="keyword">forall</span> k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="#len_18">len</a> (<a href="int.html#prefix%20-_18">-</a> (<a href="int.html#power_348">power</a> 2 k)) = k <a href="int.html#infix%20+_19">+</a> 1
+  <span class="keyword">lemma</span> <a name="len_gt_pow2_neg'lemma_71">len_gt_pow2_neg</a> : <span class="keyword">forall</span> x k : int. k <a href="int.html#infix%20%3E=_26">&gt;=</a> 1 -&gt; 0 <a href="int.html#infix%20%3E_24">&gt;</a> x <a href="int.html#infix%20%3E_24">&gt;</a> <a href="int.html#prefix%20-_18">-</a> <a href="int.html#power_348">power</a> 2 k -&gt; <a href="#len_18">len</a> x <a href="int.html#infix%20%3C=_25">&lt;=</a> k  
+  <span class="comment">(* lemma len_mul2_neg : forall x : int. x &lt; 0 -&gt; len x + 1 = len (2 * x) *)</span>
+
+  <span class="keyword">lemma</span> <a name="lenL'lemma_74">lenL</a> : <span class="keyword">forall</span> x : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> x -&gt; <a href="int.html#power_348">power</a> 2 (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20%3C=_25">&lt;=</a> x
+
+  <span class="keyword">use</span> int.<a href="int.html#MinMax_">MinMax</a>
+
+  <span class="keyword">lemma</span> <a name="len_min'lemma_78">len_min</a> : <span class="keyword">forall</span> x y : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> x -&gt; 0 <a href="int.html#infix%20%3C_21">&lt;</a> y -&gt; <a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> (<a href="relations.html#min_147">min</a> x y)) = <a href="relations.html#min_147">min</a> (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x)) (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> y))
+  <span class="keyword">lemma</span> <a name="len_max'lemma_79">len_max</a> : <span class="keyword">forall</span> x y : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> x -&gt; 0 <a href="int.html#infix%20%3C_21">&lt;</a> y -&gt; <a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> (<a href="relations.html#max_148">max</a> x y)) = <a href="relations.html#max_148">max</a> (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x)) (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> y))
+
+  <span class="keyword">lemma</span> <a name="len_b'lemma_81">len_b</a> : <span class="keyword">forall</span> x k : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> k -&gt; <a href="int.html#abs_52">abs</a> x <a href="int.html#infix%20%3C_21">&lt;</a> (<a href="int.html#power_348">power</a> 2 k) -&gt; <a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x) <a href="int.html#infix%20%3C=_25">&lt;=</a> k
+
+  <span class="keyword">lemma</span> <a name="len_up'lemma_83">len_up</a>: <span class="keyword">forall</span> x : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> x -&gt; x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 (<a href="int.html#abs_52">abs</a> (<a href="#len_18">len</a> x))
+  <span class="keyword">lemma</span> <a name="len_gt0'lemma_84">len_gt0</a> : <span class="keyword">forall</span> x : int. x &lt;&gt; 0 -&gt; <a href="#len_18">len</a> x <a href="int.html#infix%20%3E_24">&gt;</a> 0
+  <span class="keyword">lemma</span> <a name="len_lt'lemma_85">len_lt</a> : <span class="keyword">forall</span> x y : int. 0 <a href="int.html#infix%20%3C_21">&lt;</a> x -&gt; 0 <a href="int.html#infix%20%3C_21">&lt;</a> y -&gt; <a href="#len_18">len</a> (<a href="int.html#abs_52">abs</a> x) <a href="int.html#infix%20%3C_21">&lt;</a> <a href="#len_18">len</a> (<a href="int.html#abs_52">abs</a> y) -&gt; x <a href="int.html#infix%20%3C_21">&lt;</a> y
+
+  <span class="keyword">lemma</span> <a name="len_le_pow2'lemma_87">len_le_pow2</a> : <span class="keyword">forall</span> x j : int. <a href="#len_18">len</a> x <a href="int.html#infix%20%3C=_25">&lt;=</a> j -&gt; x <a href="int.html#infix%20%3C_21">&lt;</a> <a href="int.html#power_348">power</a> 2 j
+
+  
+  <span class="keyword">lemma</span> <a name="end_0'lemma_90">end_0</a> : <span class="keyword">forall</span> a b y m : int.
+    a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; b <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; 
+    <a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m <a href="int.html#infix%20%3C=_25">&lt;=</a> 2 <a href="int.html#infix%20*_20">*</a> <a href="#len_18">len</a> m -&gt;
+    (<span class="keyword">exists</span> x:int.
+        x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 &amp;&amp;
+          (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) =
+           (<a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b <a href="int.html#infix%20+_19">+</a> (2 <a href="int.html#infix%20*_20">*</a> <a href="#len_18">len</a> m) <a href="int.html#infix%20+_19">+</a> x <a href="int.html#infix%20-_23">-</a> 1)) -&gt;
+    a = 0 
+    
+   <span class="keyword">lemma</span> <a name="end_0v2'lemma_99">end_0v2</a> : <span class="keyword">forall</span> a b k q : int.
+    a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; b <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; 
+    k <a href="int.html#infix%20%3C=_25">&lt;=</a> q -&gt;
+    (<span class="keyword">exists</span> x:int.
+        x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 &amp;&amp;
+          k = (<a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b <a href="int.html#infix%20+_19">+</a> q <a href="int.html#infix%20+_19">+</a> x <a href="int.html#infix%20-_23">-</a> 1)) -&gt;
+    a = 0 
+    
+    <span class="keyword">lemma</span> <a name="end_0v3'lemma_107">end_0v3</a> : <span class="keyword">forall</span> a b k q1 q2 : int.
+    a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; b <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; 
+    k <a href="int.html#infix%20%3C=_25">&lt;=</a> q1 <a href="int.html#infix%20%3C=_25">&lt;=</a> q2 -&gt;
+    (<span class="keyword">exists</span> x:int.
+        x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 &amp;&amp;
+          k = (<a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b <a href="int.html#infix%20+_19">+</a> q2 <a href="int.html#infix%20+_19">+</a> x <a href="int.html#infix%20-_23">-</a> 1)) -&gt;
+    a = 0 
+
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="len_leq_init_115">len_leq_init</a> (a b y m: int)
+    <span class="keyword">requires</span> { <a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m <a href="int.html#infix%20%3E=_26">&gt;=</a> <a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b } 
+    <span class="keyword">requires</span> { <a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> (<a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (b <a href="int.html#infix%20-_23">-</a> a) 2) <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> a) }
+    <span class="keyword">ensures</span> { (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) <a href="int.html#infix%20%3E=_26">&gt;=</a> (<a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (b <a href="int.html#infix%20-_23">-</a> a) 2) <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> a)}
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="len_dec_121">len_dec</a> (a b y m i j k : int)
+    <span class="keyword">requires</span> { (<span class="keyword">exists</span> x:int.
+                x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 
+                &amp;&amp; (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) =
+                   ((((((<a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b) <a href="int.html#infix%20+_19">+</a> (i <a href="int.html#infix%20*_20">*</a> (k <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20+_19">+</a> x) <a href="int.html#infix%20-_23">-</a> (k <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1))     
+               \/ a = 0 }
+    <span class="keyword">requires</span> {  b <a href="int.html#infix%20%3E=_26">&gt;=</a> 0  }
+    <span class="keyword">requires</span> { a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 } 
+    <span class="keyword">requires</span> { <span class="keyword">not</span> a <a href="int.html#infix%20%3C_21">&lt;</a> b }
+    <span class="keyword">ensures</span> { (<span class="keyword">exists</span> x:int.
+                 x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 
+                 &amp;&amp; (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) =
+                      ((((((<a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b) <a href="int.html#infix%20+_19">+</a> (i <a href="int.html#infix%20*_20">*</a> (k <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20+_19">+</a> x)
+                      <a href="int.html#infix%20-_23">-</a> (k <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)) 
+               \/ ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2 = 0 }
+    = <span class="keyword">begin</span> 
+      <span class="keyword">assert</span> { <span class="keyword">not</span> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) = 0 -&gt; <span class="keyword">forall</span> x: int.
+             x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 
+             &amp;&amp; (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) =
+                ((((((<a href="#len_18">len</a> a <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b) <a href="int.html#infix%20+_19">+</a> (i <a href="int.html#infix%20*_20">*</a> (k <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> j) <a href="int.html#infix%20+_19">+</a> x) <a href="int.html#infix%20-_23">-</a> (k <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)
+             -&gt; (<a href="#len_18">len</a> y <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> m) =
+                ((((((<a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) <a href="int.html#infix%20+_19">+</a> <a href="#len_18">len</a> b) <a href="int.html#infix%20+_19">+</a> (i <a href="int.html#infix%20*_20">*</a> (k <a href="int.html#infix%20-_23">-</a> 1))) <a href="int.html#infix%20+_19">+</a> (j <a href="int.html#infix%20+_19">+</a> 1))
+                <a href="int.html#infix%20+_19">+</a> (((<a href="#len_18">len</a> a <a href="int.html#infix%20-_23">-</a> <a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2)) <a href="int.html#infix%20-_23">-</a> 1) <a href="int.html#infix%20+_19">+</a> x)) <a href="int.html#infix%20-_23">-</a> (k <a href="int.html#infix%20-_23">-</a> 1)) <a href="int.html#infix%20-_23">-</a> 1)};
+
+      <span class="keyword">assert</span> { <span class="keyword">forall</span> x: int. 
+             (a <a href="int.html#infix%20-_23">-</a> b) <a href="int.html#infix%20%3E_24">&gt;</a> 1 -&gt;
+              x <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt;
+              ((<a href="#len_18">len</a> a <a href="int.html#infix%20-_23">-</a> (<a href="#len_18">len</a> (ED.<a href="int.html#div_170">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) <a href="int.html#infix%20+_19">+</a> 1)) <a href="int.html#infix%20+_19">+</a> x) <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 
+           };
+      <span class="keyword">end</span>
+
+
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>

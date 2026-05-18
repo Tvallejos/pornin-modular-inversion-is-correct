@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>util.html</title>
+</head>
+<body>
+<p>why3doc index <a href="index.html">index</a></p>
+<hr>
+<div class="why3doc">
+<pre>
+<span class="keyword">module</span> <a name="Util_">Util</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Int_">Int</a>
+  <span class="keyword">use</span> number.<a href="number.html#Prime_">Prime</a>
+  <span class="comment">(* use EDDivisibility *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Divisibility_">Divisibility</a>
+  <span class="keyword">use</span> number.<a href="number.html#Gcd_">Gcd</a>  
+  <span class="comment">(* use EDParity *)</span>
+  <span class="keyword">use</span> number.<a href="number.html#Parity_">Parity</a>
+
+  <span class="keyword">use</span> int.<a href="int.html#Power_">Power</a>    
+  <span class="keyword">use</span> int.<a href="int.html#EuclideanDivision_">EuclideanDivision</a> <span class="keyword">as</span> ED
+  <span class="keyword">use</span> number.<a href="number.html#Coprime_">Coprime</a>
+  <span class="keyword">use</span> divdivides.<a href="divdivides.html#Div_divides_">Div_divides</a>
+  <span class="keyword">use</span> int.<a href="int.html#Abs_">Abs</a>
+  <span class="keyword">use</span> int.<a href="int.html#MinMax_">MinMax</a>
+
+  
+  <span class="comment">(* not proven by solvers *)</span>
+  <span class="keyword">lemma</span> <a name="div2_no_div2'lemma_21">div2_no_div2</a> : <span class="keyword">forall</span> a b. 
+    <a href="number.html#divides_42">divides</a> 2 a -&gt; <span class="keyword">not</span> (<a href="number.html#divides_42">divides</a> 2 b) -&gt; <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_113">div</a> a 2) b   
+    
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="gcd_sub_24">gcd_sub</a> (a b : int)
+    <span class="keyword">ensures</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (a <a href="int.html#infix%20-_23">-</a> b) b }
+  = <span class="keyword">begin</span> 
+    <span class="keyword">assert</span> { <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> b a };
+    <span class="keyword">assert</span> { <a href="number.html#gcd_111">gcd</a> b a = <a href="number.html#gcd_111">gcd</a> b (a <a href="int.html#infix%20-_23">-</a> 1 <a href="int.html#infix%20*_20">*</a> b) };
+  <span class="keyword">end</span> 
+  
+  <span class="keyword">lemma</span> <a name="gcd_odd_div2'lemma_31">gcd_odd_div2</a> : <span class="keyword">forall</span> a b.
+    <a href="number.html#odd_12">odd</a> a -&gt; <a href="number.html#odd_12">odd</a> b -&gt; <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_113">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) b
+  
+  <span class="keyword">lemma</span> <a name="gcd_mod21_div2'lemma_34">gcd_mod21_div2</a> : <span class="keyword">forall</span> a b.
+    ED.<a href="int.html#mod_114">mod</a> a 2 = 1 -&gt; ED.<a href="int.html#mod_114">mod</a> b 2 = 1 -&gt; <a href="number.html#gcd_111">gcd</a> a b = <a href="number.html#gcd_111">gcd</a> (ED.<a href="int.html#div_113">div</a> (a <a href="int.html#infix%20-_23">-</a> b) 2) b
+    
+
+
+  <span class="keyword">lemma</span> <a name="even_div_mult'lemma_39">even_div_mult</a> : <span class="keyword">forall</span> n.
+    ED.<a href="int.html#mod_114">mod</a> n 2 = 0 -&gt; n = 2 <a href="int.html#infix%20*_20">*</a> (ED.<a href="int.html#div_113">div</a> n 2)
+    
+  <span class="keyword">lemma</span> <a name="coprime_2_m'lemma_42">coprime_2_m</a> : <span class="keyword">forall</span> m.
+    m <a href="int.html#infix%20%3E=_26">&gt;=</a> 3 -&gt; ED.<a href="int.html#mod_114">mod</a> m 2 = 1 -&gt; <a href="number.html#coprime_190">coprime</a> 2 m
+
+
+
+  <span class="keyword">lemma</span> <a name="mult_geq'lemma_47">mult_geq</a> : <span class="keyword">forall</span> a b: int. a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; b <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; a <a href="int.html#infix%20*_20">*</a> b <a href="int.html#infix%20%3E=_26">&gt;=</a> 0
+  
+  <span class="keyword">lemma</span> <a name="coprime_sym'lemma_49">coprime_sym</a> : <span class="keyword">forall</span> a b : int. <a href="number.html#coprime_190">coprime</a> a b &lt;-&gt; <a href="number.html#coprime_190">coprime</a> b a
+  
+  <span class="keyword">lemma</span> <a name="coprime_odd_even'lemma_51">coprime_odd_even</a> : <span class="keyword">forall</span> a b : int. ED.<a href="int.html#mod_114">mod</a> a 2 = 1 -&gt; <a href="number.html#coprime_190">coprime</a> a b -&gt; <a href="number.html#coprime_190">coprime</a> a (b <a href="int.html#infix%20*_20">*</a> 2)
+  
+  <span class="comment">(* by induction w, case w, then exists n, w = n + 1*)</span>
+  <span class="keyword">lemma</span> <a name="coprime_odd_pow2'lemma_54">coprime_odd_pow2</a> : <span class="keyword">forall</span> a w. w <a href="int.html#infix%20%3E_24">&gt;</a> 0 -&gt; a <a href="int.html#infix%20%3E_24">&gt;</a> 2 -&gt; ED.<a href="int.html#mod_114">mod</a> a 2 = 1 -&gt; <a href="number.html#coprime_190">coprime</a> (<a href="int.html#power_348">power</a> 2 w) a
+
+  <span class="keyword">lemma</span> <a name="geq_trans'lemma_56">geq_trans</a> : <span class="keyword">forall</span> a b c: int. a <a href="int.html#infix%20%3E=_26">&gt;=</a> b -&gt; b <a href="int.html#infix%20%3E=_26">&gt;=</a> c -&gt; a <a href="int.html#infix%20%3E=_26">&gt;=</a> c  
+  <span class="keyword">lemma</span> <a name="leq_trans'lemma_57">leq_trans</a> : <span class="keyword">forall</span> a b c: int. a <a href="int.html#infix%20%3C=_25">&lt;=</a> b -&gt; b <a href="int.html#infix%20%3C=_25">&lt;=</a> c -&gt; a <a href="int.html#infix%20%3C=_25">&lt;=</a> c     
+  <span class="keyword">lemma</span> <a name="leq_scale'lemma_58">leq_scale</a> : <span class="keyword">forall</span> a b k: int. a <a href="int.html#infix%20%3C=_25">&lt;=</a> b -&gt; k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; k<a href="int.html#infix%20*_20">*</a>a <a href="int.html#infix%20%3C=_25">&lt;=</a> k<a href="int.html#infix%20*_20">*</a>b
+      
+  <span class="keyword">lemma</span> <a name="le_triangle_abs'lemma_60">le_triangle_abs</a> : <span class="keyword">forall</span> a b: int. <a href="int.html#abs_52">abs</a> (a <a href="int.html#infix%20-_23">-</a> b) <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> a <a href="int.html#infix%20+_19">+</a> <a href="int.html#abs_52">abs</a> b
+
+  <span class="keyword">lemma</span> <a name="max_gt_k'lemma_62">max_gt_k</a> : <span class="keyword">forall</span> a b k : int. (<a href="relations.html#max_148">max</a> a b <a href="int.html#infix%20%3E=_26">&gt;=</a> k) &lt;-&gt; (a <a href="int.html#infix%20%3E=_26">&gt;=</a> k /\ a <a href="int.html#infix%20%3E=_26">&gt;=</a> b) \/ (b <a href="int.html#infix%20%3E=_26">&gt;=</a> k /\ b <a href="int.html#infix%20%3E=_26">&gt;=</a> a)    
+  <span class="keyword">lemma</span> <a name="max_or'lemma_63">max_or</a> : <span class="keyword">forall</span> a b : int. <a href="relations.html#max_148">max</a> a b = a \/ <a href="relations.html#max_148">max</a> a b = b
+  <span class="keyword">lemma</span> <a name="max_known'lemma_64">max_known</a> : <span class="keyword">forall</span> a b k : int. b <a href="int.html#infix%20%3E_24">&gt;</a> k -&gt; (<a href="relations.html#max_148">max</a> a b) <a href="int.html#infix%20-_23">-</a> k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 
+  <span class="keyword">lemma</span> <a name="mult_comm_factor'lemma_65">mult_comm_factor</a> : <span class="keyword">forall</span> a b k: int. 
+    k <a href="int.html#infix%20*_20">*</a> a <a href="int.html#infix%20+_19">+</a> k <a href="int.html#infix%20*_20">*</a> b = k<a href="int.html#infix%20*_20">*</a> (a <a href="int.html#infix%20+_19">+</a> b)
+  <span class="keyword">lemma</span> <a name="max2'lemma_67">max2</a> : <span class="keyword">forall</span> a b : int. <a href="relations.html#max_148">max</a> a b = a \/ <a href="relations.html#max_148">max</a> a b = b 
+  <span class="keyword">lemma</span> <a name="max_gt'lemma_68">max_gt</a> : <span class="keyword">forall</span> a b : int. <a href="relations.html#max_148">max</a> a b <a href="int.html#infix%20%3E=_26">&gt;=</a> a /\ <a href="relations.html#max_148">max</a> a b <a href="int.html#infix%20%3E=_26">&gt;=</a> b
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="max3_70">max3</a> (a b c : int) 
+    <span class="keyword">ensures</span> { <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) = a \/ <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) = b \/ <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) = c }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+  
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="max3_gt_74">max3_gt</a> (a b c : int) 
+    <span class="keyword">ensures</span> { <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) <a href="int.html#infix%20%3E=_26">&gt;=</a> a /\ <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) <a href="int.html#infix%20%3E=_26">&gt;=</a> b /\ <a href="int.html#max_78">max</a> a (<a href="int.html#max_78">max</a> b c) <a href="int.html#infix%20%3E=_26">&gt;=</a> c }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+ 
+  <span class="keyword">let</span> <span class="keyword">lemma</span> <a name="add_max_min_78">add_max_min</a> (a b : int) 
+    <span class="keyword">ensures</span> { <a href="int.html#max_78">max</a> a b <a href="int.html#infix%20+_19">+</a> <a href="int.html#min_74">min</a> a b = a <a href="int.html#infix%20+_19">+</a> b }
+  = <span class="keyword">begin</span> <span class="keyword">end</span>
+ 
+ 
+ 
+  <span class="keyword">lemma</span> <a name="mod_abs_leq'lemma_84">mod_abs_leq</a> : <span class="keyword">forall</span> a k : int. k &lt;&gt; 0 -&gt; ED.<a href="int.html#mod_114">mod</a> a k <a href="int.html#infix%20%3C=_25">&lt;=</a> <a href="int.html#abs_52">abs</a> (k <a href="int.html#infix%20-_23">-</a> 1)
+  <span class="keyword">lemma</span> <a name="abs_pos'lemma_85">abs_pos</a> : <span class="keyword">forall</span> a : int. a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="int.html#abs_52">abs</a> a = a
+  <span class="keyword">lemma</span> <a name="abs_mult'lemma_86">abs_mult</a> : <span class="keyword">forall</span> a k : int. a <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; k <a href="int.html#infix%20%3E=_26">&gt;=</a> 0 -&gt; <a href="int.html#abs_52">abs</a> (k <a href="int.html#infix%20*_20">*</a> a) = k <a href="int.html#infix%20*_20">*</a> a
+  
+    
+<span class="keyword">end</span></pre>
+
+</div>
+<hr>
+<p>Generated by why3doc 1.8.2</p>
+</body>
+</html>
