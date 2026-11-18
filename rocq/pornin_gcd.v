@@ -3698,9 +3698,26 @@ Section algo.
     by case/and3P: (bound_at_div_strong ha hb hdk hd).
     Qed.
 
-    Theorem inner_dec : a_kB1 != 0 -> good_iv a0 b0 k vs_kB1.
+    Lemma setup :
+      a_kB1 != 0 ->
+      [/\
+         [/\    (n == maxn (ℓ (a vs0)) (ℓ (b vs0))) || (n == (2 * k)%N),
+           a vs0 = a0,
+           b vs0 = b0,
+           a0 != 0 &
+             0 < a0],
+        [/\ 0 < b0,
+          a (at_step (k - 1)) != 0,
+          (n - k).+1 = (n - k + 1)%N,
+            (2 * k <= n)%N &
+              forall x : int, 0 <= x -> 0 < 2 ^ x]
+        &
+        [/\
+          0 < 2 ^ (n%:Z - k%:Z) &
+            2 ^ (n%:Z - k%:Z + 1%:Z) = 2 * 2 ^ (n%:Z - k%:Z) :> int
+        ]
+      ].
     Proof.
-      (* setting up the context, all this should be factored by the section *)
     move=> ak1neq0.
     have h := nk_b.
     case: (ic) => [] [_ /eqP/nval nis _ _] _ _ i_ab.
@@ -3711,29 +3728,64 @@ Section algo.
       apply/eqP; exact: (iter_ba0A0 ic).
     have agtz : a0 > 0.
       by move:i_ab=> []; rewrite le_eqVlt i_a0 eq_sym (negPf aneqz).
-    wlog /eqP nab : / n == maxn (ℓ a0) (ℓ b0).
-      move=> hwlog.
-      move: nis; rewrite {}i_a0 {}i_b0 => /orP [//|n2k].
-      by move/n2k_or0ldec: n2k ak1neq0 => [-> | /ldec_lgood_vs0].
     have bgtz : 0 < b0.
       move: i_ab=> [] _ le0b0 odd_b0 _ _; rewrite -i_b0.
       by apply oddz_gt0.
-    have {nab} nabZ : n%:Z = Order.Def.max  (ℓ a0) (ℓ b0).
-      by rewrite nab; lia.
     have akN0 : a (at_step (k -1)) != 0.
       have /ab_invIK [_ [-> ]] : 0 <= (k - 1)%N%:Z <= k%:Z - 1%Z by move: kgt1; lia.
       done.
-     (* various helper lemmas, either non-linear or arith on nat vs int *)
+    (* various helper lemmas, either non-linear or arith on nat vs int *)
    have SnkB : ((n - k).+1 = n - k + 1)%N by lia.
    have le_2kn : (n >= 2 * k)%N.
      case: ic=> icc _ _ _; case: icc=> lt1k nE _ _; lia.
    have pos_exp (x : int) : 0 <= x -> 0 < 2 ^ x. (* This should be in num theory but I cannot find it *)
      case: x => // [] [| x]; first by rewrite expr0z.
-     by rewrite -exprnP exprn_gt0. 
-     have pos_2Xnsk : 0 < 2 ^ (n%:Z - k%:Z) by apply: pos_exp; lia.
+     by rewrite -exprnP exprn_gt0.
+   have pos_2Xnsk : 0 < 2 ^ (n%:Z - k%:Z) by apply: pos_exp; lia.
    have time2 : 2 ^ (n%:Z - k%:Z + 1%:Z) = 2 * 2 ^ (n%:Z - k%:Z) :> int.
      rewrite subzn; last by move: h; clear; lia.
-     by rewrite -PoszD [((n - k) + 1)%N]addn1 -exprnP exprS exprnP. 
+     by rewrite -PoszD [((n - k) + 1)%N]addn1 -exprnP exprS exprnP.
+   by split; split.
+   Qed.
+
+   Lemma suff_big_n :
+      a_kB1 != 0 ->
+     (n%:Z = Order.Def.max  (ℓ a0) (ℓ b0) -> good_iv a0 b0 k vs_kB1) ->
+    good_iv a0 b0 k vs_kB1.
+    Proof.
+    move=> ak1neq0 hwlog.
+    case: (ic) => [] [_ /eqP/nval nis _ _ ] _ _ i_ab.
+    have [i_a0 i_b0] : vs0.(a) = a0 /\ vs0.(b) = b0.
+      by move: i_ab=> [_ _ _ -> ->].
+    move: nis; rewrite {}i_a0 {}i_b0.
+    case/orP=> [/eqP nP|n2k]; first by apply hwlog; rewrite nP.
+    by move/n2k_or0ldec: n2k ak1neq0 => [-> | /ldec_lgood_vs0].
+    Qed.
+
+    Lemma inner_dec_potential_divN :
+      a_kB1 != 0 ->
+      (forall x : 'I_k, divN x) ->
+      good_iv a0 b0 k vs_kB1.
+    Proof.
+    rewrite /divN.
+    move=> ak1neq0 /= divN_all.
+    have [[_ _ _ _ agtz] [ bgtz akN0 _ _ _] [_ _]]:= (setup ak1neq0).
+    have divN : (forall x : nat, (x < k - 1)%N -> divN x).
+      move=> x hx.
+      have {}hx : (x < k)%N by lia.
+      have -> : x = Ordinal hx by [].
+      by rewrite /divN; apply: divN_all.
+    have := all_divN_good_at_exit agtz bgtz divN.
+    by rewrite (negPf akN0) orbF.
+    Qed.
+
+    Theorem inner_dec : a_kB1 != 0 -> good_iv a0 b0 k vs_kB1.
+    Proof.
+    move=> ak1neq0.
+    have h := nk_b.
+    have [[nis i_a0 i_b0 aneqz agtz] [ bgtz akN0 SnkB le_2kn pos_exp] [pos_2Xnsk time2]]:= (setup ak1neq0).
+    (*wlog assume n = *)
+    apply (suff_big_n ak1neq0)=> nabZ.
   (* Start of the proof, which goes by case analysis:
      a0 and b0 are either too distant for divergence to occur, or close enough *)
    case: (leP (2*n%:Z - k%:Z + 1%:Z) (ℓ a0 + ℓ b0)) => [div_case | ndiv_case]; last first.
@@ -3741,18 +3793,9 @@ Section algo.
   (* It a0 and b0 are close enough, we perform a case analysis on the occurrence
        of an "actual"  divergence step in course of the execution *)
    - pose has_divN := [forall t : 'I_k, (divN t)].
-     case: (boolP has_divN)=> [divN_all | /pred0Pn /= div] /=.
+     case: (boolP has_divN)=> [/forallP divN_all | /pred0Pn /= div] /=.
      (* 1. potential divergence actually does not materialized *)
-     + move/forallP: divN_all => /= divN_all {has_divN}.
-       rewrite /divN in divN_all |- *. 
-        have divN : (forall x : nat, (x < k - 1)%N -> divN x).
-          move=> x hx.
-          have {}hx : (x < k)%N by lia.
-          have -> : x = Ordinal hx by [].
-          by rewrite /divN; apply: divN_all.
-        have := all_divN_good_at_exit agtz bgtz divN.
-        by rewrite (negPf akN0) orbF.
-
+     + exact: inner_dec_potential_divN.
      (* 2. divergence happens, at step d *)
      + have  {has_divN}{}div : exists x: nat, (x < k)%N && ~~ divN x.
           by case: div=> [[x xgt ] hX]; exists x; rewrite xgt hX.
