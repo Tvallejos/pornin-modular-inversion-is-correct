@@ -3765,7 +3765,7 @@ Definition init_bb := pornin_gcd.approx b `|k| `|N|.
 Definition init_ba_w := approx a (max (len a) (max (len b) (2%Z * k))) k.
 Definition init_bb_w := approx b (max (len a) (max (len b) (2%Z * k))) k.
 
-Definition init := pornin_gcd.mkIter a b init_ba init_bb 1%Z 0%Z 0%Z 1%Z false false.
+Definition init := pornin_gcd.mkIter a b init_ba init_bb 1%Z 0%Z 0%Z 1%Z.
 Definition init_w := (iter_vars'mk a b k (max (len a) (max (len b) (2%Z * k))) 1%Z init_ba_w
                            init_bb_w 1%Z 0%Z 0%Z 1%Z 1%Z 0%Z 0%Z 1%Z bu bv false false).
 
@@ -4187,11 +4187,10 @@ case: (is_halving_dec vs_w) => [h /(_ h) -> _ /= | hN _ /(_ hN) ->].
   rewrite pornin_gcd.bb_halving_inner_iter; last by rewrite -hP.
   by rewrite eqba eqbb.
 (* non halving case *)
-- rewrite /pornin_gcd.inner_iter pornin_gcd.halvingCUunset.
+- rewrite /pornin_gcd.inner_iter.
   rewrite hP in hN; move/negP/negPf : hN=> hN.
-  rewrite  hN pornin_gcd.bb_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite pornin_gcd.ba_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite pornin_gcd.ltCUunset.
+  rewrite  hN pornin_gcd.bb_odd_s ?hN //.
+  rewrite pornin_gcd.ba_odd_s ?hN //.
   have ltP: pornin_gcd.is_ba_lt_bb (stp i') <-> (is_ba_lt_bb vs_w).
   by rewrite /vs_w -iter_aligns -this_iter_lt is_ba_lt_aligns // /stp_w iter_aligns.
   have side2 : 0%Z <= j' (ssrnat.iter i' inner_iter_fun init_w) - 1%Z.
@@ -4230,13 +4229,12 @@ case: (is_halving_dec vs_w) => [h /(_ h) -> _ | hN _ /(_ hN) ->].
 (* halving case *)
 + rewrite /halving_step //= eqf0 eqf1 eqg0 eqg1.
   by rewrite pornin_gcd.g0_halving -?hP // pornin_gcd.g1_halving -?hP // pornin_gcd.f0_halving -?hP // pornin_gcd.f1_halving -?hP //.
-- rewrite /pornin_gcd.inner_iter pornin_gcd.halvingCUunset.
+- rewrite /pornin_gcd.inner_iter.
   rewrite hP in hN; move/negP/negPf : hN=> hN.
-  rewrite  hN pornin_gcd.f0_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite  pornin_gcd.f1_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite  pornin_gcd.g0_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite  pornin_gcd.g1_odd_s ?pornin_gcd.halvingCUunset ?hN //.
-  rewrite pornin_gcd.ltCUunset.
+  rewrite  hN pornin_gcd.f0_odd_s ?hN //.
+  rewrite  pornin_gcd.f1_odd_s ?hN //.
+  rewrite  pornin_gcd.g0_odd_s ?hN //.
+  rewrite  pornin_gcd.g1_odd_s ?hN //.
   have ltP: pornin_gcd.is_ba_lt_bb (stp i') <-> (is_ba_lt_bb vs_w).
     by rewrite /vs_w -iter_aligns -this_iter_lt is_ba_lt_aligns // /stp_w iter_aligns.
   have side2 : 0%Z <= j' vs_w - 1%Z.
@@ -4250,10 +4248,6 @@ Qed.
 
 Lemma ic_fgi:
   pornin_gcd.init_fgi init.
-Proof. by split. Qed.
-
-Lemma ic_div :
- pornin_gcd.init_div init.
 Proof. by split. Qed.
 
 Lemma ic_ab (kn nn : nat):
@@ -4276,7 +4270,6 @@ move=> kn nn kneq nneq.
 rewrite /pornin_gcd.init_conditions; split.
 - by apply ic_kn.
 - by apply ic_fgi.
-- by apply ic_div.
 - by apply (ic_ab kneq nneq).
 Qed.
 
