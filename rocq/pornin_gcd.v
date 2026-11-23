@@ -2903,6 +2903,28 @@ Section algo.
       have h := nk_b. lia.
       Qed.
 
+      (* new lemma *)
+      Lemma Q_bound t u : (t <= u <= k - 1)%N -> Q t ->
+        (`|a (at_step u)| < 2 ^ (n%:Z - k%:Z + 1%:Z)) &&
+          (`|b (at_step u)| < 2 ^ (n%:Z - k%:Z + 1%:Z)).
+      Proof.
+        move=> tb Qt.
+        suff /andP [hat hbt]:
+        (`|a (at_step u)| < 2 ^ (n%:Z - k%:Z + 1%:Z)) &&
+          (`|b (at_step u)| < 2 ^ (n%:Z - k%:Z + 1%:Z)).
+        move: Qt; rewrite /Q /μ /M minEle maxEle.
+        by case: ifP=> h1; case: ifP=> h2 /andP[h3 h4]; try lia.
+      case/andP: Qt=> *; apply: (@lastinggood t); have h := nk_b; try lia.
+      Qed.
+
+      Lemma Q_sinks' t u : (t <= u <= k - 1)%N -> Q t -> Q u.
+      Proof.
+      move=> tb Qt.
+      have := Q_bound tb Qt.
+      move: Qt; rewrite /Q /μ /M minEle maxEle.
+      by case: ifP=> h1; case: ifP=> h2 /andP[h3 h4]; try lia.
+      Qed.
+
       (* Lemma 3.7. *)
       Lemma Q_sinks t : (t + 1 <= k - 1)%N -> Q t -> Q (t + 1).
       Proof.
@@ -3698,10 +3720,11 @@ Section algo.
     by case/and3P: (bound_at_div_strong ha hb hdk hd).
     Qed.
 
+    (* this lemma setups a bunch of facts that are needed as hypotheses for lia to work *)
     Lemma setup :
       a_kB1 != 0 ->
       [/\
-         [/\    (n == maxn (ℓ (a vs0)) (ℓ (b vs0))) || (n == (2 * k)%N),
+         [/\ (n == maxn (ℓ (a vs0)) (ℓ (b vs0))) || (n == (2 * k)%N),
            a vs0 = a0,
            b vs0 = b0,
            a0 != 0 &
@@ -3709,14 +3732,10 @@ Section algo.
         [/\ 0 < b0,
           a (at_step (k - 1)) != 0,
           (n - k).+1 = (n - k + 1)%N,
-            (2 * k <= n)%N &
-              forall x : int, 0 <= x -> 0 < 2 ^ x]
-        &
-        [/\
-          0 < 2 ^ (n%:Z - k%:Z) &
-            2 ^ (n%:Z - k%:Z + 1%:Z) = 2 * 2 ^ (n%:Z - k%:Z) :> int
-        ]
-      ].
+          (2 * k <= n)%N &
+            forall x : int, 0 <= x -> 0 < 2 ^ x] &
+        [/\ 0 < 2 ^ (n%:Z - k%:Z) &
+           2 ^ (n%:Z - k%:Z + 1%:Z) = 2 * 2 ^ (n%:Z - k%:Z) :> int]].
     Proof.
     move=> ak1neq0.
     have h := nk_b.
@@ -3748,6 +3767,8 @@ Section algo.
    by split; split.
    Qed.
 
+    (* if the final value of a is not zero it is enough to consider that
+       n is either the length of a or b *)
    Lemma suff_big_n :
       a_kB1 != 0 ->
      (n%:Z = Order.Def.max  (ℓ a0) (ℓ b0) -> good_iv a0 b0 k vs_kB1) ->
@@ -3762,7 +3783,8 @@ Section algo.
     by move/n2k_or0ldec: n2k ak1neq0 => [-> | /ldec_lgood_vs0].
     Qed.
 
-    Lemma inner_dec_potential_divN :
+    (* if no divergence occurss then the last step is good. *)
+    Lemma inner_dec_all_sync:
       a_kB1 != 0 ->
       (forall x : 'I_k, divN x) ->
       good_iv a0 b0 k vs_kB1.
@@ -3777,6 +3799,456 @@ Section algo.
       by rewrite /divN; apply: divN_all.
     have := all_divN_good_at_exit agtz bgtz divN.
     by rewrite (negPf akN0) orbF.
+    Qed.
+
+    (* lengths in bits are close,
+       a divergence occurrs,
+       then the last step is good.
+     *)
+    Theorem inner_dec_close_div :
+      a_kB1 != 0 ->
+      2 * n%:Z - k%:Z + 1%Z <= ℓ a0 + ℓ b0 ->
+      (exists x : 'I_k, ~~ divN x) ->
+      good_iv a0 b0 k vs_kB1.
+    Proof.
+    move=> ak1neq0 div_case div.
+    have h := nk_b.
+    have [[nis i_a0 i_b0 aneqz agtz] [ bgtz akN0 SnkB le_2kn pos_exp] [pos_2Xnsk time2]]:= (setup ak1neq0).
+    (*wlog assume n = *)
+    apply (suff_big_n ak1neq0)=> nabZ.
+    have  {}div : exists x: nat, (x < k)%N && ~~ divN x.
+      by case: div=> [[x xgt ] hX]; exists x; rewrite xgt hX.
+    case: (ex_minnP div) => d /andP[dltk d_div] first_div.
+    (* if d = k - 1 we are done *)
+    case: (leqP (k - 1) d)=> hdk.
+    * have dE : d = (k - 1)%N by lia.
+      have divN x : (x < k - 1)%N -> divN x.
+        move=> hx.
+        apply: contraLR (hx); rewrite -leqNgt => ndivx.
+        have /first_div : (x < k)%N && ~~ (divN x) by rewrite ndivx; lia.
+        lia.
+      have := all_divN_good_at_exit agtz bgtz divN.
+      by rewrite (negPf akN0) orbF.
+    * set ad := a (at_step d); set adS := a (at_step (d.+1)).
+      set bd := b (at_step d); set bdS := b (at_step (d.+1)).
+    have /andP[pos_ad pos_bd] : (ad >= 0) && (bd >= 0).
+      by apply (ab_pos dltk d_div first_div); lia.
+    (* If M d is large enough, we're actually done despite divergence *)
+      case: (ltP `|(M d)| (2 ^ (n%:Z - k%:Z + 1%Z)))=> [M_sml | M_big].
+      - suff /andP[a_sml b_sml] :
+        (`|ad| < 2 ^ (n%:Z - k%:Z + 1%Z)) && (`|bd| < 2 ^ (n%:Z - k%:Z + 1%Z)).
+          have dleqkb1 : (d <= k - 1)%N by lia.
+          have /(_ (k - 1)%N) := div_last_good div_case dleqkb1 a_sml b_sml.
+          have side : (d <= k - 1 <= k - 1)%N by lia.
+          move=> {side}/(_ side).
+          by rewrite s_stepsB // dleqkb1 leqnn=> /(_ isT) ->.
+        rewrite -gt_max //.
+        suff -> : Order.Def.max `|ad| `|bd| = `|M d| by [].
+        by rewrite /M; move: pos_ad pos_bd; clear; lia.
+       (* Otherwise, we're in the most sophisticated case. We again start by
+       stating a few facts that hold in this case. *)
+      -
+        (* move=> {div_case}. *)
+        have adbdS_b : `|bd - ad| <= 2 ^ (n - k)%N by apply divSdabsz_b.
+        have minMaxD : `|bd - ad| = M d - (μ d) by rewrite  /μ /M; clear; lia.
+        have bdSE: bdS = M d by exact: div_bE.
+        have adSE: adS = (((μ d) - (M d)) %/ 2)%Z by exact: div_aE.
+        have neg_ads : adS <= 0.
+          suff : 0 <= (M d - μ d) %/ 2 by move: adSE; clear; lia.
+          rewrite divz_ge0 // /μ /M; by clear; lia.
+        have evenMsmu : 2 %| M d - μ d.
+          suff [odd_M odd_μ] : M d = 1%:Z %[mod 2] /\ μ d = 1%:Z %[mod 2].
+            by apply dvdz_oddz.
+          rewrite /M/μ maxEle minEle.
+          have ? : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
+          suff [ad_odd bd_odd] : a_t d = 1%Z %[mod 2] /\ b_t d = 1%Z %[mod 2].
+            by rewrite a_invI // b_invI //; case: ifP; rewrite ad_odd bd_odd.
+          apply odd_step_at_bt_odd=> //.
+          move: d_div; rewrite /divN negb_or; clear; lia.
+        have pos_nkB : (0 < n - k)%N by move: le_2kn dltk; clear; lia.
+        have nkB_alt : (n - k - 1).+1 = (n - k)%N.
+          move: pos_nkB; clear; lia.
+        have adS_bound : `|adS| <= 2 ^ (n - k - 1)%N.
+          have : (μ d - M d = 0) \/ (0 <= M d - μ d - 1%Z) by lia.
+          case=> hminmax; first by rewrite adSE hminmax div0z; apply: exprz_ge0.
+          have [m em] : exists m, μ d - M d = Negz m.
+            have/ZnatP[m hm] := hminmax.
+            by exists m; rewrite NegzE; lia.
+          rewrite adSE em divNz_nat // normrN.
+          suff : (m %/ (1%N + 1%N)) < 2 ^ (n - k - 1)%N by lia.
+          rewrite ltz_divLR // -exprSzr nkB_alt; lia.
+        have l_adS_bound : (ℓ adS <= n - k)%N.
+          rewrite /ℓ/= -lez_nat.
+          apply: len_b=> //. rewrite -nkB_alt exprSz.
+          apply: le_lt_trans adS_bound _.
+          set x : int := _ ^ _.
+          suff : x > 0. lia.
+          by apply exprn_gt0.
+        have {l_adS_bound} l_adS_bound  : (ℓ adS)%:Z <= n%:Z - k%:Z.
+          by move: l_adS_bound pos_nkB; clear; lia.
+        (* Now a few abbreviations for bit lengths *)
+        set lad := (ℓ ad); set lbd := (ℓ bd).
+        set ladS := (ℓ adS); set lbdS := (ℓ bdS).
+        set la := (ℓ a0); set lb := (ℓ b0).
+        set lmd := (ℓ (μ d)); set lMd := (ℓ (M d)).
+      have lt0ad : 0 < ad.
+      (* bad is odd and we have in why3 (?) that ad and bad have the same parity *)
+      (* tomas: assuming same parity
+                + 2 %| ux _ _ f0(f1) g0(g1),
+                + bb_t t odd + b_t t odd we can prove this fact *)
+        move: d_div.
+        rewrite /divN/is_halving negb_or; set bad := ba _=> /andP[bad_odd _].
+        suff : ad \notin dvdz 2. move: bad_odd pos_ad; clear; lia.
+        rewrite /negb (@modz_dvdz _ bad 2); first by apply bad_odd.
+        have ? : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
+        suff -> : bad = ba_t d.
+         rewrite /bad/ad a_invI // /a_t/ba_t/A.
+         by apply at_bat_parity; move: hdk; clear; lia.
+        by rewrite /ba_t/A/bad ba_invI.
+      have lt0bd : 0 < bd.
+      (* why have in why3 (?) that b_t is always odd *)
+       (* tomas: indeed. I added b_t t odd as an hypothesis. Could be proven assuming. *)
+       rewrite /bd.
+       have db : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
+       move: (b_t_odd_invI db).
+       move: pos_bd; rewrite /bd b_invI //; exact: oddz_gt0.
+      have pos_Md : 0 < M d by move: lt0ad lt0bd; rewrite /M; clear; lia.
+      have pos_mud : 0 < μ d by move: lt0ad lt0bd; rewrite /μ; clear; lia.
+      have lt0mud : (0 < `|μ d|)%N.
+        by rewrite /μ -/ad -/bd; move: lt0ad lt0bd; clear; lia.
+      have lmdE : lmd = Order.Def.min lad lbd by rewrite -el_min.
+      have lMdE : lMd = Order.Def.max lad lbd by rewrite -el_max.
+      have abd_mMd : lad + lbd = lmd + lMd.
+        rewrite lmdE lMdE /lad /lbd; by clear; lia.
+      pose lambda : int := lmd%:Z - n%:Z + k%:Z.
+      pose mu : int := lMd%:Z - n%:Z + k%:Z.
+      have step1 : lad%:Z + lbd%:Z <= la%:Z + lb%:Z - k%:Z + Order.Def.max lambda mu.
+        have -> :
+          la%:Z + lb%:Z = Order.Def.min la%:Z lb%:Z + Order.Def.max la%:Z lb%:Z.
+          by clear; lia.
+        have -> : Order.Def.max la%:Z lb%:Z = n%:Z by move:nabZ; clear; lia.
+        have lMd_eq : lMd%:Z = n%:Z - k%:Z + Order.Def.max lambda mu.
+          rewrite /lMd /M -/ad -/bd /lambda /mu el_max //.
+          move: pos_nkB lmdE lMdE abd_mMd; clear; lia.
+        suffices : (lmd <= minn la lb)%N.
+          by move: pos_nkB lmdE lMdE abd_mMd; clear; lia.
+       rewrite lmdE /la /lb -i_a0 -i_b0; apply: bound_at_div=> //.
+       - by rewrite i_a0; apply: ltW.
+       - rewrite i_b0; exact: b0_pos.
+       - move=> j hj; apply: contraLR (hj); rewrite -ltnNge ltnS => divNNj.
+         apply: first_div; rewrite divNNj andbT //; move: hj; lia.
+      have step2 : ladS%:Z + lbdS%:Z <=
+                     la%:Z + lb%:Z - k%:Z +
+                       Order.Def.max lambda mu - Order.Def.min lambda mu.
+        suff : ladS%:Z + lbdS%:Z <= lad%:Z + lbd%:Z - Order.Def.min lambda mu.
+          by move: step1; clear; lia.
+        have -> : lad%:Z + lbd%:Z =
+                 (Order.Def.min lad%:Z lbd%:Z) + (Order.Def.max lad%:Z lbd%:Z).
+          by clear; lia.
+        rewrite /lbdS bdSE /M el_max // -/lad -/lbd.
+        suff : ladS%:Z <= Order.Def.min lad%:Z lbd%:Z - Order.Def.min lambda mu.
+          by move: step1; clear; lia.
+        suff : n%:Z - k%:Z <=
+                 Order.Def.min lad%:Z lbd%:Z - Order.Def.min lambda mu.
+          move: l_adS_bound; clear; lia.
+        have -> : n%:Z - k%:Z = lmd%:Z - lambda by rewrite /lambda; ring.
+        rewrite lmdE; clear; lia.
+      have good_dS : good_iv a0 b0 k (at_step d.+1).
+        rewrite /good /= -/la -/lb -/ladS -/lbdS.
+        suff : Order.max lambda mu - Order.Def.min lambda mu <= 1.
+          move: step1 step2 dltk; rewrite /good_iv -/ladS -/lbdS; clear; lia.
+        rewrite -pabszS_maxmin.
+        have -> : lambda - mu = lmd%:Z - lMd%:Z by rewrite /lambda /mu; ring.
+        have lemMd : (lmd <= lMd)%N.
+          rewrite /lmd /lMd.
+          (* rewrite -lez_nat. *)
+
+          rewrite /ℓ/=.
+          rewrite len_abs [len (M d)]len_abs.
+          apply len_incr.
+          - by rewrite -ltz_nat gtz0_abs //.
+          rewrite -lez_nat !gtz0_abs //.
+          rewrite /μ /M -/ad -/bd; move: lt0ad lt0bd; clear; lia.
+        have -> : `|(lmd%:Z - lMd%:Z)%R|%N = (lMd - lmd)%N by rewrite distnEr.
+        suff : (lMd <= lmd.+1)%N by clear; lia.
+        rewrite /lMd. rewrite -lez_nat -len_ℓ.
+         (* apply: len_spec. *)
+         have side : (0 <= lmd.+1) by lia.
+         (* have side2 : (`|ba vs0|%N%:Z < 2%Z ^ lmd.+1) by rewrite gtz0_abs //. *)
+         have := len'spec'0 side.
+         apply.
+         rewrite exprSz.
+        suff : (`|M d| <= 2 * `|μ d|)%N. (* this should really be a lemme on len *)
+          by have := len'spec'1 (μ d); rewrite len_ℓ/lmd; clear; lia.
+        suff : 2 * (M d - μ d) <= M d.
+          move: lt0ad lt0bd; rewrite /M; clear; lia.
+          have h1 : 2 * (M d - μ d) <= 2 * 2 ^ (n - k)%N.
+            by move: minMaxD adbdS_b; clear; lia.
+          apply: le_trans h1 _; rewrite -exprSz SnkB.
+          rewrite PoszD -subzn; last by move: le_2kn; clear; lia.
+          apply: le_trans M_big _; move: pos_Md; clear; lia.
+        (* Now we know d.+1 is good, and we are going to prove
+           that it is lasting good. Here is the disjunctive invariant *)
+      pose H t := (P t) || (Q t).
+      (* Observe mu (d + 1) = a (d + 1) *)
+      have HdS : H d.+1.
+        suff PdS : P d.+1 by rewrite /H PdS.
+        rewrite /P.
+        (* have posMd : 0 <= M d by rewrite /M; lia. *)
+        have /= -> : 2 ^ (n%:Z - k%:Z + 1%Z) <=  M d.+1.
+          rewrite /M -/adS -/bdS bdSE; apply: le_trans M_big _.
+          move: pos_Md; rewrite /M; clear; lia.
+        have /= -> : μ d.+1 <= 0 by move: neg_ads; rewrite /μ; clear; lia.
+        have -> : 2 ^ (n%:Z - k%:Z) = 2 * 2 ^ (n - k -1)%N :> int.
+         rewrite -[RHS]exprSz.
+         have -> : Posz (n - k - 1).+1 = n%:Z - k%:Z by move: nkB_alt; clear; lia.
+         done.
+        have -> /= : μ d.+1 = adS.
+          suff hh : adS <= bdS by rewrite /μ -/adS -/bdS /= minEle hh.
+          move: neg_ads bdSE pos_Md; clear; lia.
+        apply: le_lt_trans adS_bound _.
+        (*  2 ^ (n - k - 1)%N < 2 * 2 ^ (n - k - 1)%N BUG matching? hence lia fails *)
+        set x := (X in _ * X); rewrite -/x.
+        suff : 0 < x by clear; lia.
+        by rewrite /x; apply: exprn_gt0.
+      have lem_3_7_Q t : (t + 1 <= k - 1)%N -> Q t -> Q t.+1.
+        by move=> tb; rewrite -addn1; apply: (Q_sinks _ d_div).
+      have lem_3_7_last t : (t <= k - 1)%N -> Q t -> lgood a0 b0 t k (at_step t).
+        move=> tb Qt; apply: div_last_good=> //.
+        - case/andP: Qt=> _; clear; lia.
+        - case/andP: Qt=> _; clear; lia.
+      have lem_3_8 t :
+        0 <= t%:Z <= k%:Z - 2 (* important hypothesis to use same parity *)
+       -> P t -> (H t.+1) &&
+           ((a (at_step t) == 0) ||
+             (ℓ (a (at_step t.+1)) + ℓ (b (at_step t.+1)) <=
+                 ℓ (a (at_step t)) + ℓ (b (at_step t)))%N).
+        move=> t_b Pt; set decr := (X in _ && X).
+        case halv_t: (is_halving (at_step t)).
+        (* case 1: t is halving *)
+        - have halving_A : (* is_halving (at_step t) ->, this should be symbolic exec *)
+            a (at_step t) = 2 * a (at_step t.+1).
+           rewrite at_stepS/ inner_iter halvingCUunset halv_t.
+           rewrite unset_halving_a a_halving_step.
+           rewrite mulrC divzK // a_invI //.
+           move: halv_t.
+           rewrite /xt/is_halving ba_invI //.
+           rewrite (@modz_dvdz _ (ba_t t) 2) //.
+           by rewrite /ba_t/a_t/A; apply at_bat_parity.
+         have halving_B :  (* symbolic exec again *)
+           b (at_step t) = b (at_step t.+1) by rewrite b_halving.
+          (* We first proof that either at = 0 or t is decreasing *)
+          have -> : decr.
+              case: (a (at_step t) =P 0) => hat; first by rewrite /decr hat.
+              rewrite /decr halving_A // halving_B //.
+              set aat := a _; set bbt := b _.
+              suff : (ℓ aat <= ℓ (2 * aat))%N by clear; lia.
+                rewrite /ℓ/=.
+                rewrite len_abs [len (2 * _)]len_abs.
+                apply: len_incr; last by rewrite abszM leq_pmull.
+                move: hat; rewrite /aat halving_A; clear; lia.
+          (* We now prove that H holds at t *)
+          case/and3P: Pt => hMt hmu_neg hmult; rewrite andbT.
+          move: hMt hmult hmu_neg.
+          have aux_le : 0 <= 2 ^ (n%:Z - k%:Z) by exact: ltW.
+          rewrite /andbT /H /P /Q /M /μ time2 halving_A halving_B.
+          set aat := a _; set bbt := b _.
+          (* Either P or Q holds depending on the 2a_{t+1} <= b_{t+1}.
+           We treat this by brute force. *)
+          case: (leP (2 * aat) bbt)=> comp1.
+              case: (leP aat bbt)=> comp2.
+               + case: (leP `|aat| `|bbt|)=> comp3. (* frustrating long lia. *)
+                 * move=> -> comp5 comp6.
+                   have -> : aat <= 0 by move: comp6; rewrite pmulr_rle0.
+                   suff -> : `|aat| < 2 ^ (n%:Z - k%:Z) by [].
+                   by apply:  le_lt_trans comp5; rewrite normrM ler_peMl.
+                 * move=> -> comp5 comp6.
+                   have -> : aat <= 0 by move: comp6; rewrite pmulr_rle0.
+                   suff -> : `|aat| < 2 ^ (n%:Z - k%:Z) by [].
+                   by apply:  le_lt_trans comp5; rewrite normrM ler_peMl.
+               + move=> comp3 comp4 comp5.
+                 suff : (0 <= bbt < 0) by rewrite leNgt andNb.
+                 have -> : bbt < 0.
+                   apply: lt_le_trans comp2 _.
+                   by move: comp5; rewrite pmulr_rle0.
+                 rewrite andbT; apply: le_trans comp3=> /=.
+                 by rewrite pmulr_rge0.
+             - case: (leP aat bbt).
+               + move: comp1; clear; lia.
+               + case: (leP `|aat| `|bbt|) => comp3.
+                  * move=> comp4 comp5 comp6.
+                    suff -> : `|bbt| < 2 * 2 ^ (n%:Z - k%:Z) by rewrite orbT.
+                    move: comp6; clear; lia.
+                  * move: comp1 comp3 ; clear; lia.
+        (* Case 2: t is not halving *)
+        - case/and3P: Pt => hM muN hmu.
+           have hbSa : `|b (at_step t) - a (at_step t)| > 2^(n%:Z - k%:Z).
+             have -> : `|b (at_step t) - a (at_step t)| = M t - μ t :> int.
+               by rewrite /M /μ; clear; lia.
+               (* observe how set is helping lia, which otherwise fails *)
+            move: hM hmu; rewrite time2; set x:= (_ ^ _); clear; lia.
+          pose same_ssign x y := ((x > 0) && (y > 0)) || ((x < 0) && (y < 0)).
+          suff sync : same_ssign (b (at_step t) - a (at_step t)) (bb (at_step t) - ba (at_step t)).
+            have b_St : b (at_step t.+1) = μ t.
+              rewrite at_stepS /inner_iter.
+              have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
+                by rewrite halvingCUunset halv_t.
+              rewrite halv_unset.
+              rewrite b_odd_s ?halv_unset //.
+              (* rewrite  halv_unset f1_odd_s ?halv_unset// g1_odd_s ?{}halv_unset //. *)
+              rewrite /is_ba_lt_bb baCUunset bbCUunset /μ.
+              case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb/=.
+              + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) =
+                           a (at_step t).
+                  by move: hbabb sync hbSa; clear; rewrite /same_ssign; lia.
+                by [].
+              + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) =
+                           b (at_step t).
+                  by move: hbabb sync hbSa; clear; rewrite /same_ssign; lia.
+                by [].
+            have a_St : a (at_step t.+1) = (M t - μ t) %/ 2.
+              rewrite /a_t /A /xt /ux.
+              rewrite at_stepS /inner_iter.
+              have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
+                by rewrite halvingCUunset halv_t.
+                rewrite  halv_unset.
+                rewrite a_odd_s ?halv_unset //.
+              rewrite /is_ba_lt_bb baCUunset bbCUunset /μ/M.
+              case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb /=.
+                (* the following two ids are proved more than once in the script. (refactor?)*)
+              + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) = (a (at_step t)).
+                  move:  sync hbabb; clear; rewrite /same_ssign; lia.
+                have -> : Order.Def.max (a (at_step t)) (b (at_step t)) = (b (at_step t)).
+                  move:  sync hbabb; clear; rewrite /same_ssign; lia.
+                by [].
+              + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) = (b (at_step t)).
+                  move:  sync hbabb; clear; rewrite /same_ssign; lia.
+                have -> : Order.Def.max (a (at_step t)) (b (at_step t)) = (a (at_step t)).
+                  move:  sync hbabb; clear; rewrite /same_ssign; lia.
+                by [].
+            have -> : H t.+1.
+              rewrite /H /P /Q.
+              have [-> ->] :
+                (μ t.+1 = b (at_step t.+1)) /\ (M t.+1 = a (at_step t.+1)).
+                have hh : 0 <= a (at_step t.+1) by rewrite a_St /M /μ; clear; lia.
+                by split; rewrite /μ /M; move: muN b_St a_St hh; clear; lia.
+              rewrite b_St muN /= hmu andbT.
+              have ltmu /= : `|μ t| < 2 ^ (n%:Z - k%:Z + 1%Z).
+                apply: lt_le_trans hmu _; rewrite time2.
+                have hh x : 0 <= x -> x <= 2 * x :> int by clear; lia.
+                apply: hh; rewrite subzn; last by move: h; clear; lia.
+                rewrite -exprnP; exact: exprn_ge0.
+              case: (leP (2 ^ (n%:Z - k%:Z + 1%Z)) (a (at_step t.+1))) => //= haSt.
+              * rewrite ltmu /=. (* Q should be rephrased as max |mu t | |M t|  < ... *)
+                suff -> : `|a (at_step t.+1)| = a (at_step t.+1). (* lia does not work! *)
+                  by rewrite gt_max haSt ltmu.
+                suff : 0 <= a (at_step t.+1) by clear; lia.
+                rewrite a_St divz_ge0 // /M /μ; clear; lia.
+            rewrite /= /decr.
+            suff hh : (ℓ (a (at_step t.+1)) <= ℓ (M t))%N.
+              rewrite b_St.
+              have hhh : (ℓ (a (at_step t.+1)) + ℓ (μ t) <= ℓ (M t) + ℓ (μ t))%N.
+                by move: hh; clear; lia.
+              apply/orP; right; apply: leq_trans hhh _.
+              suff -> : (ℓ (M t) + ℓ (μ t) = ℓ (a (at_step t)) + ℓ (b (at_step t)))%N by [].
+              by rewrite /M maxEle /μ minEle; case: ifP => //; rewrite addnC.
+            have evenMsmut : 2 %| M t - μ t.
+              suff [odd_M odd_μ] : M t = 1%:Z %[mod 2] /\ μ t = 1%:Z %[mod 2].
+                apply dvdz_oddz=> //.
+              rewrite /M/μ maxEle minEle.
+              suff [at_odd bt_odd] : a_t t = 1%Z %[mod 2] /\ b_t t = 1%Z %[mod 2].
+                rewrite a_invI // b_invI //.
+                by case: ifP; rewrite at_odd bt_odd.
+              apply odd_step_at_bt_odd=> //.
+              ++ move: halv_t; clear; lia.
+            have {a_St} a_St : (a (at_step t.+1)) * 2 = (M t - μ t).
+              by move: (evenMsmut); rewrite a_St dvdz_eq => /eqP ->.
+            rewrite /ℓ/=.
+            rewrite len_abs [len (M t)]len_abs.
+            apply: len_incr.
+            * (* (0 < `|a_t t.+1|)%N *)
+              suff : 0 < (a (at_step t !)) * 2 by clear; lia.
+              have : 0 < 2 ^ (n%:Z - k%:Z + 1%Z).
+                by apply: pos_exp; move: h; clear; lia.
+              by move: muN hM a_St=> /=; clear; lia.
+            * (* this is |a t.+1| <= |M t| / 2 *)
+              rewrite -at_stepS.
+              suff : `|(M t - μ t)| <= `|M t| * 2 by move: a_St; clear; lia.
+              have hh :  `|M t - μ t| <=  `|M t| + `|μ t| by clear; lia.
+              apply: leq_trans hh _.
+              suff : `|μ t| <= `|M t| by clear; lia.
+              suff -> : `|M t| = M t.
+                apply: le_trans hM; apply: ltW; apply: lt_le_trans hmu _; rewrite time2.
+              (* lia problem : assuming 0 <= 2 ^ .. does not help *)
+                have hh x : 0 <= x -> x <= 2 * x :> int by clear; lia.
+                apply: hh; apply: ltW; apply: pos_exp; move: h; clear; lia.
+              suff : 0 <= M t by clear; lia.
+              apply: le_trans hM; apply:ltW; apply: pos_exp; move: h; clear; lia.
+            pose c : int := 2 ^(n%:Z - 2*k%:Z).
+            have : c * (bb (at_step t) - ba (at_step t)) =
+                     (c * bb (at_step t) - b (at_step t)) - (c * ba (at_step t) - a (at_step t))
+                     + ((b (at_step t) - a (at_step t))).
+              ring.
+            set u := (X in X = _); set v := (X in _ = X) => e.
+            have hh : `|c * bb (at_step t) - b (at_step t)| +
+                      `|c * ba (at_step t) - a (at_step t)| <= 2 ^ (n%:Z - k%:Z).
+
+              have HH4 : (k%:Z - 2%:Z <= k%:Z - 1%:Z) by clear; lia.
+              (* have tb : (0 <= t <= k - 1)%N. *)
+              (*    by rewrite leq0n /= -!lez_nat -subzn; move: kgt1 t_b HH4 ; clear; lia. *)
+              have [HH5 HH6] := close_approx t_b.
+              have HH1 : `|c * bb (at_step t) - b (at_step t)| <= 2 ^ (n - k - 1)%N.
+                rewrite /c bb_invI; rewrite distrC.
+                have [] := close_approx t_b.
+                by rewrite b_invI // subzn /= addn1 //.
+              have HH2 : `|c * ba (at_step t) - a (at_step t)| <= 2 ^ (n - k - 1)%N.
+                rewrite /c ba_invI; rewrite distrC.
+                by rewrite a_invI // subzn /= addn1 //.
+              have HH3 : 2 ^ (n - k - 1)%N + 2 ^ (n - k - 1)%N <= (2 : int) ^ (n%:Z - k%:Z).
+                have -> : 2 ^ (n - k - 1)%N + 2 ^ (n - k - 1)%N = 2 * (2: int) ^ (n - k - 1)%N. by rewrite mul2z.
+                by rewrite -exprSz nkB_alt subzn // kleqn.
+              by apply: (le_trans _ HH3); apply lerD.
+          have pos_c : 0 < c by rewrite /c subzn // -exprnP exprn_gt0.
+          rewrite /same_ssign [_ < 0]ltNge.
+          case: (ltrgtP 0 (b (at_step t) - a (at_step t))) => hcomp /=.
+          + rewrite orbF.
+            suff : 0 < c * (bb (at_step t) - ba (at_step t)) by rewrite pmulr_rgt0.
+            rewrite -/u {}e {u} /v; set u := (X in 0 < X + _).
+            suff : `|u| < `|b (at_step t) - a (at_step t)| by move: hcomp; clear; lia.
+            rewrite /u; move: hbSa hh; clear; lia.
+          + suff : c * (bb (at_step t) - ba (at_step t)) < 0 by rewrite pmulr_rlt0.
+            rewrite -/u {}e {u} /v; set u := (X in X + _ < 0).
+            suff : `|u| < `|b (at_step t) - a (at_step t)| by move: hcomp; clear; lia.
+            rewrite /u; move: hbSa hh; clear; lia.
+          + move: hbSa; rewrite -hcomp ltNge; apply: contraR=> _.
+            apply: ltW; apply: pos_exp; move: pos_nkB; clear; lia.
+      have cor_3_9 t u :
+          H t -> good_iv a0 b0 k (at_step t) ->
+                                (0 <= u <= k - 1 - t)%N ->
+                               H (t + u)%N && good_iv a0 b0 k (at_step (t + u)).
+        move=> Ht good_t.
+        elim: u => [| u ihu] ht; first by rewrite !addn0 Ht.
+        have /ihu /andP[ihH ihgood] : (0 <= u <= k - 1 - t)%N by move: ht; clear; lia.
+        case/orP: ihH => [hP | hQ]; last first.
+          have side : (t + u + 1 <= k - 1)%N by move: ht; clear; lia.
+          move/(lem_3_7_Q _ side): (hQ). rewrite /H addnS => ->; rewrite orbT //=.
+          have {}hQ : (Q (t + u + 1)) by rewrite addn1; apply lem_3_7_Q=> //.
+          move/lgoodP: (lem_3_7_last _ side hQ). by rewrite -at_stepS; apply; move: ht; clear; lia.
+        have u_b : 0 <= ((t + u)%N)%:Z <= k%:Z - 2. by move: ht; clear; lia.
+        case/andP: (lem_3_8 _ u_b hP)=> e hh.
+        rewrite addnS e /= /good_iv.
+        (* have -> : (t + u < k - 1)%N by move: ht; clear; lia.  *)
+        rewrite /=; case/orP: hh => hh; last first.
+          apply: leq_trans hh _.
+          have /ihu : (0 <= u <= k - 1 - t)%N by move: ht; clear; lia.
+          by case/andP.
+        have /(zero_lgood (eqP hh) ihgood) : ((t + u) <= (t + u).+1 < k)%N.
+          by move: ht; clear; lia.
+        by done.
+      have pouah : (0 <= k - 1 - d.+1 <= k - 1 - d.+1)%N by move: dltk; clear; lia.
+      have /andP[] := cor_3_9 _ _ HdS good_dS pouah.
+      have -> : (d.+1 + (k - 1 - d.+1) = k - 1)%N by move: hdk; clear; lia.
+      done.
     Qed.
 
     Theorem inner_dec : a_kB1 != 0 -> good_iv a0 b0 k vs_kB1.
@@ -3794,444 +4266,11 @@ Section algo.
        of an "actual"  divergence step in course of the execution *)
    - pose has_divN := [forall t : 'I_k, (divN t)].
      case: (boolP has_divN)=> [/forallP divN_all | /pred0Pn /= div] /=.
-     (* 1. potential divergence actually does not materialized *)
-     + exact: inner_dec_potential_divN.
+     (* 1. potential divergence actually does not materialize *)
+     + exact: inner_dec_all_sync.
      (* 2. divergence happens, at step d *)
-     + have  {has_divN}{}div : exists x: nat, (x < k)%N && ~~ divN x.
-          by case: div=> [[x xgt ] hX]; exists x; rewrite xgt hX.
-       case: (ex_minnP div) => d /andP[dltk d_div] first_div.
-       (* if d = k - 1 we are done *)
-       case: (leqP (k - 1) d)=> hdk.
-       * have dE : d = (k - 1)%N by lia.
-         have divN x : (x < k - 1)%N -> divN x.
-           move=> hx.
-           apply: contraLR (hx); rewrite -leqNgt => ndivx.
-           have /first_div : (x < k)%N && ~~ (divN x) by rewrite ndivx; lia.
-           lia.
-         have := all_divN_good_at_exit agtz bgtz divN.
-         by rewrite (negPf akN0) orbF.
-       * set ad := a (at_step d); set adS := a (at_step (d.+1)).
-         set bd := b (at_step d); set bdS := b (at_step (d.+1)).
-       have /andP[pos_ad pos_bd] : (ad >= 0) && (bd >= 0).
-         by apply (ab_pos dltk d_div first_div); lia.
-       (* If M d is large enough, we're actually done despite divergence *)
-         case: (ltP `|(M d)| (2 ^ (n%:Z - k%:Z + 1%Z)))=> [M_sml | M_big].
-         - suff /andP[a_sml b_sml] :
-           (`|ad| < 2 ^ (n%:Z - k%:Z + 1%Z)) && (`|bd| < 2 ^ (n%:Z - k%:Z + 1%Z)).
-           have dleqkb1 : (d <= k - 1)%N by lia.
-           have /(_ (k - 1)%N) := div_last_good div_case dleqkb1 a_sml b_sml.
-             have side : (d <= k - 1 <= k - 1)%N by lia.
-             move=> {side}/(_ side).
-             by rewrite s_stepsB // dleqkb1 leqnn=> /(_ isT) ->.
-           rewrite -gt_max //.
-           suff -> : Order.Def.max `|ad| `|bd| = `|M d| by [].
-           rewrite /M; move: pos_ad pos_bd; clear; lia.
-          (* Otherwise, we're in the most sophisticated case. We again start by
-          stating a few facts that hold in this case. *) 
-         - have adbdS_b : `|bd - ad| <= 2 ^ (n - k)%N by apply divSdabsz_b.
-           have minMaxD : `|bd - ad| = M d - (μ d) by rewrite  /μ /M; clear; lia.
-           have bdSE: bdS = M d by exact: div_bE.
-           have adSE: adS = (((μ d) - (M d)) %/ 2)%Z by exact: div_aE.
-           have neg_ads : adS <= 0.
-             suff : 0 <= (M d - μ d) %/ 2 by move: adSE; clear; lia.
-             rewrite divz_ge0 // /μ /M; by clear; lia.
-           have evenMsmu : 2 %| M d - μ d.
-             suff [odd_M odd_μ] : M d = 1%:Z %[mod 2] /\ μ d = 1%:Z %[mod 2].
-               by apply dvdz_oddz.
-             rewrite /M/μ maxEle minEle.
-             have ? : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
-             suff [ad_odd bd_odd] : a_t d = 1%Z %[mod 2] /\ b_t d = 1%Z %[mod 2].
-               by rewrite a_invI // b_invI //; case: ifP; rewrite ad_odd bd_odd.
-             apply odd_step_at_bt_odd=> //.
-             move: d_div; rewrite /divN negb_or; clear; lia.
-           have pos_nkB : (0 < n - k)%N by move: le_2kn dltk; clear; lia.
-           have nkB_alt : (n - k - 1).+1 = (n - k)%N.
-             move: pos_nkB; clear; lia.
-           have adS_bound : `|adS| <= 2 ^ (n - k - 1)%N.
-             have : (μ d - M d = 0) \/ (0 <= M d - μ d - 1%Z) by lia.
-             case=> hminmax; first by rewrite adSE hminmax div0z; apply: exprz_ge0.
-             have [m em] : exists m, μ d - M d = Negz m.
-               have/ZnatP[m hm] := hminmax.
-               by exists m; rewrite NegzE; lia.
-             rewrite adSE em divNz_nat // normrN. 
-             suff : (m %/ (1%N + 1%N)) < 2 ^ (n - k - 1)%N by lia.
-             rewrite ltz_divLR // -exprSzr nkB_alt; lia.
-           have l_adS_bound : (ℓ adS <= n - k)%N.
-             rewrite /ℓ/= -lez_nat.
-             apply: len_b=> //. rewrite -nkB_alt exprSz.
-             apply: le_lt_trans adS_bound _.
-             set x : int := _ ^ _.
-             suff : x > 0. lia.
-             by apply exprn_gt0.
-           have {l_adS_bound} l_adS_bound  : (ℓ adS)%:Z <= n%:Z - k%:Z.
-             by move: l_adS_bound pos_nkB; clear; lia.
-           (* Now a few abbreviations for bit lengths *)
-           set lad := (ℓ ad); set lbd := (ℓ bd).
-           set ladS := (ℓ adS); set lbdS := (ℓ bdS).
-           set la := (ℓ a0); set lb := (ℓ b0).
-           set lmd := (ℓ (μ d)); set lMd := (ℓ (M d)).
-         have lt0ad : 0 < ad.
-         (* bad is odd and we have in why3 (?) that ad and bad have the same parity *)
-         (* tomas: assuming same parity
-                   + 2 %| ux _ _ f0(f1) g0(g1),
-                   + bb_t t odd + b_t t odd we can prove this fact *)
-           move: d_div.
-           rewrite /divN/is_halving negb_or; set bad := ba _=> /andP[bad_odd _].
-           suff : ad \notin dvdz 2. move: bad_odd pos_ad; clear; lia.
-           rewrite /negb (@modz_dvdz _ bad 2); first by apply bad_odd.
-           have ? : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
-           suff -> : bad = ba_t d.
-            rewrite /bad/ad a_invI // /a_t/ba_t/A.
-            by apply at_bat_parity; move: hdk; clear; lia.
-           by rewrite /ba_t/A/bad ba_invI.
-         have lt0bd : 0 < bd.
-         (* why have in why3 (?) that b_t is always odd *)
-          (* tomas: indeed. I added b_t t odd as an hypothesis. Could be proven assuming. *)
-          rewrite /bd.
-          have db : 0 <= d%:Z <= k%:Z - 2 by move: hdk; clear; lia.
-          move: (b_t_odd_invI db).
-          move: pos_bd; rewrite /bd b_invI //; exact: oddz_gt0.
-         have pos_Md : 0 < M d by move: lt0ad lt0bd; rewrite /M; clear; lia.
-         have pos_mud : 0 < μ d by move: lt0ad lt0bd; rewrite /μ; clear; lia.
-         have lt0mud : (0 < `|μ d|)%N.
-           by rewrite /μ -/ad -/bd; move: lt0ad lt0bd; clear; lia.
-         have lmdE : lmd = Order.Def.min lad lbd by rewrite -el_min.
-         have lMdE : lMd = Order.Def.max lad lbd by rewrite -el_max.
-         have abd_mMd : lad + lbd = lmd + lMd.
-           rewrite lmdE lMdE /lad /lbd; by clear; lia.
-         pose lambda : int := lmd%:Z - n%:Z + k%:Z.
-         pose mu : int := lMd%:Z - n%:Z + k%:Z.
-         have step1 : lad%:Z + lbd%:Z <= la%:Z + lb%:Z - k%:Z + Order.Def.max lambda mu.
-           have -> :
-             la%:Z + lb%:Z = Order.Def.min la%:Z lb%:Z + Order.Def.max la%:Z lb%:Z.
-             by clear; lia.
-           have -> : Order.Def.max la%:Z lb%:Z = n%:Z by move:nabZ; clear; lia.
-           have lMd_eq : lMd%:Z = n%:Z - k%:Z + Order.Def.max lambda mu.
-             rewrite /lMd /M -/ad -/bd /lambda /mu el_max //.
-             move: pos_nkB lmdE lMdE abd_mMd; clear; lia. 
-           suffices : (lmd <= minn la lb)%N.
-             by move: pos_nkB lmdE lMdE abd_mMd; clear; lia. 
-          rewrite lmdE /la /lb -i_a0 -i_b0; apply: bound_at_div=> //.
-          - by rewrite i_a0; apply: ltW.
-          - rewrite i_b0; exact: b0_pos.
-          - move=> j hj; apply: contraLR (hj); rewrite -ltnNge ltnS => divNNj.
-            apply: first_div; rewrite divNNj andbT //; move: hj; lia.
-         have step2 : ladS%:Z + lbdS%:Z <=
-                        la%:Z + lb%:Z - k%:Z +
-                          Order.Def.max lambda mu - Order.Def.min lambda mu.
-           suff : ladS%:Z + lbdS%:Z <= lad%:Z + lbd%:Z - Order.Def.min lambda mu.
-             by move: step1; clear; lia.
-           have -> : lad%:Z + lbd%:Z =
-                    (Order.Def.min lad%:Z lbd%:Z) + (Order.Def.max lad%:Z lbd%:Z).
-             by clear; lia.
-           rewrite /lbdS bdSE /M el_max // -/lad -/lbd.
-           suff : ladS%:Z <= Order.Def.min lad%:Z lbd%:Z - Order.Def.min lambda mu.
-             by move: step1; clear; lia.
-           suff : n%:Z - k%:Z <=
-                    Order.Def.min lad%:Z lbd%:Z - Order.Def.min lambda mu.
-             move: l_adS_bound; clear; lia.
-           have -> : n%:Z - k%:Z = lmd%:Z - lambda by rewrite /lambda; ring.
-           rewrite lmdE; clear; lia.
-         have good_dS : good_iv a0 b0 k (at_step d.+1).
-           rewrite /good /= -/la -/lb -/ladS -/lbdS.
-           suff : Order.max lambda mu - Order.Def.min lambda mu <= 1.
-             move: step1 step2 dltk; rewrite /good_iv -/ladS -/lbdS; clear; lia.
-           rewrite -pabszS_maxmin.
-           have -> : lambda - mu = lmd%:Z - lMd%:Z by rewrite /lambda /mu; ring.
-           have lemMd : (lmd <= lMd)%N.
-             rewrite /lmd /lMd.
-             (* rewrite -lez_nat. *)
-
-             rewrite /ℓ/=.
-             rewrite len_abs [len (M d)]len_abs.
-             apply len_incr.
-             - by rewrite -ltz_nat gtz0_abs //.
-             rewrite -lez_nat !gtz0_abs //.
-             rewrite /μ /M -/ad -/bd; move: lt0ad lt0bd; clear; lia.
-           have -> : `|(lmd%:Z - lMd%:Z)%R|%N = (lMd - lmd)%N by rewrite distnEr.
-           suff : (lMd <= lmd.+1)%N by clear; lia.
-           rewrite /lMd. rewrite -lez_nat -len_ℓ.
-            (* apply: len_spec. *)
-            have side : (0 <= lmd.+1) by lia.
-            (* have side2 : (`|ba vs0|%N%:Z < 2%Z ^ lmd.+1) by rewrite gtz0_abs //. *)
-            have := len'spec'0 side.
-            apply.
-            rewrite exprSz.
-           suff : (`|M d| <= 2 * `|μ d|)%N. (* this should really be a lemme on len *)
-             by have := len'spec'1 (μ d); rewrite len_ℓ/lmd; clear; lia.
-           suff : 2 * (M d - μ d) <= M d.
-             move: lt0ad lt0bd; rewrite /M; clear; lia.
-             have h1 : 2 * (M d - μ d) <= 2 * 2 ^ (n - k)%N.
-               by move: minMaxD adbdS_b; clear; lia.
-             apply: le_trans h1 _; rewrite -exprSz SnkB.
-             rewrite PoszD -subzn; last by move: le_2kn; clear; lia.
-             apply: le_trans M_big _; move: pos_Md; clear; lia.
-           (* Now we know d.+1 is good, and we are going to prove
-              that it is lasting good. Here is the disjunctive invariant *)
-         pose H t := (P t) || (Q t).
-         (* Observe mu (d + 1) = a (d + 1) *)
-         have HdS : H d.+1.
-           suff PdS : P d.+1 by rewrite /H PdS.
-           rewrite /P.
-           (* have posMd : 0 <= M d by rewrite /M; lia. *)
-           have /= -> : 2 ^ (n%:Z - k%:Z + 1%Z) <=  M d.+1.
-             rewrite /M -/adS -/bdS bdSE; apply: le_trans M_big _.
-             move: pos_Md; rewrite /M; clear; lia.
-           have /= -> : μ d.+1 <= 0 by move: neg_ads; rewrite /μ; clear; lia.
-           have -> : 2 ^ (n%:Z - k%:Z) = 2 * 2 ^ (n - k -1)%N :> int.
-            rewrite -[RHS]exprSz.
-            have -> : Posz (n - k - 1).+1 = n%:Z - k%:Z by move: nkB_alt; clear; lia.
-            done.
-           have -> /= : μ d.+1 = adS.
-             suff hh : adS <= bdS by rewrite /μ -/adS -/bdS /= minEle hh.
-             move: neg_ads bdSE pos_Md; clear; lia.
-           apply: le_lt_trans adS_bound _.
-           (*  2 ^ (n - k - 1)%N < 2 * 2 ^ (n - k - 1)%N BUG matching? hence lia fails *)
-           set x := (X in _ * X); rewrite -/x.
-           suff : 0 < x by clear; lia.
-           by rewrite /x; apply: exprn_gt0.
-         have lem_3_7_Q t : (t + 1 <= k - 1)%N -> Q t -> Q t.+1.
-           by move=> tb; rewrite -addn1; apply: (Q_sinks _ d_div).
-         have lem_3_7_last t : (t <= k - 1)%N -> Q t -> lgood a0 b0 t k (at_step t).
-           move=> tb Qt; apply: div_last_good=> //.
-           - case/andP: Qt=> _; clear; lia.
-           - case/andP: Qt=> _; clear; lia.
-         have lem_3_8 t :
-           0 <= t%:Z <= k%:Z - 2 (* important hypothesis to use same parity *)
-          -> P t -> (H t.+1) &&
-              ((a (at_step t) == 0) ||
-                (ℓ (a (at_step t.+1)) + ℓ (b (at_step t.+1)) <=
-                    ℓ (a (at_step t)) + ℓ (b (at_step t)))%N).
-           move=> t_b Pt; set decr := (X in _ && X).
-           case halv_t: (is_halving (at_step t)).
-           (* case 1: t is halving *)
-           - have halving_A : (* is_halving (at_step t) ->, this should be symbolic exec *)
-               a (at_step t) = 2 * a (at_step t.+1).
-              rewrite at_stepS/ inner_iter halvingCUunset halv_t.
-              rewrite unset_halving_a a_halving_step.
-              rewrite mulrC divzK // a_invI //.
-              move: halv_t.
-              rewrite /xt/is_halving ba_invI //.
-              rewrite (@modz_dvdz _ (ba_t t) 2) //.
-              by rewrite /ba_t/a_t/A; apply at_bat_parity.
-            have halving_B :  (* symbolic exec again *)
-              b (at_step t) = b (at_step t.+1) by rewrite b_halving.
-             (* We first proof that either at = 0 or t is decreasing *)
-             have -> : decr.
-                 case: (a (at_step t) =P 0) => hat; first by rewrite /decr hat.
-                 rewrite /decr halving_A // halving_B //.
-                 set aat := a _; set bbt := b _.
-                 suff : (ℓ aat <= ℓ (2 * aat))%N by clear; lia.
-                   rewrite /ℓ/=.
-                   rewrite len_abs [len (2 * _)]len_abs.
-                   apply: len_incr; last by rewrite abszM leq_pmull.
-                   move: hat; rewrite /aat halving_A; clear; lia.
-             (* We now prove that H holds at t *)
-             case/and3P: Pt => hMt hmu_neg hmult; rewrite andbT.
-             move: hMt hmult hmu_neg.
-             have aux_le : 0 <= 2 ^ (n%:Z - k%:Z) by exact: ltW.
-             rewrite /andbT /H /P /Q /M /μ time2 halving_A halving_B.
-             set aat := a _; set bbt := b _.
-             (* Either P or Q holds depending on the 2a_{t+1} <= b_{t+1}.
-              We treat this by brute force. *)
-             case: (leP (2 * aat) bbt)=> comp1.
-                 case: (leP aat bbt)=> comp2.
-                  + case: (leP `|aat| `|bbt|)=> comp3. (* frustrating long lia. *)
-                    * move=> -> comp5 comp6.
-                      have -> : aat <= 0 by move: comp6; rewrite pmulr_rle0.
-                      suff -> : `|aat| < 2 ^ (n%:Z - k%:Z) by [].
-                      by apply:  le_lt_trans comp5; rewrite normrM ler_peMl.
-                    * move=> -> comp5 comp6.
-                      have -> : aat <= 0 by move: comp6; rewrite pmulr_rle0.
-                      suff -> : `|aat| < 2 ^ (n%:Z - k%:Z) by [].
-                      by apply:  le_lt_trans comp5; rewrite normrM ler_peMl.
-                  + move=> comp3 comp4 comp5.
-                    suff : (0 <= bbt < 0) by rewrite leNgt andNb.
-                    have -> : bbt < 0.
-                      apply: lt_le_trans comp2 _.
-                      by move: comp5; rewrite pmulr_rle0.
-                    rewrite andbT; apply: le_trans comp3=> /=.
-                    by rewrite pmulr_rge0.
-                - case: (leP aat bbt).
-                  + move: comp1; clear; lia.
-                  + case: (leP `|aat| `|bbt|) => comp3.
-                     * move=> comp4 comp5 comp6.
-                       suff -> : `|bbt| < 2 * 2 ^ (n%:Z - k%:Z) by rewrite orbT.
-                       move: comp6; clear; lia.
-                     * move: comp1 comp3 ; clear; lia.
-           (* Case 2: t is not halving *)
-           - case/and3P: Pt => hM muN hmu.
-              have hbSa : `|b (at_step t) - a (at_step t)| > 2^(n%:Z - k%:Z).
-                have -> : `|b (at_step t) - a (at_step t)| = M t - μ t :> int.
-                  by rewrite /M /μ; clear; lia.
-                  (* observe how set is helping lia, which otherwise fails *)
-               move: hM hmu; rewrite time2; set x:= (_ ^ _); clear; lia.
-             pose same_ssign x y := ((x > 0) && (y > 0)) || ((x < 0) && (y < 0)).
-             suff sync : same_ssign (b (at_step t) - a (at_step t)) (bb (at_step t) - ba (at_step t)).
-               have b_St : b (at_step t.+1) = μ t.
-                 rewrite at_stepS /inner_iter.
-                 have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
-                   by rewrite halvingCUunset halv_t.
-                 rewrite halv_unset.
-                 rewrite b_odd_s ?halv_unset //.
-                 (* rewrite  halv_unset f1_odd_s ?halv_unset// g1_odd_s ?{}halv_unset //. *)
-                 rewrite /is_ba_lt_bb baCUunset bbCUunset /μ.
-                 case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb/=.
-                 + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) =
-                              a (at_step t).
-                     by move: hbabb sync hbSa; clear; rewrite /same_ssign; lia.
-                   by [].
-                 + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) =
-                              b (at_step t).
-                     by move: hbabb sync hbSa; clear; rewrite /same_ssign; lia.
-                   by [].
-               have a_St : a (at_step t.+1) = (M t - μ t) %/ 2.
-                 rewrite /a_t /A /xt /ux.
-                 rewrite at_stepS /inner_iter.
-                 have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
-                   by rewrite halvingCUunset halv_t.
-                   rewrite  halv_unset.
-                   rewrite a_odd_s ?halv_unset //.
-                 rewrite /is_ba_lt_bb baCUunset bbCUunset /μ/M.
-                 case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb /=.
-                   (* the following two ids are proved more than once in the script. (refactor?)*)
-                 + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) = (a (at_step t)).
-                     move:  sync hbabb; clear; rewrite /same_ssign; lia.
-                   have -> : Order.Def.max (a (at_step t)) (b (at_step t)) = (b (at_step t)).
-                     move:  sync hbabb; clear; rewrite /same_ssign; lia.
-                   by [].
-                 + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) = (b (at_step t)).
-                     move:  sync hbabb; clear; rewrite /same_ssign; lia.
-                   have -> : Order.Def.max (a (at_step t)) (b (at_step t)) = (a (at_step t)).
-                     move:  sync hbabb; clear; rewrite /same_ssign; lia.
-                   by [].
-               have -> : H t.+1.
-                 rewrite /H /P /Q.
-                 have [-> ->] :
-                   (μ t.+1 = b (at_step t.+1)) /\ (M t.+1 = a (at_step t.+1)).
-                   have hh : 0 <= a (at_step t.+1) by rewrite a_St /M /μ; clear; lia.
-                   by split; rewrite /μ /M; move: muN b_St a_St hh; clear; lia.
-                 rewrite b_St muN /= hmu andbT.
-                 have ltmu /= : `|μ t| < 2 ^ (n%:Z - k%:Z + 1%Z).
-                   apply: lt_le_trans hmu _; rewrite time2.
-                   have hh x : 0 <= x -> x <= 2 * x :> int by clear; lia.
-                   apply: hh; rewrite subzn; last by move: h; clear; lia.
-                   rewrite -exprnP; exact: exprn_ge0.
-                 case: (leP (2 ^ (n%:Z - k%:Z + 1%Z)) (a (at_step t.+1))) => //= haSt.
-                 * rewrite ltmu /=. (* Q should be rephrased as max |mu t | |M t|  < ... *)
-                   suff -> : `|a (at_step t.+1)| = a (at_step t.+1). (* lia does not work! *)
-                     by rewrite gt_max haSt ltmu.
-                   suff : 0 <= a (at_step t.+1) by clear; lia.
-                   rewrite a_St divz_ge0 // /M /μ; clear; lia.
-                   rewrite /= /decr.
-                   suff hh : (ℓ (a (at_step t.+1)) <= ℓ (M t))%N.
-                     rewrite b_St.
-                     have hhh : (ℓ (a (at_step t.+1)) + ℓ (μ t) <= ℓ (M t) + ℓ (μ t))%N.
-                       by move: hh; clear; lia.
-                     apply/orP; right; apply: leq_trans hhh _.
-                     suff -> : (ℓ (M t) + ℓ (μ t) = ℓ (a (at_step t)) + ℓ (b (at_step t)))%N by [].
-                     by rewrite /M maxEle /μ minEle; case: ifP => //; rewrite addnC.
-                   have evenMsmut : 2 %| M t - μ t.
-                     suff [odd_M odd_μ] : M t = 1%:Z %[mod 2] /\ μ t = 1%:Z %[mod 2].
-                       apply dvdz_oddz=> //.
-                     rewrite /M/μ maxEle minEle.
-                     suff [at_odd bt_odd] : a_t t = 1%Z %[mod 2] /\ b_t t = 1%Z %[mod 2].
-                       rewrite a_invI // b_invI //.
-                       by case: ifP; rewrite at_odd bt_odd.
-                     apply odd_step_at_bt_odd=> //.
-                     ++ move: halv_t; clear; lia.
-                   have {a_St} a_St : (a (at_step t.+1)) * 2 = (M t - μ t).
-                     by move: (evenMsmut); rewrite a_St dvdz_eq => /eqP ->.
-                   rewrite /ℓ/=.
-                   rewrite len_abs [len (M t)]len_abs.
-                   apply: len_incr.
-                   * (* (0 < `|a_t t.+1|)%N *)
-                     suff : 0 < (a (at_step t !)) * 2 by clear; lia.
-                     have : 0 < 2 ^ (n%:Z - k%:Z + 1%Z).
-                       by apply: pos_exp; move: h; clear; lia.
-                     by move: muN hM a_St=> /=; clear; lia.
-                   * (* this is |a t.+1| <= |M t| / 2 *)
-                     rewrite -at_stepS.
-                     suff : `|(M t - μ t)| <= `|M t| * 2 by move: a_St; clear; lia.
-                     have hh :  `|M t - μ t| <=  `|M t| + `|μ t| by clear; lia.
-                     apply: leq_trans hh _.
-                     suff : `|μ t| <= `|M t| by clear; lia.
-                     suff -> : `|M t| = M t.
-                       apply: le_trans hM; apply: ltW; apply: lt_le_trans hmu _; rewrite time2.
-                     (* lia problem : assuming 0 <= 2 ^ .. does not help *)
-                       have hh x : 0 <= x -> x <= 2 * x :> int by clear; lia.
-                       apply: hh; apply: ltW; apply: pos_exp; move: h; clear; lia.
-                     suff : 0 <= M t by clear; lia.
-                     apply: le_trans hM; apply:ltW; apply: pos_exp; move: h; clear; lia.
-               pose c : int := 2 ^(n%:Z - 2*k%:Z).
-               have : c * (bb (at_step t) - ba (at_step t)) =
-                        (c * bb (at_step t) - b (at_step t)) - (c * ba (at_step t) - a (at_step t))
-                        + ((b (at_step t) - a (at_step t))).
-                 ring.
-               set u := (X in X = _); set v := (X in _ = X) => e.
-               have hh : `|c * bb (at_step t) - b (at_step t)| +
-                         `|c * ba (at_step t) - a (at_step t)| <= 2 ^ (n%:Z - k%:Z).
-
-                 have HH4 : (k%:Z - 2%:Z <= k%:Z - 1%:Z) by clear; lia.
-                 (* have tb : (0 <= t <= k - 1)%N. *)
-                 (*    by rewrite leq0n /= -!lez_nat -subzn; move: kgt1 t_b HH4 ; clear; lia. *)
-                 have [HH5 HH6] := close_approx t_b.
-                 have HH1 : `|c * bb (at_step t) - b (at_step t)| <= 2 ^ (n - k - 1)%N.
-                   rewrite /c bb_invI; rewrite distrC.
-                   have [] := close_approx t_b.
-                   by rewrite b_invI // subzn /= addn1 //.
-                 have HH2 : `|c * ba (at_step t) - a (at_step t)| <= 2 ^ (n - k - 1)%N.
-                   rewrite /c ba_invI; rewrite distrC.
-                   by rewrite a_invI // subzn /= addn1 //.
-                 have HH3 : 2 ^ (n - k - 1)%N + 2 ^ (n - k - 1)%N <= (2 : int) ^ (n%:Z - k%:Z).
-                   have -> : 2 ^ (n - k - 1)%N + 2 ^ (n - k - 1)%N = 2 * (2: int) ^ (n - k - 1)%N. by rewrite mul2z.
-                   by rewrite -exprSz nkB_alt subzn // kleqn.
-                 by apply: (le_trans _ HH3); apply lerD.
-             have pos_c : 0 < c by rewrite /c subzn // -exprnP exprn_gt0.
-             rewrite /same_ssign [_ < 0]ltNge.
-             case: (ltrgtP 0 (b (at_step t) - a (at_step t))) => hcomp /=.
-             + rewrite orbF.
-               suff : 0 < c * (bb (at_step t) - ba (at_step t)) by rewrite pmulr_rgt0.
-               rewrite -/u {}e {u} /v; set u := (X in 0 < X + _).
-               suff : `|u| < `|b (at_step t) - a (at_step t)| by move: hcomp; clear; lia.
-               rewrite /u; move: hbSa hh; clear; lia.
-             + suff : c * (bb (at_step t) - ba (at_step t)) < 0 by rewrite pmulr_rlt0.
-               rewrite -/u {}e {u} /v; set u := (X in X + _ < 0).
-               suff : `|u| < `|b (at_step t) - a (at_step t)| by move: hcomp; clear; lia.
-               rewrite /u; move: hbSa hh; clear; lia.
-             + move: hbSa; rewrite -hcomp ltNge; apply: contraR=> _.
-               apply: ltW; apply: pos_exp; move: pos_nkB; clear; lia.
-         have cor_3_9 t u :
-             H t -> good_iv a0 b0 k (at_step t) ->
-                                   (0 <= u <= k - 1 - t)%N ->
-                                  H (t + u)%N && good_iv a0 b0 k (at_step (t + u)).
-           move=> Ht good_t.
-           elim: u => [| u ihu] ht; first by rewrite !addn0 Ht.
-           have /ihu /andP[ihH ihgood] : (0 <= u <= k - 1 - t)%N by move: ht; clear; lia.
-           case/orP: ihH => [hP | hQ]; last first.
-             have side : (t + u + 1 <= k - 1)%N by move: ht; clear; lia.
-             move/(lem_3_7_Q _ side): (hQ). rewrite /H addnS => ->; rewrite orbT //=.
-             have {}hQ : (Q (t + u + 1)) by rewrite addn1; apply lem_3_7_Q=> //.
-             move/lgoodP: (lem_3_7_last _ side hQ). by rewrite -at_stepS; apply; move: ht; clear; lia.
-           have u_b : 0 <= ((t + u)%N)%:Z <= k%:Z - 2. by move: ht; clear; lia.
-           case/andP: (lem_3_8 _ u_b hP)=> e hh.
-           rewrite addnS e /= /good_iv.
-           (* have -> : (t + u < k - 1)%N by move: ht; clear; lia.  *)
-           rewrite /=; case/orP: hh => hh; last first.
-             apply: leq_trans hh _.
-             have /ihu : (0 <= u <= k - 1 - t)%N by move: ht; clear; lia.
-             by case/andP. 
-           have /(zero_lgood (eqP hh) ihgood) : ((t + u) <= (t + u).+1 < k)%N.
-             by move: ht; clear; lia.
-           by done. 
-         have pouah : (0 <= k - 1 - d.+1 <= k - 1 - d.+1)%N by move: dltk; clear; lia.
-         have /andP[] := cor_3_9 _ _ HdS good_dS pouah.
-         have -> : (d.+1 + (k - 1 - d.+1) = k - 1)%N by move: hdk; clear; lia.
-         done.
-         Qed.
-
-
-
+     + exact: inner_dec_close_div.
+    Qed.
 
   End inner_iter_dec.
 
