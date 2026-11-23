@@ -75,28 +75,28 @@ Section algo.
       g0         : int;
       f1         : int;
       g1         : int;
-      this_iter  : bool;
-      divergence : bool;
+      (* this_iter  : bool; *)
+      (* divergence : bool; *)
     }.
 
   (* eqType instance on iter_vars *)
   Definition eqb_iv (p1 p2 : iter_vars) :=
     match (p1, p2) with
-    | (mkIter a b ba bb f0 g0 f1 g1 ti div,
-        mkIter a' b' ba' bb' f0' g0' f1' g1' ti' div') =>
-        [&& [&& a == a', b == b', ba == ba', bb == bb' & f0 == f0'],
-          [&& g0 == g0', f1 == f1'& g1 == g1'],
-          ti == ti' &  div == div']
+    | (mkIter a b ba bb f0 g0 f1 g1,
+        mkIter a' b' ba' bb' f0' g0' f1' g1') =>
+        [&& a == a', b == b', ba == ba', bb == bb' & f0 == f0']
+        && [&& g0 == g0', f1 == f1'& g1 == g1']
+          (* ti == ti' &  div == div'] *)
     end.
 
   Lemma iv_eqDec : Equality.axiom eqb_iv.
   Proof.
-    move=> [a b ba bb f0 g0 f1 g1 ti div].
-    move=> [a' b' ba' bb' f0' g0' f1' g1' ti' div'].
+    move=> [a b ba bb f0 g0 f1 g1].
+    move=> [a' b' ba' bb' f0' g0' f1' g1'].
     apply (iffP idP).
     + rewrite /eqb_iv=> /and4P[/and5P[/eqP -> /eqP -> /eqP -> /eqP -> /eqP ->]].
-      by move=> /and3P[ /eqP -> /eqP -> /eqP ->] /eqP -> /eqP ->.
-    + move=> [[]] -> -> -> -> -> -> -> -> -> ->.
+      by move=> /eqP -> /eqP -> /eqP ->.
+    + move=> [[]] -> -> -> -> -> -> -> ->.
       by rewrite /eqb_iv !eqxx.
   Qed.
 
@@ -117,44 +117,7 @@ Section algo.
     let a := (vs.(a) %/ 2) %Z in
     let f1 := (2 * vs.(f1)) in
     let g1 := (2 * vs.(g1)) in
-    mkIter a vs.(b) ba vs.(bb) vs.(f0) vs.(g0) f1 g1 false vs.(divergence).
-
-  (* unset_this_iter vs is vs but with this_iter enforced to be false *)
-  Definition unset_this_iter (vs : iter_vars) : iter_vars :=
-    (* ensures { result.this_iter' = false }  *)
-    mkIter vs.(a) vs.(b) vs.(ba) vs.(bb) vs.(f0) vs.(g0) vs.(f1) vs.(g1)
-      false vs.(divergence).
-
-  Lemma halvingCUunset : fCU is_halving unset_this_iter. Proof. by []. Qed.
-
-  Lemma aCUunset : fCU a unset_this_iter. Proof. by []. Qed.
-
-  Lemma bCUunset :
-    fCU b unset_this_iter. Proof. by []. Qed.
-
-  Lemma baCUunset : fCU ba unset_this_iter. Proof. by []. Qed.
-
-  Lemma bbCUunset : fCU bb unset_this_iter. Proof. by []. Qed.
-
-  Lemma f0CUunset :
-    fCU f0 unset_this_iter.
-  Proof. by []. Qed.
-
-  Lemma g0CUunset :
-    fCU g0 unset_this_iter.
-  Proof. by []. Qed.
-
-  Lemma f1CUunset :
-    fCU f1 unset_this_iter.
-  Proof. by []. Qed.
-
-  Lemma g1CUunset :
-    fCU g1 unset_this_iter.
-  Proof. by []. Qed.
-
-  Lemma divCUunset :
-    fCU divergence unset_this_iter.
-  Proof. by []. Qed.
+    mkIter a vs.(b) ba vs.(bb) vs.(f0) vs.(g0) f1 g1.
 
   (* Applying update factors f0 and g0 to a and b *)
   Definition ux (a b f0 g0: int) : int := a * f0 + b * g0.
@@ -216,127 +179,6 @@ Section algo.
     let b := vs.(b) in
     ((ba < bb) && ~~ (a < b)) || ((~~ (ba < bb)) && (a < b)).
 
-  (* tests the 'divergence' field of record vs *)
-  Definition has_diverged (vs : iter_vars) : bool := vs.(divergence).
-
-  (* set_this_iter vs is vs but with this_iter enforced to be true *)
-  Definition set_this_iter (vs : iter_vars) : iter_vars :=
-    mkIter vs.(a) vs.(b) vs.(ba) vs.(bb) vs.(f0) vs.(g0) vs.(f1) vs.(g1)
-      true vs.(divergence).
-
-  Lemma set_tiCP :
-    [/\ fCU4 a b ba bb set_this_iter,
-       fCU4 f0 g0 f1 g1 set_this_iter&
-         fCU divergence set_this_iter].
-  Proof. by []. Qed.
-
-  Lemma aCUset_ti : fCU a set_this_iter.
-  Proof. by have [[[]]] := set_tiCP. Qed.
-
-  Lemma bCUset_ti : fCU b set_this_iter.
-  Proof. by have [[[]]] := set_tiCP. Qed.
-
-  Lemma baCUset_ti  : fCU ba set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma bbCUset_ti  : fCU bb set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma f0CUset_ti  : fCU f0 set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma g0CUset_ti  : fCU g0 set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma f1CUset_ti  : fCU f1 set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma g1CUset_ti  : fCU g1 set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Lemma divCUset_ti  : fCU divergence set_this_iter .
-  Proof. by have [[[]]] := set_tiCP . Qed.
-
-  Definition set_divergence (vs : iter_vars) : iter_vars :=
-    mkIter vs.(a) vs.(b) vs.(ba) vs.(bb) vs.(f0) vs.(g0) vs.(f1) vs.(g1)
-      vs.(this_iter) true.
-
-  Lemma set_divCP :
-    [/\ fCU4 a b ba bb set_divergence,
-       fCU4 f0 g0 f1 g1 set_divergence&
-         fCU this_iter set_divergence].
-  Proof. by []. Qed.
-
-  Lemma aCUset_div  : fCU a set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma bCUset_div  : fCU b set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma baCUset_div  : fCU ba set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma bbCUset_div  : fCU bb set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma f0CUset_div  : fCU f0 set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma g0CUset_div  : fCU g0 set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma f1CUset_div  : fCU f1 set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma g1CUset_div  : fCU g1 set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  Lemma tiCUset_div  : fCU this_iter set_divergence .
-  Proof. by have [[[]]] := set_divCP . Qed.
-
-  (* This if then else is unneeded *)
-  Definition update_divergence_status (vs : iter_vars) : iter_vars :=
-    (* requires j_geq_1 { vars.j' - 1 >= 0 }  *)
-    (* requires odd { not (is_halving vars) }  *)
-    (* requires reset { vars.this_iter' = false }  *)
-    if is_divergent vs then
-      (if has_diverged vs
-        then vs (* divergence already set to true *)
-        else set_this_iter (set_divergence vs))
-    else vs.
-
-  Lemma updateCP :
-    [/\ fCU4 a b ba bb update_divergence_status &
-       fCU4 f0 g0 f1 g1 update_divergence_status].
-  Proof.
-  rewrite /fCU4/fCU2/fCU/CU/update_divergence_status.
-  by split; [split | split]; split=> vs; case: ifP => // _ ; case: ifP.
-  Qed.
-
-  Lemma aCUupdate : fCU a update_divergence_status.
-  Proof. by have [[[]]] := updateCP. Qed.
-
-  Lemma bCUupdate : fCU b update_divergence_status.
-  Proof. by have [[[]]] := updateCP. Qed.
-
-  Lemma baCUupdate : fCU ba update_divergence_status.
-  Proof. by have [[[_ _] []] ] := updateCP. Qed.
-
-  Lemma bbCUupdate : fCU bb update_divergence_status.
-  Proof. by have [[[_ _] []]] := updateCP. Qed.
-
-  Lemma f0CUupdate : fCU f0 update_divergence_status.
-  Proof. by have [_ [[]]] := updateCP. Qed.
-
-  Lemma g0CUupdate : fCU g0 update_divergence_status.
-  Proof. by have [_ [[]]] := updateCP. Qed.
-
-  Lemma f1CUupdate : fCU f1 update_divergence_status.
-  Proof. by have [_ [_ []]] := updateCP. Qed.
-
-  Lemma g1CUupdate : fCU g1 update_divergence_status.
-  Proof. by have [_ [_ []]] := updateCP. Qed.
-
   Definition is_ba_lt_bb (vs : iter_vars) : bool := vs.(ba) < vs.(bb).
 
   (* Assia : what does this comment mean? *)
@@ -346,20 +188,6 @@ Section algo.
       fCU is_ba_lt_bb f.
   Proof. by move=> [e1 e2] vs; rewrite /CU/is_ba_lt_bb e1 e2. Qed.
 
-
-  Lemma lt_update : fCU is_ba_lt_bb update_divergence_status.
-  Proof.
-  move=> vs; rewrite /CU/= baltDE ?eqxx //.
-  split; [ exact: baCUupdate | exact: bbCUupdate].
-  Qed.
-
-  Lemma ltCUunset :
-    fCU is_ba_lt_bb unset_this_iter.
-  Proof. apply baltDE. split; [ exact: baCUunset | exact: bbCUunset ]. Qed.
-
-  (* hypotheses can be reduced for this lemma *)
-  (* used *)
-
 (* iteration when ba is odd and no swap happens. *)
   Definition odd_not_swap (vs : iter_vars) : iter_vars :=
     let ba := ((vs.(ba) - vs.(bb)) %/ 2)%Z in
@@ -368,9 +196,7 @@ Section algo.
     let g0 := (vs.(g0) - vs.(g1)) in
     let f1 := (2 * vs.(f1)) in
     let g1 := (2 * vs.(g1)) in
-    mkIter a vs.(b) ba vs.(bb) f0 g0 f1 g1
-       vs.(this_iter)
-        vs.(divergence).
+    mkIter a vs.(b) ba vs.(bb) f0 g0 f1 g1.
 
   (* swapping condition *)
   Definition is_swap (vs : iter_vars ) : bool :=
@@ -378,47 +204,28 @@ Section algo.
 
   (*swapping a and b (resp. ba and bb) *)
   Definition swap (vs : iter_vars) : iter_vars :=
-    mkIter vs.(b) vs.(a) vs.(bb) vs.(ba) vs.(f1) vs.(g1) vs.(f0) vs.(g0)
-    vs.(this_iter) vs.(divergence).
-  
+    mkIter vs.(b) vs.(a) vs.(bb) vs.(ba) vs.(f1) vs.(g1) vs.(f0) vs.(g0).
+
   (* iteration when ba is odd *)
   Definition odd_step (vs: iter_vars) : iter_vars :=
     (* requires j_geq_1 { vars.j' - 1 >= 0 } *)
     (*   requires { not (is_halving vars) } *)
     (*   requires reset { vars.this_iter' = false } *)
-    let vs' := update_divergence_status vs in
-      if is_ba_lt_bb vs'
-      then odd_not_swap (swap vs')
-      else odd_not_swap vs'.
+      if is_ba_lt_bb vs
+      then odd_not_swap (swap vs)
+      else odd_not_swap vs.
 
   (* iteration *)
   Definition inner_iter (vs : iter_vars) : iter_vars :=
-    let vs' := unset_this_iter vs in
-    if is_halving vs' then halving_step vs' else odd_step vs'.
+    if is_halving vs then halving_step vs else odd_step vs.
 
   (* Perform an inner iteration on vs *)
   Notation "vs !" := (inner_iter vs) (at level 40).
 
-  Lemma unset_halving_a (vs : iter_vars) :
-    a (halving_step (unset_this_iter vs)) = a (halving_step vs).
-  Proof. by []. Qed.
-
-  Lemma unset_halving_b (vs : iter_vars) :
-    b (halving_step (unset_this_iter vs)) = b (halving_step vs).
-  Proof. by []. Qed.
-
-  Lemma unset_halving_ba (vs : iter_vars) :
-    ba (halving_step (unset_this_iter vs)) = ba (halving_step vs).
-  Proof. by []. Qed.
-
-  Lemma unset_halving_bb (vs : iter_vars) :
-    bb (halving_step (unset_this_iter vs)) = bb (halving_step vs).
-  Proof. by []. Qed.
-
   Lemma a_halving (vs : iter_vars) :
     is_halving vs ->
     (vs !).(a) = vs.(a) %/ 2.
-  Proof. by move=> ih; rewrite /inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /inner_iter ih /=. Qed.
 
   Lemma a_halving_step (vs : iter_vars) :
     (halving_step vs).(a) = vs.(a) %/ 2.
@@ -427,7 +234,7 @@ Section algo.
   Lemma ba_halving (vs : iter_vars) :
     is_halving vs ->
     (vs !).(ba) = vs.(ba) %/ 2.
-  Proof. by move=> ih; rewrite /inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /inner_iter ih /=. Qed.
 
   Lemma ba_halving_step (vs : iter_vars) :
     (halving_step vs).(ba) = vs.(ba) %/ 2.
@@ -436,12 +243,12 @@ Section algo.
   Lemma b_halving (vs : iter_vars) :
     is_halving vs ->
     CU b inner_iter vs.
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma bb_halving_inner_iter (vs : iter_vars) :
     is_halving vs ->
     CU bb inner_iter vs.
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma bb_halving_step (vs : iter_vars) :
     CU bb halving_step vs.
@@ -454,12 +261,12 @@ Section algo.
   Lemma f0_halving (vs : iter_vars) :
     is_halving vs ->
     CU f0 inner_iter vs.
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma g0_halving (vs : iter_vars) :
     is_halving vs ->
     CU g0 inner_iter vs.
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma f0_halving_step (vs : iter_vars) :
     (halving_step vs).(f0) = vs.(f0).
@@ -472,12 +279,12 @@ Section algo.
   Lemma f1_halving (vs : iter_vars) :
     is_halving vs ->
     (vs !).(f1) = (2 * vs.(f1)).
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma g1_halving (vs : iter_vars) :
     is_halving vs ->
     (vs !).(g1) = (2 * vs.(g1)).
-  Proof. by move=> ih; rewrite /CU/inner_iter halvingCUunset ih /=. Qed.
+  Proof. by move=> ih; rewrite /CU/inner_iter ih /=. Qed.
 
   Lemma f1_halving_step (vs : iter_vars) :
     (halving_step vs).(f1) = (2 * vs.(f1)).
@@ -488,31 +295,19 @@ Section algo.
   Proof. by []. Qed.
 
   Lemma a_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   a (odd_step vs) = a (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= aCUupdate bCUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma b_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   b (odd_step vs) = b (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= ?aCUupdate ?bCUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma ba_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   ba (odd_step vs) = ba (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= baCUupdate bbCUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma ba_odd_not_swap (vs :iter_vars) :
   ba (odd_not_swap vs) = (ba vs - bb vs) %/ 2.
@@ -531,13 +326,9 @@ Section algo.
   Proof. by []. Qed.
 
   Lemma bb_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   bb (odd_step vs) = bb (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= ?baCUupdate ?bbCUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma a_swap vs: a (swap vs) = b vs.
   Proof. by []. Qed.
@@ -551,61 +342,25 @@ Section algo.
   Lemma bb_swap vs: bb (swap vs) = ba vs.
   Proof. by []. Qed.
 
-  Lemma a_odd_step_unset vs: a (odd_step (unset_this_iter vs))
-                              = a (odd_step vs).
-  Proof.
-  rewrite /odd_step.
-  rewrite !lt_update ltCUunset.
-  case: ifP; rewrite !a_odd_not_swap.
-  by rewrite !(a_swap) !b_swap !bCUupdate !aCUupdate aCUunset bCUunset.
-  by rewrite !bCUupdate !aCUupdate aCUunset bCUunset.
-  Qed.
-
-  Lemma b_odd_step_unset vs: b (odd_step (unset_this_iter vs))
-                              = b (odd_step vs).
-  Proof.
-  rewrite /odd_step.
-  rewrite !lt_update ltCUunset.
-  case: ifP; rewrite !b_odd_not_swap.
-  by rewrite !b_swap !aCUupdate aCUunset.
-  by rewrite !bCUupdate bCUunset.
-  Qed.
-
   Lemma f0_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   f0 (odd_step vs) = f0 (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= f0CUupdate f1CUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma g0_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   g0 (odd_step vs) = g0 (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= g0CUupdate g1CUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma f1_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   f1 (odd_step vs) = f1 (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= ?f0CUupdate ?f1CUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma g1_odd_s (vs :iter_vars) :
-    ~~ is_halving vs ->
   g1 (odd_step vs) = g1 (if is_ba_lt_bb vs
                       then odd_not_swap (swap vs) else odd_not_swap vs).
-  Proof.
-  move=> ihN; rewrite /odd_step lt_update.
-  by case: ifP; rewrite /= ?g0CUupdate ?g1CUupdate.
-  Qed.
+  Proof. by []. Qed.
 
   Lemma f1_odd_swap (vs :iter_vars) :
     f1 (odd_not_swap (swap vs)) = 2 * f0 vs.
@@ -814,6 +569,7 @@ Section algo.
   Lemma gcdn_div2 (x y: nat) :
     (2 %| x)%N -> ~~ (2 %| y)%N -> gcdn (x %/ 2) y = gcdn x y.
   Proof. by move=> dx; rewrite dvdn2 negbK -coprimen2=> dy; apply gcdn_div. Qed.
+
   Definition init_kn (k n : nat) (vs : iter_vars) : Prop :=
     [/\ k > 1,
       n = maxn (maxn (ℓ vs.(a)) (ℓ vs.(b))) (2 * k) ,
@@ -831,9 +587,6 @@ Section algo.
   (*     vs.(bg0) = 0 & *)
   (*       vs.(bg1) = 1]. *)
 
-  Definition init_div (vs : iter_vars) : Prop :=
-    vs.(this_iter) = false /\ vs.(divergence) = false.
-
   Definition init_ab (a0 b0 : int) (vs : iter_vars) : Prop :=
     [/\ (vs.(a) >= 0) ,
       (vs.(b) >=0), vs.(b) = 1%:Z %[mod 2],
@@ -842,9 +595,10 @@ Section algo.
 
   Definition init_conditions (a0 b0 : int) (k n : nat) (vs : iter_vars) :=
     [/\ init_kn k n vs,
-      init_fgi vs,
+      init_fgi vs&
       (* init_bfgi vs, *)
-      init_div vs & init_ab a0 b0 vs].
+        (* init_div vs & *)
+        init_ab a0 b0 vs].
 
   Definition blasting (from to : nat) (vs : iter_vars) (P : nat -> iter_vars -> Prop) :=
     forall i, (from <= i <= to -> P i (s_steps from (i - from) vs))%N.
@@ -865,8 +619,8 @@ Section algo.
   Lemma inner_a_is_0 (vs : iter_vars) (ba_is0 : vs.(ba) = 0) :
     (vs !).(ba) = 0.
   Proof.
-    rewrite /inner_iter/= halvingCUunset is_halving_0 //.
-    by rewrite unset_halving_ba /= ba_is0 div0z.
+    rewrite /inner_iter/= is_halving_0 //.
+    by rewrite /= ba_is0 div0z.
   Qed.
 
 
@@ -1005,14 +759,13 @@ Section algo.
   Lemma fCUiter {T: Type} (f : iter_vars -> T) (t : nat) :
     fCU f halving_step  ->
     fCU f odd_step ->
-    fCU f unset_this_iter ->
+    (* fCU f unset_this_iter -> *)
     fCU f inner_iter.
   Proof.
-  move=> fCUfh fCUfo fCUfu vs.
-  rewrite /inner_iter/CU halvingCUunset.
+  move=> fCUfh fCUfo vs; rewrite /inner_iter/CU.
   case: (is_halving vs).
-  by rewrite fCUfh fCUfu.
-  by rewrite fCUfo fCUfu.
+  by rewrite fCUfh.
+  by rewrite fCUfo.
   Qed.
 
   Lemma a_is0 {a0 b0 : int} {vs : iter_vars}
@@ -1039,7 +792,7 @@ Section algo.
               vs_s.(g1) = 2 ^ t
           ].
   Proof.
-  have [i_kn i_fgi i_div i_ab]:= ic.
+  have [i_kn i_fgi i_ab]:= ic.
   move=> /(a_is0 i_ab) ais0 t.
   have ba_is0 := a0_ba0_ikn i_kn ais0.
   elim: t=> [/= | t' IHt vs'].
@@ -1062,7 +815,7 @@ Section algo.
         let vs_s := s_steps 0 t vs in
         A a0 b0 t vs_s = 0.
   Proof.
-  have [i_kn i_fgi i_div i_ab] := ic.
+  have [i_kn i_fgi i_ab] := ic.
   move=> ais0 t vs'.
   suff: vs'.(f0) = 1 /\ vs'.(g0) = 0.
     by rewrite ais0 /A/xt=> [[-> ->]]; rewrite ux_ab10 div0z.
@@ -1086,10 +839,10 @@ Section algo.
 
 
     Lemma a0_pos : 0 <= a0.
-    Proof. by case: ic; move=> _ _ _ [? _ _ ->]. Qed.
+    Proof. by case: ic; move=> _ _ [? _ _ ->]. Qed.
 
     Lemma b0_pos : 0 <= b0.
-    Proof. by case: ic; move=> _ _ _ [_ ? _ _ ->]. Qed.
+    Proof. by case: ic; move=> _ _ [_ ? _ _ ->]. Qed.
 
     Definition vs_kB1 := at_exit k vs0.
     Definition at_step_vs t vs := s_steps 0 t vs.
@@ -1125,9 +878,9 @@ Section algo.
       -> B x y t (at_step t) = B x y t.+1 (at_step t.+1).
     Proof.
     move=> ihN ltN; rewrite /B/A at_stepS.
-    rewrite /inner_iter halvingCUunset (negPf ihN).
+    rewrite /inner_iter (negPf ihN).
     rewrite f1_odd_s // g1_odd_s //.
-    by rewrite ltCUunset (negPf ltN) /= xtSH.
+    by rewrite (negPf ltN) /= xtSH.
     Qed.
 
     Lemma halvingN_lt_B t x y :
@@ -1136,9 +889,9 @@ Section algo.
       -> A x y t (at_step t) = B x y t.+1 (at_step t.+1).
     Proof.
     move=> ihN lt; rewrite /B/A at_stepS.
-    rewrite /inner_iter halvingCUunset (negPf ihN).
+    rewrite /inner_iter (negPf ihN).
     rewrite f1_odd_s // g1_odd_s //.
-    by rewrite ltCUunset lt /= xtSH.
+    by rewrite lt /= xtSH.
     Qed.
 
     Lemma halvingN_lt_A t x y :
@@ -1148,9 +901,8 @@ Section algo.
         = xt x y (f1 (at_step t) - f0 (at_step t)) (g1 (at_step t) - g0 (at_step t)) t.+1.
     Proof.
     move=> ihN lt; rewrite /B/A at_stepS.
-    rewrite /inner_iter halvingCUunset (negPf ihN).
-    rewrite f0_odd_s // g0_odd_s //.
-    by rewrite ltCUunset lt.
+    rewrite /inner_iter (negPf ihN).
+    by rewrite f0_odd_s // g0_odd_s // lt.
     Qed.
 
     Lemma halvingN_ltN_A t x y :
@@ -1160,18 +912,17 @@ Section algo.
         = xt x y (f0 (at_step t) - f1 (at_step t)) (g0 (at_step t) - g1 (at_step t)) t.+1.
     Proof.
     move=> ihN lt; rewrite /B/A at_stepS.
-    rewrite /inner_iter halvingCUunset (negPf ihN).
-    rewrite f0_odd_s // g0_odd_s //.
-    by rewrite ltCUunset lt.
+    rewrite /inner_iter (negPf ihN).
+    by rewrite f0_odd_s // g0_odd_s // lt.
     Qed.
 
     Lemma inner_iter_ind_coarse P vs :
-      (is_halving vs -> P (halving_step (unset_this_iter vs)))
-      -> (~~ is_halving vs -> P (odd_step (unset_this_iter vs)))
+      (is_halving vs -> P (halving_step vs))
+      -> (~~ is_halving vs -> P (odd_step vs))
       -> P (inner_iter vs).
     Proof.
     move=> H NH; rewrite /inner_iter.
-    case: ifP; rewrite halvingCUunset // => nh.
+    case: ifP=> // nh.
     by apply NH; rewrite nh.
     Qed.
 
@@ -1316,7 +1067,7 @@ Section algo.
 
         Lemma kltn : (k < n)%N.
         Proof.
-        move: ic=> [/ic_nge2k le2kn _ _ _].
+        move: ic=> [/ic_nge2k le2kn _ _].
         have mull : (k < 2 * k)%N. by apply ltn_Pmull=> //; rewrite kgtz.
         by apply : leq_trans mull le2kn.
         Qed.
@@ -1325,11 +1076,11 @@ Section algo.
         Proof. by rewrite ltnW // kltn. Qed.
 
         Lemma nge2k : (2 * k <= n)%N.
-        Proof. by case: ic=> [i_kn _ _ _]; apply (ic_nge2k i_kn). Qed.
+        Proof. by case: ic=> [i_kn _ _]; apply (ic_nge2k i_kn). Qed.
 
         Lemma gtkcm : k%:Z < n%:Z - k%:Z + 1%Z.
         Proof.
-        move: ic=>[ikn _ _ _].
+        move: ic=>[ikn _ _ ].
         have le2kn := ic_nge2k ikn.
         lia.
         Qed.
@@ -1617,12 +1368,12 @@ Section algo.
     Proof.
     elim: t=> [|t' IHt].
     rewrite /at_step/at_step_vs O_steps /=.
-    case: ic=> [] [_ _ _ bb_approx] _ _ [_ _ b_odd].
+    case: ic=> [] [_ _ _ bb_approx] _ [_ _ b_odd].
     by rewrite bb_approx - odd_b_odd_approx.
     rewrite /bb_t/B at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - by rewrite bb_halving_step ?halvingCUunset //.
-    - rewrite bb_odd_s ?halvingCUunset //.
+    - by rewrite bb_halving_step //.
+    - rewrite bb_odd_s //.
       case: ifP=> [ltba | //] /=.
       by move: ihN; rewrite /is_halving notin2_odd=> /eqP.
     Qed.
@@ -1644,22 +1395,22 @@ Section algo.
     Proof. rewrite at_step0; move: ic=> [] _ []; lia. Qed.
 
     Lemma a0E : (a vs0) = a0.
-    Proof. move: ic=> [] _ _ _ []; lia. Qed.
+    Proof. move: ic=> [] _ _ []; lia. Qed.
 
     Lemma ba0 : ba (at_step 0) = approx a0 k n.
     Proof. rewrite at_step0 -a0E; move: ic=> [] []; lia. Qed.
 
     Lemma b0E : (b vs0) = b0.
-    Proof. move: ic=> [] _ _ _ []; lia. Qed.
+    Proof. move: ic=> [] _ _ []; lia. Qed.
 
     Lemma bb0 : bb (at_step 0) = approx b0 k n.
     Proof. rewrite at_step0 -b0E; move: ic=> [] []; lia. Qed.
 
     Lemma a0geq0: a0 >= 0.
-    Proof. case: ic=> [] _ _ _ []/=; lia. Qed.
+    Proof. case: ic=> [] _ _ []/=; lia. Qed.
 
     Lemma b0geq0: b0 >= 0.
-    Proof. case: ic=> [] _ _ _ []/=; lia. Qed.
+    Proof. case: ic=> [] _ _ []/=; lia. Qed.
 
     Lemma approx_ge0 x : x >= 0 -> approx x k n >= 0.
     Proof.
@@ -1700,7 +1451,7 @@ Section algo.
       + by rewrite expr0z /= !dvd1z.
       (* ba(b)_t base case *)
       + rewrite /ba_t/bb_t/at_stepS /=/A/B.
-        case: ic=> [[]] _ _ -> -> [] -> -> -> -> _ [_ _ _ -> ->].
+        case: ic=> [[]] _ _ -> -> [] -> -> -> -> [_ _ _ -> ->].
         by rewrite !xt0 ux_ab10 ux_ab01.
     - split.
       (* 2 ^ t %| ux inductive case *)
@@ -1711,8 +1462,7 @@ Section algo.
              apply /dvdz_mod0P.
              by move: ih; rewrite /is_halving eqba/ba_t/A=> /dvdz_mod0P.
          + rewrite /odd_step.
-           rewrite lt_update ltCUunset.
-           case: ifP=> [ltba | ltbaN]; rewrite /= f0CUupdate f1CUupdate g0CUupdate g1CUupdate f0CUunset f1CUunset g0CUunset g1CUunset.
+           case: ifP=> [ltba | ltbaN]=> /=.
            - split.
              * (* both are odd *)
                rewrite exprSzr.
@@ -1749,19 +1499,18 @@ Section algo.
              by apply exact_divs_even_f1.
       (* ba(b)_t  inductive case *)
       -- rewrite at_stepS. apply inner_iter_ind_coarse=> [h | nh].
-         + rewrite unset_halving_ba unset_halving_bb bb_halving_step //.
-           rewrite /ba_t. rewrite halving_a_tS //; last first.
+         + rewrite bb_halving_step /ba_t halving_a_tS //; last first.
            * by rewrite -/(ba_t t') -eqba.
            by rewrite ba_halving_step -/(ba_t t') eqba eqbb halving_bb_t.
-         + rewrite ba_odd_s // bb_odd_s // ltCUunset.
+         + rewrite ba_odd_s // bb_odd_s //.
            case: ifP=> [baltbb | baltbbN]; rewrite ba_odd_not_swap bb_odd_not_swap /=.
            - rewrite /ba_t/A at_stepS; split; last first.
              by rewrite eqba/ba_t halvingN_lt_B //.
              suff help : 2 ^ t' * 2 %| ux (approx a0 k n) (approx b0 k n) (f0 (at_step t'.+1)) (g0 (at_step t'.+1)).
                rewrite -at_stepS xtS // at_stepS/inner_iter.
-               rewrite halvingCUunset (negPf nh) f0_odd_s // g0_odd_s // ltCUunset baltbb /=.
+               rewrite (negPf nh) f0_odd_s // g0_odd_s // baltbb /=.
                rewrite eqba eqbb /ba_t/bb_t/A/B -xt_sub //.
-             rewrite at_stepS /inner_iter halvingCUunset (negPf nh) f0_odd_s // g0_odd_s // ltCUunset baltbb /=.
+             rewrite at_stepS /inner_iter (negPf nh) f0_odd_s // g0_odd_s // baltbb /=.
              rewrite mulrC; apply dvdz_factors; first by apply expfz_neq0.
              * by rewrite ux_sub; apply dvdz_sub.
              rewrite ux_sub.
@@ -1773,8 +1522,8 @@ Section algo.
              have -> : (q2 * 2 ^ t' - q1 * 2 ^ t') = (q2 - q1) * 2 ^ t' by lia.
              rewrite !mulzK // ?expfz_neq0 //.
              by move=> ? ?; apply dvdz_oddz.
-           - rewrite /ba_t/A/bb_t/B at_stepS /inner_iter halvingCUunset (negPf nh) f1_odd_s // g1_odd_s // ltCUunset baltbbN /=.
-             rewrite xtSH eqbb; split=> //; rewrite f0_odd_s // g0_odd_s // ltCUunset baltbbN /=.
+           - rewrite /ba_t/A/bb_t/B at_stepS /inner_iter (negPf nh) f1_odd_s // g1_odd_s // baltbbN /=.
+             rewrite xtSH eqbb; split=> //; rewrite f0_odd_s // g0_odd_s // baltbbN /=.
              suff H : 2 ^ t' * 2 %| ux (approx a0 k n) (approx b0 k n) (f0 (at_step t') - f1 (at_step t')) (g0 (at_step t') - g1 (at_step t')).
                by rewrite xtS // eqba xt_sub.
              rewrite mulrC; apply dvdz_factors; first by apply expfz_neq0.
@@ -1951,13 +1700,13 @@ Section algo.
     Proof.
     elim: t=> [| t' IHt] tb.
     - rewrite /b_t/B xt0 /at_step/at_step_vs O_steps.
-      case: ic=> [] _ [_ -> _ ->] _ [_ _ b_odd _ ->].
+      case: ic=> [] _ [_ -> _ ->] [_ _ b_odd _ ->].
       by rewrite ux_ab01.
     rewrite /b_t/B at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - rewrite f1_halving_step g1_halving_step xtSH f1CUunset g1CUunset -/(B a0 b0 t' _)-/(b_t t').
+    - rewrite f1_halving_step g1_halving_step xtSH -/(B a0 b0 t' _)-/(b_t t').
       by rewrite IHt //; lia.
-    - rewrite f1_odd_s ?halvingCUunset // g1_odd_s ?halvingCUunset //.
+    - rewrite f1_odd_s // g1_odd_s //.
       move: ihN; rewrite /is_halving notin2_odd=> /eqP ; rewrite ba_invI/ba_t/A.
       case: ifP=> [ltba <- | ltbaN _] /=; rewrite xtSH.
       + apply at_bat_parity; lia.
@@ -1972,28 +1721,28 @@ Section algo.
     Proof.
     elim: t => [_ | t' IHt t'_b].
     - rewrite /a_t/b_t/at_stepS /=/A/B.
-      case: ic=> [] _ [-> -> -> ->] _ [] _ _ _ -> ->.
+      case: ic=> [] _ [-> -> -> ->] [] _ _ _ -> ->.
       by rewrite !xt0 ux_ab10 ux_ab01.
     - have tb : 0 <= t'%:Z <= k%:Z - 2 by lia.
       have {IHt t'_b}[[pow2_a pow2_b] [eqa eqb]]:= IHt tb.
       rewrite at_stepS.
       split; last first.
       --  apply inner_iter_ind_coarse=> [h | nh].
-        + rewrite unset_halving_a unset_halving_b b_halving_step a_halving_step.
+        + rewrite b_halving_step a_halving_step.
           rewrite /a_t. rewrite halving_a_tS //; last first.
           * rewrite (@modz_dvdz _ (ba (at_step t')) 2) //.
             by rewrite ba_invI/(ba_t)/A; apply at_bat_parity.
           by rewrite -/(a_t t') eqa eqb halving_b_t.
-        + rewrite a_odd_s // b_odd_s // ltCUunset.
+        + rewrite a_odd_s // b_odd_s.
           case: ifP=> [baltbb | baltbbN]; rewrite a_odd_not_swap b_odd_not_swap /=.
           - rewrite /a_t/A at_stepS; split; last first.
             by rewrite eqa/a_t halvingN_lt_B //.
             suff dvd2_ux : 2 ^ t' * 2 %| ux a0 b0 (f0 (at_step t'.+1)) (g0 (at_step t'.+1)).
               rewrite -at_stepS xtS // at_stepS/inner_iter.
-              rewrite halvingCUunset (negPf nh) f0_odd_s // g0_odd_s // ltCUunset baltbb /=.
+              rewrite (negPf nh) f0_odd_s // g0_odd_s // baltbb /=.
               by rewrite eqa eqb /a_t/b_t/A/B -xt_sub //.
 
-            rewrite at_stepS /inner_iter halvingCUunset (negPf nh) f0_odd_s // g0_odd_s // ltCUunset baltbb /=.
+            rewrite at_stepS /inner_iter (negPf nh) f0_odd_s // g0_odd_s // baltbb /=.
             rewrite mulrC; apply dvdz_factors; first by apply expfz_neq0.
             * by rewrite ux_sub; apply dvdz_sub.
             rewrite ux_sub.
@@ -2006,8 +1755,8 @@ Section algo.
             have -> : (q2 * 2 ^ t' - q1 * 2 ^ t') = (q2 - q1) * 2 ^ t' by lia.
             rewrite !mulzK // ?expfz_neq0 //.
             by move=> ? ?; apply dvdz_oddz.
-          - rewrite /a_t/A/b_t/B at_stepS /inner_iter halvingCUunset (negPf nh) f1_odd_s // g1_odd_s // ltCUunset baltbbN /=.
-            rewrite xtSH eqb; split=> //; rewrite f0_odd_s // g0_odd_s // ltCUunset baltbbN /=.
+          - rewrite /a_t/A/b_t/B at_stepS /inner_iter (negPf nh) f1_odd_s // g1_odd_s // baltbbN /=.
+            rewrite xtSH eqb; split=> //; rewrite f0_odd_s // g0_odd_s // baltbbN /=.
             suff H : 2 ^ t' * 2 %| ux a0 b0 (f0 (at_step t') - f1 (at_step t')) (g0 (at_step t') - g1 (at_step t')).
             by rewrite xtS // eqa xt_sub //.
             rewrite mulrC; apply dvdz_factors=> //; first by apply expfz_neq0.
@@ -2030,8 +1779,7 @@ Section algo.
              rewrite ba_invI/ba_t/A=> <-.
              by apply at_bat_parity.
          + rewrite /odd_step.
-           rewrite lt_update ltCUunset.
-           case: ifP=> [ltba | ltbaN]; rewrite /= f0CUupdate f1CUupdate g0CUupdate g1CUupdate f0CUunset f1CUunset g0CUunset g1CUunset.
+           case: ifP=> [ltba | ltbaN].
            - split.
              * (* both are odd *)
                rewrite exprSzr.
@@ -2093,25 +1841,23 @@ Section algo.
     Lemma b_odd x : (x <= k -2)%N -> ~~ (2 %| `|b (at_step x)|)%N. 
     Proof.
     elim: x => [| x ihx hxk]. 
-       case: ic=> _ _ _ [] _ _ h _ ib _.
+       case: ic=> _ _ [] _ _ h _ ib _.
        have -> : 2%N = `|2|%N :> nat by lia.
        by rewrite -dvdzE notin2_odd //; apply/eqP. 
     have -> : (at_step x.+1) = (at_step x !) by [].
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - rewrite b_halving_step bCUunset; apply: ihx; lia.
-    - have ihNN : ~~ is_halving (unset_this_iter (at_step x)).
-        by move: ihN; rewrite /is_halving baCUunset.
-      rewrite b_odd_s //; case: ifP=> hcond.
-      + rewrite b_odd_not_swap b_swap aCUunset.
-        suff odd_a : ~~ (2 %| (a (at_step x)))%Z.
-          suff -> : 2%N = `|2|%N :> nat by rewrite -dvdzE.
-          by lia.
-        apply: contra ihN => ihN.
-        rewrite /is_halving (@modz_dvdz _ (a (at_step x))) //.
-        rewrite ba_invI a_invI; last by lia.
-        symmetry; apply: at_bat_parity; lia.
-      + rewrite b_odd_not_swap bCUunset.
-        apply: ihx; lia.
+    - by rewrite b_halving_step; apply: ihx; lia.
+    rewrite b_odd_s //; case: ifP=> hcond.
+    + rewrite b_odd_not_swap b_swap.
+      suff odd_a : ~~ (2 %| (a (at_step x)))%Z.
+        suff -> : 2%N = `|2|%N :> nat by rewrite -dvdzE.
+        by lia.
+      apply: contra ihN => ihN.
+      rewrite /is_halving (@modz_dvdz _ (a (at_step x))) //.
+      rewrite ba_invI a_invI; last by lia.
+      symmetry; apply: at_bat_parity; lia.
+    + rewrite b_odd_not_swap.
+      apply: ihx; lia.
     Qed.
 
    Lemma zero_lgood_strong t u :
@@ -2130,9 +1876,9 @@ Section algo.
     have -> : (t + x.+1 = (t + x).+1) by lia.
     rewrite [at_step _]s_stepsS b_halving // hb eqxx.
     have aSt : a ((at_step (t + x)) !) = 0.  (* should be a lemma ... *)
-      have a_halving' : is_halving (unset_this_iter (at_step (t + x))).
-        by rewrite /is_halving baCUunset.
-      by rewrite /inner_iter a_halving' a_halving_step aCUunset ha div0z.
+      have a_halving' : is_halving (at_step (t + x)).
+        by rewrite /is_halving.
+      by rewrite /inner_iter a_halving' a_halving_step ha div0z.
     rewrite aSt eqxx !andbT.
     by move: hgood; rewrite /good_iv aSt b_halving // hb ha. 
     Qed.
@@ -2163,7 +1909,7 @@ Section algo.
     rewrite /decreasing_iv.
     have -> : (at_step i.+1) = (at_step i !) by [].
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - rewrite a_halving_step aCUunset b_halving_step bCUunset.
+    - rewrite a_halving_step b_halving_step.
       rewrite divz_ge0 // (ltW lt0a) andbT /=.
       have even_a :  2 %| (a (at_step i)).
         rewrite (@modz_dvdz _ (ba (at_step i))) //.
@@ -2176,17 +1922,16 @@ Section algo.
       suff : (2 <=  `|a (at_step i)|)%N by lia.
       apply: dvdn_leq; first by lia.
       by move: even_a; rewrite dvdzE.
-    - have ihNN : ~~ is_halving (unset_this_iter (at_step i)).
-        by move: ihN; rewrite /is_halving baCUunset.
+    -
       rewrite a_odd_s // b_odd_s //.
-      rewrite /is_ba_lt_bb baCUunset bbCUunset.
+      rewrite /is_ba_lt_bb.
       have odd_a : a (at_step i) = 1%Z %[mod 2].
         apply/eqP; rewrite -notin2_odd.
         apply: contra ihN => ihN.
         rewrite /is_halving (@modz_dvdz _ (a (at_step i))) //.
         rewrite ba_invI a_invI; last by lia.
         symmetry; apply: at_bat_parity; lia.
-      case: ifP=> h; rewrite a_odd_not_swap ?a_swap ?b_swap aCUunset bCUunset.
+      case: ifP=> h; rewrite a_odd_not_swap ?a_swap ?b_swap.
       + have even_m : 2 %| (b (at_step i) - a (at_step i)).
           by apply: dvdz_oddz => //; apply/eqP.
         have ltab : a (at_step i) < b (at_step i).
@@ -2202,7 +1947,7 @@ Section algo.
         have ltab : b (at_step i) <= a (at_step i).
           move: divNi; rewrite /divN (negPf ihN) /= /is_sync (negPf ihN) /=.
           by rewrite /is_divergent h /= -leNgt. 
-        rewrite b_odd_not_swap bCUunset.
+        rewrite b_odd_not_swap.
           have hm : 0 <= (a (at_step i) - b (at_step i)) %/ 2.
           move: (even_m); rewrite dvdz_eq; move/eqP; lia.
         have odd_cor : (1 <= ℓ (a (at_step i))).
@@ -2267,7 +2012,7 @@ Section algo.
         apply: leq_trans hdecr _; move: iht_reg; rewrite /regular_iv.
         lia.
     - rewrite /regular_iv at_step0. 
-      case: ic=> _ _ _ [h1 h2 h3 <- <-].
+      case: ic=> _ _ [h1 h2 h3 <- <-].
       rewrite subn0 leqnn; lia.
     Qed.
 
@@ -2283,7 +2028,7 @@ Section algo.
     (forall x : nat, (x < k - 1)%N -> divN x) -> good_iv a0 b0 k (at_exit k vs0) || (a (at_step (k - 1)) == 0). 
     Proof.
     move=> ha0 hb0 hdivN.
-    case: ic=> []; case=> lt1k _ _ _ _ _ _. 
+    case: ic=> []; case=> lt1k _ _ _ _ _.
     apply: all_divN_regular=> //; first by lia.
     Qed.
 
@@ -2293,17 +2038,15 @@ Section algo.
     move=> htk hdivNt.
     have -> : (at_step t.+1) = (at_step t !) by [].
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - rewrite b_halving_step bCUunset. 
+    - rewrite b_halving_step.
       by move: hdivNt; rewrite /divN negb_or ih. 
-    - have ihN' : ~~ is_halving (unset_this_iter (at_step t)).
-        by rewrite /is_halving baCUunset.
-      rewrite b_odd_s //; case: ifP=> hcond; rewrite b_odd_not_swap ?b_swap ?aCUunset ?bCUunset.
+    - rewrite b_odd_s //; case: ifP=> hcond; rewrite b_odd_not_swap ?b_swap.
       + have hbabb : ba (at_step t) < bb (at_step t).
-          by move: hcond; rewrite /is_ba_lt_bb baCUunset bbCUunset.
+          by move: hcond; rewrite /is_ba_lt_bb.
         move: hdivNt; rewrite /divN negb_or; case/andP=> _.
         rewrite /is_sync negb_and !negbK (negPf ihN) /= /is_divergent /M; lia. (* nice lia *)
       +  have hbabb : bb (at_step t) <= ba (at_step t).
-           move: hcond; rewrite /is_ba_lt_bb baCUunset bbCUunset; lia.
+           move: hcond; rewrite /is_ba_lt_bb; lia.
         move: hdivNt; rewrite /divN negb_or; case/andP=> _.
         rewrite /is_sync negb_and !negbK (negPf ihN) /= /is_divergent /M; lia. (* nice lia *)
     Qed.
@@ -2316,19 +2059,17 @@ Section algo.
     move=> htk hdivNt.
     have -> : (at_step t.+1) = (at_step t !) by [].
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - rewrite a_halving_step aCUunset. 
+    - rewrite a_halving_step.
       by move: hdivNt; rewrite /divN negb_or ih. 
-    - have ihN' : ~~ is_halving (unset_this_iter (at_step t)).
-        by rewrite /is_halving baCUunset.
-      rewrite a_odd_s //.
-      case: ifP=> hcond; rewrite a_odd_not_swap ?a_swap ?b_swap ?aCUunset ?bCUunset.
+    - rewrite a_odd_s //.
+      case: ifP=> hcond; rewrite a_odd_not_swap ?a_swap ?b_swap.
       + have hbabb : ba (at_step t) < bb (at_step t).
-          by move: hcond; rewrite /is_ba_lt_bb baCUunset bbCUunset.
+          by move: hcond; rewrite /is_ba_lt_bb.
         suff [-> ->] : (M t = a (at_step t)) /\ (μ t = b (at_step t)) by [].
         move: hdivNt; rewrite /divN negb_or; case/andP=> _.
         rewrite /is_sync negb_and !negbK (negPf ihN) /= /is_divergent /M /μ; lia. (* nice lia *)
       +  have hbabb : bb (at_step t) <= ba (at_step t).
-           move: hcond; rewrite /is_ba_lt_bb baCUunset bbCUunset; lia.
+           move: hcond; rewrite /is_ba_lt_bb; lia.
         suff [-> ->] : (M t = b (at_step t)) /\ (μ t = a (at_step t)) by [].
         move: hdivNt; rewrite /divN negb_or; case/andP=> _.
         rewrite /is_sync negb_and !negbK (negPf ihN) /= /is_divergent /M /μ; lia. (* nice lia *)
@@ -2358,23 +2099,21 @@ Section algo.
       split.
       (* divisibility by 2 halving *)
       - rewrite f0_halving_step g0_halving_step f1_halving_step g1_halving_step.
-        rewrite f0CUunset g0CUunset f1CUunset g1CUunset.
         split; last by apply exact_divs_even_f1; apply pow2_b_ux_invI.
         by apply exact_divs_even_f0=> //; apply pow2_a_ux_invI.
       - (* formula holds halving *)
-        rewrite /a_t halving_a_tS // ?pow2_a_ux_invI // a_halving_step aCUunset a_invI //.
-        by rewrite /b_t -halving_B // b_halving_step bCUunset b_invI.
+        rewrite /a_t halving_a_tS // ?pow2_a_ux_invI // a_halving_step a_invI=> //.
+        by rewrite /b_t -halving_B // b_halving_step b_invI.
     + (* not halving *)
     (* divisibility by 2 odd *)
       rewrite f0_odd_s // g0_odd_s // f1_odd_s // g1_odd_s //.
-      rewrite a_odd_s // b_odd_s // ltCUunset.
+      rewrite a_odd_s // b_odd_s //.
       case: ifP=> [lth | lthN];
                  (* bureaucratic step *)
       rewrite a_odd_not_swap b_odd_not_swap;
       rewrite ?f0_odd_swap ?f1_odd_swap ?g0_odd_swap ?g1_odd_swap ;
       rewrite ?f0_odd_not_swap ?g0_odd_not_swap ?f1_odd_not_swap ?g1_odd_not_swap;
-      rewrite f0CUunset f1CUunset g0CUunset g1CUunset;
-      rewrite ?a_swap ?b_swap aCUunset bCUunset.
+      rewrite ?a_swap ?b_swap.
       *
       (* divisibility lt *)
       (* same as ab_invI could be factored out *)
@@ -2451,12 +2190,12 @@ Section algo.
     rewrite at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
     - rewrite a_halving_step b_halving_step ba_halving_step bb_halving_step.
-      by rewrite baCUunset bbCUunset aCUunset bCUunset eqa eqb.
+      by rewrite eqa eqb.
     - rewrite ba_odd_s // bb_odd_s // a_odd_s // b_odd_s //.
       case: ifP=> hlt;
       rewrite ba_odd_not_swap bb_odd_not_swap a_odd_not_swap b_odd_not_swap;
       rewrite ?ba_swap ?bb_swap ?a_swap ?b_swap;
-      by rewrite baCUunset bbCUunset aCUunset bCUunset eqa eqb.
+      by rewrite eqa eqb.
     Qed.
 
     Lemma n2k_a_eq_invI : n == 2 * k -> forall i, ba (at_step i) = (a (at_step i)).
@@ -2489,15 +2228,12 @@ Section algo.
     Proof.
     move=> ba_t0 u.
     elim: u=> [| u' IHu].
-    -
-      (*  by rewrite ltn0. *)
-      by rewrite leqn0=> /eqP eq; rewrite -eq ba_t0 eq.
+    - by rewrite leqn0=> /eqP eq; rewrite -eq ba_t0 eq.
     move=> ub.
     case: (boolP (t == u'.+1))=> [/eqP <- // | H].
     rewrite at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
-    + rewrite ba_halving_step baCUunset.
-      by rewrite IHu //; lia.
+    + by rewrite ba_halving_step IHu //; lia.
     by move: ihN; rewrite /is_halving IHu //; lia.
     Qed.
 
@@ -2530,17 +2266,17 @@ Section algo.
       have {baSneq0}: ba (at_step i.+1) > 0. move: (ba_ge0_invI i.+1); lia.
       rewrite at_stepS.
       apply inner_iter_ind_coarse=> [ih | ihN].
-      + rewrite ba_halving_step baCUunset bb_halving_step bbCUunset.
+      + rewrite ba_halving_step bb_halving_step.
         move: ih.
         rewrite /is_halving.
         move=> /dvdzP/=[q1 ->].
         rewrite mulzK // mulrC=> gt0; rewrite len2 //; lia.
-      + rewrite ba_odd_s // bb_odd_s // /is_ba_lt_bb baCUunset bbCUunset.
+      + rewrite ba_odd_s // bb_odd_s // /is_ba_lt_bb.
         (* rewrite ba_invI // bb_invI // /ba_t/bb_t appxa appxb -/(a_t i)-/(b_t i) -a_invI // -b_invI //. *)
         move: ihN; rewrite /is_halving notin2_odd=> /eqP.
         have := bb_odd_invI i=> b_odd a_odd.
         case: ifP=> hlt.
-        - rewrite ba_odd_not_swap bb_odd_not_swap ba_swap bb_swap bbCUunset baCUunset.
+        - rewrite ba_odd_not_swap bb_odd_not_swap ba_swap bb_swap.
           have := dvdz_oddz b_odd a_odd.
           move=> /dvdzP/=[q1 eq] gt0; rewrite eq mulzK // in gt0.
           set diff : int := (bb (at_step i) - ba (at_step i)).
@@ -2551,7 +2287,7 @@ Section algo.
           apply el_sub.
           suff : 0 <= ba (at_step i) by lia.
           by apply ba_ge0_invI.
-        - rewrite ba_odd_not_swap bb_odd_not_swap bbCUunset baCUunset.
+        - rewrite ba_odd_not_swap bb_odd_not_swap.
           have := dvdz_oddz a_odd b_odd.
           move=> /dvdzP/=[q1 eq] gt0; rewrite eq mulzK // in gt0.
           set diff : int := (ba (at_step i) - bb (at_step i)).
@@ -2582,9 +2318,7 @@ Section algo.
     have {IHt}/andP[apos bpos] := IHt tb2.
     rewrite at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
-    rewrite unset_halving_a unset_halving_b.
     by rewrite a_halving_step b_halving_step bpos divz_ge0 // apos.
-    rewrite a_odd_step_unset b_odd_step_unset.
     rewrite a_odd_s // b_odd_s //.
     case: (boolP (divN t')); last first.
     + move=> syncN.
@@ -2636,11 +2370,11 @@ Section algo.
     have {IHu}/andP[au_b bu_b] := IHu Wtb'.
     rewrite at_stepS.
     apply inner_iter_ind_coarse=> [ih | ihN].
-    - by rewrite a_halving_step b_halving_step aCUunset bCUunset; apply/andP; lia.
+    - by rewrite a_halving_step b_halving_step; apply/andP; lia.
       rewrite a_odd_s // b_odd_s //.
     suff [a_odd b_odd] : ((a (at_step u')) = 1%:Z %[mod 2]) /\ (b (at_step u') = 1%:Z %[mod 2]).
       case: ifP=> hlt.
-    - rewrite a_odd_not_swap a_swap b_odd_not_swap b_swap bCUunset aCUunset au_b andbT.
+    - rewrite a_odd_not_swap a_swap b_odd_not_swap b_swap au_b andbT.
     suff dvdz_diff : 2 %| (b (at_step u') - a (at_step u')).
       have := abs_div_le _ dvdz_diff.
       move=> /(_ isT) step1.
@@ -2648,7 +2382,7 @@ Section algo.
         by apply lez_pdiv2r=> //; apply ler_normB.
       by lia.
       by apply dvdz_oddz.
-    rewrite a_odd_not_swap b_odd_not_swap bCUunset aCUunset bu_b andbT.
+    rewrite a_odd_not_swap b_odd_not_swap bu_b andbT.
     suff dvdz_diff : 2 %| (a (at_step u') - b (at_step u')).
       have := abs_div_le _ dvdz_diff.
       move=> /(_ isT) step1.
@@ -2679,7 +2413,7 @@ Section algo.
     have nnk_b : (0 < n - k + 1)%N by have := nk_b; lia.
     have kgt0 : 0 < k by move: kgt1; lia.
     case=> /(len_b nk_b);rewrite fold_el=> lai_b /(len_b nk_b); rewrite fold_el=> lbi_b.
-    case: ic => [] [lt1k hnk] _ _ _ _ _.
+    case: ic => [] [lt1k hnk] _ _ _ _.
     by rewrite /good_iv-/(at_step_vs _ _); lia.
     Qed.
 
@@ -2692,14 +2426,13 @@ Section algo.
     have absM C : `|2 * C | = `|2| * `|C| by lia.
     apply inner_iter_ind_coarse=> [ih | ihN].
     + rewrite f0_halving_step g0_halving_step f1_halving_step g1_halving_step.
-      rewrite f0CUunset g0CUunset f1CUunset g1CUunset.
       split; first by apply: (le_trans bnd0 _); rewrite exprSz; lia.
       by rewrite !absM exprSz; lia.
     rewrite f0_odd_s // f1_odd_s // g0_odd_s // g1_odd_s //.
-    suff [H1 [H2 H3]] : `|f1 (unset_this_iter (at_step t')) - f0 (unset_this_iter (at_step t'))| +
-  `|g1 (unset_this_iter (at_step t')) - g0 (unset_this_iter (at_step t'))| <= 2 ^ t'.+1 /\
-                                                                             `|2 * f0 (unset_this_iter (at_step t'))| + `|2 * g0 (unset_this_iter (at_step t'))| <= 2 ^ t'.+1
-                                                                                                                                                                         /\ `|2 * f1 (unset_this_iter (at_step t'))| + `|2 * g1 (unset_this_iter (at_step t'))| <= 2 ^ t'.+1.
+    suff [H1 [H2 H3]] :
+      `|f1 (at_step t') - f0 (at_step t')| + `|g1  (at_step t') - g0 (at_step t')| <= 2 ^ t'.+1
+       /\ `|2 * f0 (at_step t')| + `|2 * g0 (at_step t')| <= 2 ^ t'.+1
+       /\ `|2 * f1 (at_step t')| + `|2 * g1 (at_step t')| <= 2 ^ t'.+1.
     case: ifP.
     - rewrite f0_odd_swap f1_odd_swap g0_odd_swap g1_odd_swap //.
     - rewrite f0_odd_not_swap f1_odd_not_swap g0_odd_not_swap g1_odd_not_swap //.
@@ -2962,50 +2695,33 @@ Section algo.
     have -> : i = (1 + ((s + i) - (s  + 1)))%N by lia.
     have : (0 <= (s + i) - (s  + 1) <= k - s - 2)%N by lia.
     elim: ((s + i) - (s  + 1))%N => [| j ihj] /andP[] _ hj.
-      rewrite addn0 !one_step /inner_iter !halvingCUunset.
+      rewrite addn0 !one_step /inner_iter.
       rewrite /is_halving (negPf Nhalva).
       have -> : ba (swap (at_step s)) = bb (at_step s) by case: (at_step s).    
       rewrite (negPf Nhalvb).
-      case: (at_step s) Nhalva Nhalvb ltab ltbab => sa sb saa sbb sf0 sg0 sf1 sg1 sit sdiv /= Nhalva Nhalvb ltab ltbab.
-      rewrite /swap /unset_this_iter /= /odd_step /update_divergence_status.
-      rewrite /is_divergent /= ltbab ltab /= /is_ba_lt_bb /= ltbab /=.
-      have -> /= : (sbb < saa) = false by lia.
-      have -> /= : (sb < sa) = false by lia.
-      rewrite /swap /=.
-      have -> /= : (sbb < saa) = false by lia.
-      done.
-    rewrite addnS !(s_stepsS _ (1 + j)); move: ihj. 
+      case: (at_step s) Nhalva Nhalvb ltab ltbab => sa sb saa sbb sf0 sg0 sf1 sg1 /= Nhalva Nhalvb ltab ltbab.
+      rewrite /odd_step/swap /= /is_ba_lt_bb/= ltbab.
+      by have -> /= : (sbb < saa) = false by lia.
+    rewrite addnS !(s_stepsS _ (1 + j)); move: ihj.
     set vs := s_steps s (1 + j) (at_step s).
     set vs_swap := s_steps s (1 + j) (swap (at_step s)) => ihj.
     have [ha hb hba hbb] :
       [/\ a vs = a vs_swap,  b vs = b vs_swap, ba vs = ba vs_swap & bb vs = bb vs_swap].
        by apply: ihj; lia.
     (* for any v w, a (v !) = a (w !) as soon as [b]a v = [b]a w and [b]b v = [b]b w. *)
-    rewrite /inner_iter !halvingCUunset /is_halving -hba; split. 
+    rewrite /inner_iter /is_halving -hba; split.
     - case: ifP=> c; first by rewrite /halving_step /= -ha //.
-      rewrite /odd_step /is_ba_lt_bb /update_divergence_status /is_divergent.
-      rewrite /unset_this_iter /= -hba -hbb -ha -hb /set_divergence /set_this_iter /=.
-      set cc := _ ||  _.
-      by case: cc {ihj}; case: (divergence vs); case: (divergence vs_swap) => /=;
-           rewrite /swap /= /odd_not_swap /=; case: ifP.
+      rewrite /odd_step /is_ba_lt_bb -hba -hbb.
+      by case: ifP; rewrite !a_odd_not_swap /= -ha -hb.
     - case: ifP=> c; first by rewrite /halving_step /= -hb //.
-      rewrite /odd_step /is_ba_lt_bb /update_divergence_status /is_divergent.
-      rewrite /unset_this_iter /= -hba -hbb -ha -hb /set_divergence /set_this_iter /=.
-      set cc := _ ||  _.
-      by case: cc {ihj}; case: (divergence vs); case: (divergence vs_swap) => /=;
-           rewrite /swap /= /odd_not_swap /=; case: ifP.
+      rewrite /odd_step /is_ba_lt_bb -hba -hbb.
+      by case: ifP; rewrite !b_odd_not_swap -?ha -?hb.
     - case: ifP=> c; first by rewrite /halving_step /= -hba //.
-      rewrite /odd_step /is_ba_lt_bb /update_divergence_status /is_divergent.
-      rewrite /unset_this_iter /= -hba -hbb -ha -hb /set_divergence /set_this_iter /=.
-      set cc := _ ||  _.
-      by case: cc {ihj}; case: (divergence vs); case: (divergence vs_swap) => /=;
-               rewrite /swap /= /odd_not_swap /=; case: ifP.
+      rewrite /odd_step /is_ba_lt_bb -hba -hbb.
+      by case: ifP; rewrite !ba_odd_not_swap -?ha -?hb /= -hba -hbb.
     - case: ifP=> c; first by rewrite /halving_step /= -hbb //.
-      rewrite /odd_step /is_ba_lt_bb /update_divergence_status /is_divergent.
-      rewrite /unset_this_iter /= -hba -hbb -ha -hb /set_divergence /set_this_iter /=.
-      set cc := _ ||  _.
-      by case: cc {ihj}; case: (divergence vs); case: (divergence vs_swap) => /=;
-         rewrite /swap /= /odd_not_swap /=; case: ifP.
+      rewrite /odd_step /is_ba_lt_bb -hba -hbb.
+      by case: ifP.
       Qed.
 
     Lemma sync_swap_a s i : (s + 1 <= s + i <= k - 1)%N -> ~~ (2 %| ba (at_step s)) -> ~~ (2 %| bb (at_step s)) ->
@@ -3057,21 +2773,21 @@ Section algo.
       move=> hyu; case=> hab hba lt0by.
       have -> : b (stp y !) = b (stp y).
       - apply inner_iter_ind_coarse=> [hhalv | hhalvN].
-        + by rewrite b_halving_step bCUunset.
-        + rewrite b_odd_step_unset b_odd_s //.
+        + by rewrite b_halving_step.
+        + rewrite b_odd_s //.
           have -> : is_ba_lt_bb (stp y) = false by rewrite /is_ba_lt_bb; lia.  
           by rewrite b_odd_not_swap.
       have -> : bb (stp y !) = bb (stp y).
       - apply inner_iter_ind_coarse=> [hhalv | hhalvN].
-        + by rewrite bb_halving_step bbCUunset.
-        + rewrite bb_odd_s; last by rewrite /is_halving baCUunset.
-          rewrite /is_ba_lt_bb baCUunset bbCUunset.
+        + by rewrite bb_halving_step.
+        + rewrite bb_odd_s.
+          rewrite /is_ba_lt_bb.
           have -> : ba (stp y) < bb (stp y) = false by lia.  
           by rewrite bb_odd_not_swap.
       suff ha : (ℓ (a (stp y !)) <= ℓ (a (stp y)) - 1)%N by split.
       (* TODO : if 0 < b (vs) and may be odd, then b (stp y) remains strictly positive *) 
       apply inner_iter_ind_coarse=> [hhalv | hhalvN].
-      - rewrite a_halving_step aCUunset. 
+      - rewrite a_halving_step.
         have tt : len (a (stp y) %/ 2)%Z + 1%Z <= (len (a (stp y))). 
 
         rewrite -[X in X <= _]len_div2 //; lia. 
@@ -3079,10 +2795,10 @@ Section algo.
         suff : `|len (a (stp y) %/ 2)%Z| <= `|len (a (stp y))| - 1%Z by lia.
         suff : (0 < len (a (stp y))) /\ (0 < len (a (stp y) %/ 2)%Z) by lia. 
         split; apply: len_gt0; lia.
-      - rewrite a_odd_s; last by rewrite /is_halving baCUunset.
-        rewrite /is_ba_lt_bb baCUunset bbCUunset.
+      - rewrite a_odd_s.
+        rewrite /is_ba_lt_bb.
         have -> : ba (stp y) < bb (stp y) = false by lia.  
-        rewrite a_odd_not_swap aCUunset bCUunset.
+        rewrite a_odd_not_swap.
         have : (a (stp y) - b (stp y) = 1%Z)  \/ (1 < (a (stp y) - b (stp y))) by lia.
         case=> hhab.
         + rewrite hhab.
@@ -3190,22 +2906,20 @@ Section algo.
            rewrite /stp s_stepsS.
            apply inner_iter_ind_coarse=> [hhalv | hhalvN].
            - by rewrite hhalv in halvj |- *.
-             rewrite ba_odd_s; last by rewrite /is_halving baCUunset.
-             rewrite ltCUunset.
+             rewrite ba_odd_s.
              have -> : is_ba_lt_bb (s_steps s j vs) = false.
                have hj : (j <= u - 2)%N by lia.
                case: (PP _ hj Pj)=> [][]; rewrite /stp /is_ba_lt_bb; lia. 
-             by rewrite ba_odd_not_swap baCUunset bbCUunset.
+             by rewrite ba_odd_not_swap.
          have -> : a (stp j.+1) = (a (stp j) - b (stp j)) %/ 2.
            rewrite /stp s_stepsS.
            apply inner_iter_ind_coarse=> [hhalv | hhalvN].
            - by rewrite hhalv in halvj |- *.
-             rewrite a_odd_s; last by rewrite /is_halving baCUunset.
-             rewrite ltCUunset.
+             rewrite a_odd_s.
              have -> : is_ba_lt_bb (s_steps s j vs) = false.
                have hj : (j <= u - 2)%N by lia.
                case: (PP _ hj Pj)=> [][]; rewrite /stp /is_ba_lt_bb; lia. 
-             by rewrite a_odd_not_swap aCUunset bCUunset.
+             by rewrite a_odd_not_swap.
           have e : 2 ^ j.+1 = 2 ^ j * 2 :> int by rewrite exprSz mulrC.
           rewrite {2 4}e !divzMA_ge0 //.
           rewrite hbSj hbbSj; split=> //.
@@ -3292,7 +3006,7 @@ Section algo.
     Lemma lt_k_approx x : 0 < x -> (ℓ x)%:Z <= n%:Z - k%:Z -> approx x k n  < 2 ^ k.
     Proof.
     have le_2kn : (n >= 2 * k)%N.
-    case: ic=> icc _ _ _; case: icc=> _ nEE _ _; lia.
+    case: ic=> icc _ _; case: icc=> _ nEE _ _; lia.
     rewrite /approx => lt0x hlx.
     have hl : (x %% 2 ^ (k - 1)%N)%Z < 2 ^ (k - 1)%N.
       by apply: ltz_pmod; apply: exprn_gt0.
@@ -3319,7 +3033,7 @@ Section algo.
     Lemma gt_k_approx x : 0 < x -> ((ℓ x) = n)%N -> 2 ^ (2 * k%:Z - 1%Z) <= approx x k n.
     Proof.
     have le_2kn : (n >= 2 * k)%N.
-    case: ic=> icc _ _ _; case: icc=> _ nEE _ _; lia.
+    case: ic=> icc _ _; case: icc=> _ nEE _ _; lia.
     rewrite /approx => lt0x hlx.
     have hx : x >= 2 ^ (n%:Z - 1%:Z) by have := lenL lt0x; rewrite hlx.
     suff hr : 2 ^ (k - 1)%N * (x %/ 2 ^ (n - k - 1)%N)%Z >= 2 ^ (2 * k%:Z - 1%:Z).
@@ -3349,7 +3063,7 @@ Section algo.
     Proof.
     (* setting up the context *)
     move=> a0neq0 nE lebnSz.  
-    case: (ic) => [] [lt1k /eqP/nval nis baE bbE] ifg _ i_ab.
+    case: (ic) => [] [lt1k /eqP/nval nis baE bbE] ifg i_ab.
     have [i_a0 i_b0] : vs0.(a) = a0 /\ vs0.(b) = b0.
       by move: i_ab=> [_ _ _ -> ->].
     have [i_f0 i_f1 i_g0 i_g1] := ifg.
@@ -3360,7 +3074,7 @@ Section algo.
       by apply oddz_gt0.
     have bb0_gt0 : 0 < bb vs0. by apply bb0_gt0.
     have le_2kn : (n >= 2 * k)%N.
-      case: ic=> icc _ _ _; case: icc=> _ nEE _ _; lia.
+      case: ic=> icc _ _; case: icc=> _ nEE _ _; lia.
     have hb : b0 < 2 ^ (n - k)%N.
       have -> : b0 = `|b0| by lia.
       apply: len_le_pow2. rewrite -abszE gtz0_abs // len_ℓ; lia.
@@ -3420,7 +3134,7 @@ Section algo.
     rewrite at_stepS.
     have lt0k := kgtz.
     apply inner_iter_ind_coarse=> [ih |]; last by rewrite hs.
-    rewrite b_halving_step bCUunset; apply: ihs; first by lia.
+    rewrite b_halving_step; apply: ihs; first by lia.
     move=> j hjs; apply: hs; lia.
     Qed.
 
@@ -3430,7 +3144,7 @@ Section algo.
     rewrite at_stepS.
     have lt0k := kgtz.
     apply inner_iter_ind_coarse=> [ih |]; last by rewrite hs.
-    rewrite bb_halving_step bbCUunset; apply: ihs; first by lia.
+    rewrite bb_halving_step; apply: ihs; first by lia.
     move=> j hjs; apply: hs; lia.
     Qed.
 
@@ -3442,7 +3156,7 @@ Section algo.
     Proof.
     (* Context and helper facts *)
     move=> ak1neq0 a0neq0 h_ndiv.
-    case: (ic) => [] [lt1k /eqP/nval nis baE bbE] ifg _ i_ab.
+    case: (ic) => [] [lt1k /eqP/nval nis baE bbE] ifg i_ab.
     have [i_a0 i_b0] : vs0.(a) = a0 /\ vs0.(b) = b0.
       by move: i_ab=> [_ _ _ -> ->].
     have [i_f0 i_f1 i_g0 i_g1] := ifg.
@@ -3453,7 +3167,7 @@ Section algo.
       by apply oddz_gt0.
     have bbgtz : bb vs0 > 0 by apply bb0_gt0. 
     have le_2kn : (n >= 2 * k)%N.
-      case: ic=> icc _ _ _; case: icc=> _ nE _ _; lia.
+      case: ic=> icc _ _; case: icc=> _ nE _ _; lia.
    (* we exclude the trival case n = 2k, this should be factored *)
     wlog /eqP nab : / n == maxn (ℓ a0) (ℓ b0).
     move=> hwlog.
@@ -3674,7 +3388,7 @@ Section algo.
       apply: ihd; first by lia.
       move=> j hjd; apply: hd; lia.
     apply inner_iter_ind_coarse=> hhalv.
-    - rewrite a_halving_step aCUunset b_halving_step bCUunset.
+    - rewrite a_halving_step b_halving_step.
       rewrite -[s_steps 0 d vs0]/(at_step d) hb andbT /=.
       suff : ((ℓ (a (at_step d) %/ 2)%Z)%:Z <= (ℓ (a (at_step d)))%:Z)%Z by lia.
       rewrite -!len_ℓ; apply: len_geq.
@@ -3683,9 +3397,9 @@ Section algo.
       rewrite (@modz_dvdz _ (ba (at_step d))) //. 
       have ? : 0 <= d%:Z <= k%:Z - 2 by lia.
       by rewrite a_invI // ba_invI //; apply: at_bat_parity.
-    - rewrite a_odd_s ?b_odd_s ?halv_unset /is_ba_lt_bb // baCUunset bbCUunset  -[s_steps 0 d vs0]/(at_step d).
+    - rewrite a_odd_s ?b_odd_s ?halv_unset /is_ba_lt_bb // -[s_steps 0 d vs0]/(at_step d).
       case: ifP=> hcond.
-      + rewrite a_odd_not_swap b_odd_not_swap a_swap b_swap bCUunset aCUunset.
+      + rewrite a_odd_not_swap b_odd_not_swap a_swap b_swap.
         rewrite ha andbT /=.
         have : divN d by apply: hd; lia.
         rewrite /divN (negPf hhalv) /= /is_sync hhalv /= /is_divergent.
@@ -3698,7 +3412,7 @@ Section algo.
         apply: le_trans.
         suff : (`|((b (at_step d) - a (at_step d)) %/ 2)%Z| <= `|b (at_step d) - a (at_step d)|)%N by lia.
         exact: lez_div.
-     + rewrite a_odd_not_swap b_odd_not_swap aCUunset bCUunset.
+     + rewrite a_odd_not_swap b_odd_not_swap.
        rewrite hb andbT /=.
        have : divN d by apply: hd; lia.
        rewrite /divN (negPf hhalv) /= /is_sync hhalv /= /is_divergent.
@@ -3739,7 +3453,7 @@ Section algo.
     Proof.
     move=> ak1neq0.
     have h := nk_b.
-    case: (ic) => [] [_ /eqP/nval nis _ _] _ _ i_ab.
+    case: (ic) => [] [_ /eqP/nval nis _ _] _ i_ab.
     have [i_a0 i_b0] : vs0.(a) = a0 /\ vs0.(b) = b0.
       by move: i_ab=> [_ _ _ -> ->].
     have aneqz: a0 != 0.
@@ -3756,7 +3470,7 @@ Section algo.
     (* various helper lemmas, either non-linear or arith on nat vs int *)
    have SnkB : ((n - k).+1 = n - k + 1)%N by lia.
    have le_2kn : (n >= 2 * k)%N.
-     case: ic=> icc _ _ _; case: icc=> lt1k nE _ _; lia.
+     case: ic=> icc _ _; case: icc=> lt1k nE _ _; lia.
    have pos_exp (x : int) : 0 <= x -> 0 < 2 ^ x. (* This should be in num theory but I cannot find it *)
      case: x => // [] [| x]; first by rewrite expr0z.
      by rewrite -exprnP exprn_gt0.
@@ -3775,7 +3489,7 @@ Section algo.
     good_iv a0 b0 k vs_kB1.
     Proof.
     move=> ak1neq0 hwlog.
-    case: (ic) => [] [_ /eqP/nval nis _ _ ] _ _ i_ab.
+    case: (ic) => [] [_ /eqP/nval nis _ _ ] _ i_ab.
     have [i_a0 i_b0] : vs0.(a) = a0 /\ vs0.(b) = b0.
       by move: i_ab=> [_ _ _ -> ->].
     move: nis; rewrite {}i_a0 {}i_b0.
@@ -4028,8 +3742,8 @@ Section algo.
         (* case 1: t is halving *)
         - have halving_A : (* is_halving (at_step t) ->, this should be symbolic exec *)
             a (at_step t) = 2 * a (at_step t.+1).
-           rewrite at_stepS/ inner_iter halvingCUunset halv_t.
-           rewrite unset_halving_a a_halving_step.
+           rewrite at_stepS/ inner_iter halv_t.
+           rewrite a_halving_step.
            rewrite mulrC divzK // a_invI //.
            move: halv_t.
            rewrite /xt/is_halving ba_invI //.
@@ -4091,12 +3805,9 @@ Section algo.
           suff sync : same_ssign (b (at_step t) - a (at_step t)) (bb (at_step t) - ba (at_step t)).
             have b_St : b (at_step t.+1) = μ t.
               rewrite at_stepS /inner_iter.
-              have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
-                by rewrite halvingCUunset halv_t.
-              rewrite halv_unset.
-              rewrite b_odd_s ?halv_unset //.
-              (* rewrite  halv_unset f1_odd_s ?halv_unset// g1_odd_s ?{}halv_unset //. *)
-              rewrite /is_ba_lt_bb baCUunset bbCUunset /μ.
+              rewrite halv_t.
+              rewrite b_odd_s ?halv_t //.
+              rewrite /is_ba_lt_bb /μ.
               case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb/=.
               + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) =
                            a (at_step t).
@@ -4109,11 +3820,9 @@ Section algo.
             have a_St : a (at_step t.+1) = (M t - μ t) %/ 2.
               rewrite /a_t /A /xt /ux.
               rewrite at_stepS /inner_iter.
-              have halv_unset : is_halving (unset_this_iter (at_step t)) = false.
-                by rewrite halvingCUunset halv_t.
-                rewrite  halv_unset.
-                rewrite a_odd_s ?halv_unset //.
-              rewrite /is_ba_lt_bb baCUunset bbCUunset /μ/M.
+                rewrite  halv_t.
+                rewrite a_odd_s ?halv_t //.
+              rewrite /is_ba_lt_bb /μ/M.
               case: (ltP (ba (at_step t)) (bb (at_step t))) => hbabb /=.
                 (* the following two ids are proved more than once in the script. (refactor?)*)
               + have -> : Order.Def.min (a (at_step t)) (b (at_step t)) = (a (at_step t)).
